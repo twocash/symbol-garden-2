@@ -112,9 +112,10 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
         renderStyle = "fill";
     }
 
-    // Extract all paths
-    const paths = Array.from(doc.querySelectorAll("path"))
-        .map(p => p.getAttribute("d"))
+    // Extract all paths and convert shapes to paths
+    const elements = Array.from(svgElement.querySelectorAll("path, rect, circle, ellipse, line, polyline, polygon"));
+    const paths = elements
+        .map(el => elementToPath(el))
         .filter(Boolean)
         .join(" ");
 
@@ -140,4 +141,100 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
         categories: ["imported"],
         synonyms: []
     };
+}
+
+// Helper to convert SVG shapes to path commands
+function elementToPath(element: Element): string | null {
+    const tagName = element.tagName.toLowerCase();
+
+    switch (tagName) {
+        case "path":
+            return element.getAttribute("d");
+
+        case "rect": {
+            const x = parseFloat(element.getAttribute("x") || "0");
+            const y = parseFloat(element.getAttribute("y") || "0");
+            const w = parseFloat(element.getAttribute("width") || "0");
+            const h = parseFloat(element.getAttribute("height") || "0");
+            const rx = parseFloat(element.getAttribute("rx") || "0");
+            const ry = parseFloat(element.getAttribute("ry") || "0");
+
+            if (rx || ry) {
+                // Rounded rect (simplified, handling uniform radius)
+                const r = rx || ry;
+                return `M ${x + r} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r} V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
+            }
+            return `M ${x} ${y} H ${x + w} V ${y + h} H ${x} Z`;
+        }
+
+        case "circle": {
+            const cx = parseFloat(element.getAttribute("cx") || "0");
+            const cy = parseFloat(element.getAttribute("cy") || "0");
+            const r = parseFloat(element.getAttribute("r") || "0");
+            return `M ${cx - r} ${cy} A ${r} ${r} 0 1 0 ${cx + r} ${cy} A ${r} ${r} 0 1 0 ${cx - r} ${cy} Z`;
+        }
+
+        case "ellipse": {
+            const cx = parseFloat(element.getAttribute("cx") || "0");
+            const cy = parseFloat(element.getAttribute("cy") || "0");
+            const rx = parseFloat(element.getAttribute("rx") || "0");
+            const ry = parseFloat(element.getAttribute("ry") || "0");
+            return `M ${cx - rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx - rx} ${cy} Z`;
+        }
+
+        case "line": {
+            const x1 = element.getAttribute("x1");
+            const y1 = element.getAttribute("y1");
+            const x2 = element.getAttribute("x2");
+            const y2 = element.getAttribute("y2");
+            return `M ${x1} ${y1} L ${x2} ${y2}`;
+        }
+
+        case "polyline": {
+            const points = element.getAttribute("points");
+            if (!points) return null;
+            const pairs = points.trim().split(/\s+|,/);
+            // Basic parsing, assuming valid points string
+            // M p1 L p2 L p3 ...
+            // Actually, points string is just "x,y x,y"
+            // We need to format it to "M x y L x y"
+            // But simpler: just use the points string if we construct it carefully
+            // Let's parse it properly
+            // Actually, polyline is just M first L rest
+            // But points attribute syntax is flexible.
+            // Let's assume standard "x,y x,y" or "x y x y"
+            // A robust way is to let the browser parse it? No we are in logic.
+            // Let's just replace the first space/comma with M and subsequent with L?
+            // Too risky. 
+            // Let's try a simple regex replacement for now:
+            // "10,10 20,20" -> "M 10 10 L 20 20"
+            // This is complex to do perfectly without a full parser.
+            // For Lucide, points are usually "x,y x,y".
+            // Let's try to clean it up.
+            const cleaned = points.trim().replace(/,/g, " ");
+            const coords = cleaned.split(/\s+/);
+            if (coords.length < 2) return null;
+            let d = `M ${coords[0]} ${coords[1]}`;
+            for (let i = 2; i < coords.length; i += 2) {
+                d += ` L ${coords[i]} ${coords[i + 1]}`;
+            }
+            return d;
+        }
+
+        case "polygon": {
+            const points = element.getAttribute("points");
+            if (!points) return null;
+            const cleaned = points.trim().replace(/,/g, " ");
+            const coords = cleaned.split(/\s+/);
+            if (coords.length < 2) return null;
+            let d = `M ${coords[0]} ${coords[1]}`;
+            for (let i = 2; i < coords.length; i += 2) {
+                d += ` L ${coords[i]} ${coords[i + 1]}`;
+            }
+            return d + " Z";
+        }
+
+        default:
+            return null;
+    }
 }
