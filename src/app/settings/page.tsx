@@ -79,6 +79,23 @@ export default function SettingsPage() {
         }
     };
 
+    const handleDeleteSource = (sourceToDelete: any) => {
+        if (confirm(`Are you sure you want to delete "${sourceToDelete.name}"? This will remove all ${sourceToDelete.count} icons from this library.`)) {
+            // Remove icons from this library
+            const existingIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+            const filteredIcons = existingIcons.filter((icon: any) => icon.library !== sourceToDelete.name);
+            localStorage.setItem("ingested_icons", JSON.stringify(filteredIcons));
+
+            // Remove source from list
+            const updatedSources = sources.filter(s => s.id !== sourceToDelete.id);
+            setSources(updatedSources);
+            localStorage.setItem("icon_sources", JSON.stringify(updatedSources));
+
+            // Reload to update search context
+            window.location.reload();
+        }
+    };
+
     return (
         <div className="container max-w-4xl py-8 space-y-8">
             <div>
@@ -151,7 +168,12 @@ export default function SettingsPage() {
                                             <p className="text-sm font-medium">{source.count} icons</p>
                                             <p className="text-xs text-muted-foreground">Ingested</p>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            onClick={() => handleDeleteSource(source)}
+                                        >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
