@@ -52,7 +52,8 @@ export async function ingestGitHubRepo(
             try {
                 onProgress?.(completed, svgFiles.length, `Processing ${file.name}...`);
                 const rawSvg = await fetchRawFile(file.download_url);
-                const icon = parseSvg(rawSvg, file.name, repo);
+                // Pass full path for unique ID generation
+                const icon = parseSvg(rawSvg, file.path, file.name, repo);
                 if (icon) {
                     ingestedIcons.push(icon);
                 }
@@ -67,7 +68,7 @@ export async function ingestGitHubRepo(
     return ingestedIcons;
 }
 
-function parseSvg(svgContent: string, filename: string, libraryName: string): Icon | null {
+function parseSvg(svgContent: string, fullPath: string, filename: string, libraryName: string): Icon | null {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgContent, "image/svg+xml");
     const svgElement = doc.querySelector("svg");
@@ -121,8 +122,12 @@ function parseSvg(svgContent: string, filename: string, libraryName: string): Ic
 
     const name = filename.replace(".svg", "").replace(/[-_]/g, " ");
 
+    // Use full path for unique ID to prevent collisions in libraries with subdirectories
+    // e.g., Font Awesome has brands/font-awesome.svg and regular/font-awesome.svg
+    const uniqueId = fullPath.replace(/\//g, "-").replace(".svg", "");
+
     return {
-        id: `${libraryName}-${filename.replace(".svg", "")}`,
+        id: `${libraryName}-${uniqueId}`,
         name: name,
         library: libraryName,
         style: "outline",
