@@ -152,12 +152,8 @@ function elementToPath(element: Element): string | null {
             const d = element.getAttribute("d");
             if (!d) return null;
             // If path starts with relative 'm', convert to absolute 'M'
-            // This is crucial when joining multiple paths, as subsequent 'm's would be relative to previous path's end
-            const trimmed = d.trim();
-            if (trimmed.startsWith("m")) {
-                return "M" + trimmed.slice(1);
-            }
-            return trimmed;
+            // Using regex to handle potential leading whitespace and ensure robust replacement
+            return d.replace(/^\s*m/, "M").trim();
         }
 
         case "rect": {
