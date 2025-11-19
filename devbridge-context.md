@@ -1,22 +1,21 @@
 # DevBridge Context: Symbol Garden 2.0
 
 project: Symbol Garden 2.0
-repo: (to be initialized)
+repo: https://github.com/twocash/symbol-garden-2
 local_path: c:\GitHub\symbol-garden-2
 created: 2025-11-19T16:21:00Z
-last_updated: 2025-11-19T16:21:00Z
-sessions_total: 1
-checkpoints_total: 7
+last_updated: 2025-11-19T20:44:00Z
+sessions_total: 2
+checkpoints_total: 10
 
 ## Current State
 
 state: in_progress
-next_action: Implement project management features (create/load project UI, primary library selection, favorites & collections)
-active_blockers: none
+next_action: Fix Lucide rendering issues and test ingestion robustness with multiple icon libraries
+active_blockers: Lucide icons render incorrectly after ingestion (needs investigation)
 files_in_progress:
-  - src/lib/search-context.tsx
-  - src/app/page.tsx
-  - src/components/icons/IconDetail.tsx
+  - src/lib/ingestion-service.ts
+  - src/app/settings/page.tsx
 automation_status:
   tool: none
   started: null
@@ -24,6 +23,71 @@ automation_status:
   cost_spent: 0.00
 
 ## Timeline
+
+### 2025-11-19T15:00:00Z Session 2
+**Type:** Human Interactive  
+**Duration:** 4.5 hours  
+**State Change:** in_progress → in_progress
+**Checkpoints:** 3
+
+**Completed:**
+Published repository to GitHub, deployed to Vercel, fixed Font Awesome icon duplication bug, implemented library delete functionality, and fixed library name mismatch bug. Application is now live in production with working delete feature for iterative development.
+
+#### Checkpoint: 15:30
+- Completed: Published repository to GitHub and deployed to Vercel
+- Files: README.md, vercel.json, .gitignore
+- Decision: Created comprehensive README with features, installation, and usage instructions. Added vercel.json to configure Next.js deployment settings.
+
+#### Checkpoint: 15:52
+- Completed: Fixed Font Awesome icon duplication bug by using full file paths for icon IDs
+- Files: src/lib/ingestion-service.ts
+- Decision: Changed ID generation from filename-only to full path (e.g., "brands-font-awesome" vs "regular-font-awesome") to prevent collisions when Font Awesome has same filenames in different subdirectories.
+
+#### Checkpoint: 16:18
+- Completed: Implemented library delete functionality and fixed name mismatch bug
+- Files: src/app/settings/page.tsx
+- Decision: Added handleDeleteSource function to remove individual libraries from localStorage. Fixed bug where source.name used last URL segment instead of repo name, causing delete to fail.
+
+**Key Decisions:**
+- **GitHub Repository**: Published to https://github.com/twocash/symbol-garden-2 with comprehensive README
+- **Vercel Deployment**: Manual deployment via CLI due to auto-deploy not being configured. Set up vercel.json for proper Next.js build configuration.
+- **Full Path Icon IDs**: Changed from filename-only to full path to prevent duplicate IDs in libraries with subdirectories (Font Awesome brands/, regular/, etc.)
+- **Library Name Consistency**: Use repo name (e.g., "lucide") instead of URL path segment (e.g., "icons") for consistent matching between icon.library and source.name
+
+**Blockers Resolved:**
+- Vercel deployment configuration: Added vercel.json with Next.js settings (10 min)
+- Font Awesome duplication: Fixed icon ID generation to use full paths (20 min)
+- Library delete not working: Fixed name mismatch between icon.library and source.name (15 min)
+
+**Blockers Identified:**
+- Lucide icons render incorrectly after ingestion (needs investigation of SVG parsing logic)
+
+**Files Touched:**
+- README.md
+- vercel.json
+- .gitignore
+- devbridge-context.md
+- src/lib/ingestion-service.ts
+- src/app/settings/page.tsx
+
+**Git Commits:**
+- Initial commit: Symbol Garden 2.0 MVP (4f3e7d8)
+- Add Vercel configuration for Next.js deployment (10ba011)
+- Fix: Use full file path for icon IDs to prevent Font Awesome duplicates (bf95c15)
+- Update .gitignore to exclude .vercel directory (73643e2)
+- Add delete functionality for individual libraries (eaa7e16)
+- Fix: Library delete name mismatch bug (f1146af)
+
+**Next Priority:**
+Investigate and fix Lucide icon rendering issues. The icons appear broken/corrupted after ingestion, suggesting SVG parsing logic may not be handling Lucide's specific SVG structure correctly. May need to adjust renderStyle detection or path extraction logic.
+
+**Notes for Next Dev:**
+- Delete functionality now works for newly ingested libraries, but existing localStorage data with old naming won't delete properly (users need to use "Clear All Data" button)
+- Vercel deployments currently require manual `vercel --prod` command - consider enabling auto-deploy from main branch in Vercel dashboard
+- Font Awesome duplication fix is deployed and working
+- Test ingestion with Lucide, Phosphor, Heroicons to validate robustness and identify any other rendering issues
+
+---
 
 ### 2025-11-19T11:00:00Z Session 1
 **Type:** Human Interactive  
@@ -98,7 +162,7 @@ Built core MVP features for icon library management application including UI com
 - src/lib/export-utils.ts
 - public/data/icons.json
 
-**Git Commits:** (to be committed)
+**Git Commits:** Session 1 work committed in Session 2
 
 **Next Priority:**
 Implement project management features: create/load project UI, primary library selection logic, favorites and collections functionality. This will enable users to organize icons across multiple projects and maintain project-specific icon selections.
@@ -115,21 +179,24 @@ Implement project management features: create/load project UI, primary library s
 ## Project Insights
 
 **Velocity:**
-- Sessions: 1
+- Sessions: 2
 - Days active: 1
-- Avg session: 5.5 hours
-- Features: 7
-- Checkpoints: 7
+- Avg session: 5.0 hours
+- Features: 10
+- Checkpoints: 10
 
 **Common Blockers:**
 - URL parsing: 1 occurrence (15 min avg)
-- SVG compatibility: 1 occurrence (20 min avg)
+- SVG compatibility: 2 occurrences (20 min avg)
 - Missing dependencies: 1 occurrence (5 min avg)
+- Deployment configuration: 1 occurrence (10 min avg)
+- Library naming inconsistency: 1 occurrence (15 min avg)
 
 **Hot Files:**
-1. src/components/icons/IconDetail.tsx: 1 session
-2. src/lib/ingestion-service.ts: 1 session
-3. src/lib/search-context.tsx: 1 session
+1. src/lib/ingestion-service.ts: 2 sessions
+2. src/app/settings/page.tsx: 2 sessions
+3. src/components/icons/IconDetail.tsx: 1 session
+4. src/lib/search-context.tsx: 1 session
 
 **Automation:**
 - Sessions: 0
