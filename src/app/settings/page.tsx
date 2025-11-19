@@ -44,9 +44,13 @@ export default function SettingsPage() {
             localStorage.setItem("ingested_icons", JSON.stringify(updatedIcons));
 
             // Update sources list
+            // Extract repo name from URL (e.g., "lucide" from "https://github.com/lucide-icons/lucide")
+            const urlParts = repoUrl.replace("https://github.com/", "").split("/");
+            const repoName = urlParts[1] || urlParts[0] || "Unknown Repo";
+
             const newSource = {
                 id: Date.now().toString(),
-                name: repoUrl.split("/").pop() || "Unknown Repo",
+                name: repoName, // Use repo name to match icon.library field
                 url: repoUrl,
                 path: repoPath,
                 count: newIcons.length
