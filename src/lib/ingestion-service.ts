@@ -148,8 +148,17 @@ function elementToPath(element: Element): string | null {
     const tagName = element.tagName.toLowerCase();
 
     switch (tagName) {
-        case "path":
-            return element.getAttribute("d");
+        case "path": {
+            const d = element.getAttribute("d");
+            if (!d) return null;
+            // If path starts with relative 'm', convert to absolute 'M'
+            // This is crucial when joining multiple paths, as subsequent 'm's would be relative to previous path's end
+            const trimmed = d.trim();
+            if (trimmed.startsWith("m")) {
+                return "M" + trimmed.slice(1);
+            }
+            return trimmed;
+        }
 
         case "rect": {
             const x = parseFloat(element.getAttribute("x") || "0");
@@ -193,24 +202,7 @@ function elementToPath(element: Element): string | null {
         case "polyline": {
             const points = element.getAttribute("points");
             if (!points) return null;
-            const pairs = points.trim().split(/\s+|,/);
-            // Basic parsing, assuming valid points string
-            // M p1 L p2 L p3 ...
-            // Actually, points string is just "x,y x,y"
-            // We need to format it to "M x y L x y"
-            // But simpler: just use the points string if we construct it carefully
-            // Let's parse it properly
-            // Actually, polyline is just M first L rest
-            // But points attribute syntax is flexible.
-            // Let's assume standard "x,y x,y" or "x y x y"
-            // A robust way is to let the browser parse it? No we are in logic.
-            // Let's just replace the first space/comma with M and subsequent with L?
-            // Too risky. 
-            // Let's try a simple regex replacement for now:
-            // "10,10 20,20" -> "M 10 10 L 20 20"
-            // This is complex to do perfectly without a full parser.
-            // For Lucide, points are usually "x,y x,y".
-            // Let's try to clean it up.
+            // Basic parsing: "x,y x,y" -> "M x y L x y"
             const cleaned = points.trim().replace(/,/g, " ");
             const coords = cleaned.split(/\s+/);
             if (coords.length < 2) return null;
