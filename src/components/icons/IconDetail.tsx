@@ -13,10 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Copy, Download, Check, GitCompare } from "lucide-react";
-import { useState } from "react";
+import { Copy, Download, Check, GitCompare, Heart, ArrowLeftRight, Sparkles, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { CompareModal } from "@/components/icons/CompareModal";
 import { copySvg, copyPng, downloadPng, downloadSvg } from "@/lib/export-utils";
+import { useProject } from "@/lib/project-context";
+import { useSearch } from "@/lib/search-context";
+import { cn } from "@/lib/utils";
 
 interface IconDetailProps {
     icon: Icon | null;
@@ -25,10 +28,13 @@ interface IconDetailProps {
 }
 
 export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
+    const { currentProject, toggleFavorite } = useProject();
+    const { icons, setIcons } = useSearch();
     const [copied, setCopied] = useState(false);
     const [compareOpen, setCompareOpen] = useState(false);
     const [size, setSize] = useState(256);
     const [color, setColor] = useState("#ffffff"); // Default to white for dark mode contrast
+    const [generating, setGenerating] = useState(false);
 
     // Reset defaults when icon changes
     // useEffect(() => {
@@ -39,6 +45,8 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
     // }, [open, icon]);
 
     if (!icon) return null;
+
+    const isFavorite = currentProject?.favorites.includes(icon.id);
 
     const handleCopySvg = async () => {
         await copySvg(icon, size, color);
@@ -63,6 +71,61 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
 
     const handleDownloadSvg = () => {
         downloadSvg(icon, size, color);
+    };
+
+    const handleGenerateDescription = async () => {
+        const apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey) {
+            alert("Please enter a Gemini API Key in Settings first.");
+            return;
+        }
+
+        setGenerating(true);
+        try {
+            const res = await fetch("/api/enrich", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ icons: [icon], apiKey })
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "API Failed");
+            }
+
+            const { data } = await res.json();
+            if (data && data[0]) {
+                const enriched = data[0];
+
+                // Update local state
+                const updatedIcon = {
+                    ...icon,
+                    tags: [...new Set([...icon.tags, ...enriched.tags])],
+                    aiDescription: enriched.description
+                };
+
+                // Update context
+                const updatedIcons = icons.map(i => i.id === icon.id ? updatedIcon : i);
+                setIcons(updatedIcons);
+
+                // Update localStorage if it exists there
+                const storedIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+                const storedIndex = storedIcons.findIndex((i: any) => i.id === icon.id);
+                if (storedIndex !== -1) {
+                    storedIcons[storedIndex] = updatedIcon;
+                    localStorage.setItem("ingested_icons", JSON.stringify(storedIcons));
+                }
+
+                // Force UI refresh by reloading the page
+                // This is a simple way to ensure the new data is fetched and displayed
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error(error);
+            alert(`Failed to generate description: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setGenerating(false);
+        }
     };
 
     return (
@@ -147,6 +210,24 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
 
                         {/* Actions */}
                         <div className="grid grid-cols-2 gap-4">
+                            <Button
+                                variant="outline"
+                                className={cn("w-full", isFavorite && "text-red-500 hover:text-red-600")}
+                                onClick={() => toggleFavorite(icon.id)}
+                            >
+                                <Heart className={cn("mr-2 h-4 w-4", isFavorite && "fill-current")} />
+                                {isFavorite ? "Favorited" : "Favorite"}
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => setCompareOpen(true)}
+                            >
+                                <ArrowLeftRight className="mr-2 h-4 w-4" />
+                                Compare
+                            </Button>
+
                             <Button onClick={handleCopySvg} variant="outline" className="w-full">
                                 <Copy className="mr-2 h-4 w-4" />
                                 Copy SVG
@@ -163,19 +244,43 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
                                 <Download className="mr-2 h-4 w-4" />
                                 PNG
                             </Button>
-
-                            <Button
-                                variant="ghost"
-                                className="col-span-2"
-                                onClick={() => setCompareOpen(true)}
-                            >
-                                <GitCompare className="mr-2 h-4 w-4" />
-                                Compare Variants
-                            </Button>
                         </div>
 
                         {/* Metadata */}
                         <div className="space-y-4 pt-4 border-t">
+                            {icon.aiDescription ? (
+                                <div>
+                                    <h3 className="mb-2 text-sm font-medium text-muted-foreground">AI Description</h3>
+                                    <p className="text-sm text-foreground leading-relaxed">
+                                        {icon.aiDescription}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-sm font-medium text-muted-foreground">AI Description</h3>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full h-auto py-4 border-dashed"
+                                        onClick={handleGenerateDescription}
+                                        disabled={generating}
+                                    >
+                                        {generating ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Generating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles className="mr-2 h-4 w-4" />
+                                                Generate Description
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
                             <div>
                                 <h3 className="mb-2 text-sm font-medium text-muted-foreground">Tags</h3>
                                 <div className="flex flex-wrap gap-2">

@@ -13,6 +13,7 @@ export const IconSchema = z.object({
   tags: z.array(z.string()),
   categories: z.array(z.string()).optional(),
   synonyms: z.array(z.string()).optional(),
+  aiDescription: z.string().optional(),
 });
 
 export type Icon = z.infer<typeof IconSchema>;
