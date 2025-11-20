@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Github, Loader2, Plus, Trash2 } from "lucide-react";
+import { Github, Loader2, Plus, Trash2, Sparkles } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { ingestGitHubRepo } from "@/lib/ingestion-service";
 
 export default function SettingsPage() {
@@ -14,6 +15,10 @@ export default function SettingsPage() {
     const [repoPath, setRepoPath] = useState("");
     const [loading, setLoading] = useState(false);
     const [sources, setSources] = useState<any[]>([]);
+    const [apiKey, setApiKey] = useState("");
+    const [enriching, setEnriching] = useState(false);
+    const [enrichmentProgress, setEnrichmentProgress] = useState(0);
+    const [testingApi, setTestingApi] = useState(false);
 
     // Load sources from localStorage on mount
     useEffect(() => {
@@ -26,6 +31,12 @@ export default function SettingsPage() {
                 { id: "1", name: "Phosphor Icons", url: "https://github.com/phosphor-icons/core", path: "assets/regular", count: 1240 },
                 { id: "2", name: "Lucide", url: "https://github.com/lucide-icons/lucide", path: "icons", count: 850 },
             ]);
+        }
+
+        // Load API key
+        const storedApiKey = localStorage.getItem("gemini_api_key");
+        if (storedApiKey) {
+            setApiKey(storedApiKey);
         }
     }, []);
 
@@ -97,6 +108,103 @@ export default function SettingsPage() {
 
             // Reload to update search context
             window.location.reload();
+        }
+    };
+
+    const handleSaveApiKey = () => {
+        localStorage.setItem("gemini_api_key", apiKey);
+        alert("API Key saved successfully!");
+    };
+
+    const handleTestApiKey = async () => {
+        if (!apiKey) {
+            alert("Please enter an API key first.");
+            return;
+        }
+
+        setTestingApi(true);
+        try {
+            const res = await fetch("/api/list-models", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ apiKey })
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch models");
+            }
+
+            const { models } = await res.json();
+            alert(`API Key is valid!\n\nAvailable models:\n${models.map((m: any) => `- ${m.name}`).join("\n")}`);
+        } catch (error) {
+            alert(`API Test failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setTestingApi(false);
+        }
+    };
+
+    const handleEnrichLibrary = async () => {
+        if (!apiKey) {
+            alert("Please enter and save your Gemini API Key first.");
+            return;
+        }
+
+        const allIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+        const unenrichedIcons = allIcons.filter((icon: any) => !icon.aiDescription);
+
+        if (unenrichedIcons.length === 0) {
+            alert("All icons are already enriched!");
+            return;
+        }
+
+        if (!confirm(`This will enrich ${unenrichedIcons.length} icons. Continue?`)) {
+            return;
+        }
+
+        setEnriching(true);
+        setEnrichmentProgress(0);
+
+        const BATCH_SIZE = 10;
+        let enriched = 0;
+
+        try {
+            for (let i = 0; i < unenrichedIcons.length; i += BATCH_SIZE) {
+                const batch = unenrichedIcons.slice(i, i + BATCH_SIZE);
+
+                const res = await fetch("/api/enrich", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ icons: batch, apiKey })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Batch ${i / BATCH_SIZE + 1} failed`);
+                }
+
+                const { data } = await res.json();
+
+                // Merge enriched data back
+                data.forEach((enrichedIcon: any) => {
+                    const iconIndex = allIcons.findIndex((icon: any) => icon.id === enrichedIcon.id);
+                    if (iconIndex !== -1) {
+                        allIcons[iconIndex].tags = [...new Set([...allIcons[iconIndex].tags, ...enrichedIcon.tags])];
+                        allIcons[iconIndex].aiDescription = enrichedIcon.description;
+                    }
+                });
+
+                enriched += batch.length;
+                setEnrichmentProgress((enriched / unenrichedIcons.length) * 100);
+            }
+
+            // Save updated icons
+            localStorage.setItem("ingested_icons", JSON.stringify(allIcons));
+            alert("Enrichment complete!");
+            window.location.reload();
+        } catch (error) {
+            alert(`Enrichment failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setEnriching(false);
+            setEnrichmentProgress(0);
         }
     };
 
@@ -185,6 +293,57 @@ export default function SettingsPage() {
                             </Card>
                         ))}
                     </div>
+                </section>
+
+                <section className="space-y-4">
+                    <h2 className="text-xl font-semibold tracking-tight">AI Enrichment</h2>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Gemini API Key</CardTitle>
+                            <CardDescription>
+                                Enter your Google Gemini API key to enable AI-powered icon descriptions and tag generation.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Input
+                                        type="password"
+                                        placeholder="Enter your Gemini API key"
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                    />
+                                </div>
+                                <Button onClick={handleSaveApiKey} variant="outline">
+                                    Save
+                                </Button>
+                                <Button onClick={handleTestApiKey} variant="secondary" disabled={testingApi}>
+                                    {testingApi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    Test
+                                </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Button
+                                    onClick={handleEnrichLibrary}
+                                    disabled={enriching || !apiKey}
+                                    className="w-full"
+                                >
+                                    {enriching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                    {enriching ? "Enriching..." : "Start Enrichment"}
+                                </Button>
+                                {enriching && (
+                                    <div className="space-y-1">
+                                        <Progress value={enrichmentProgress} />
+                                        <p className="text-sm text-muted-foreground text-center">
+                                            {Math.round(enrichmentProgress)}% complete
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </section>
             </div>
         </div>
