@@ -127,6 +127,62 @@ Implemented and deployed AI-powered data enrichment using Google Gemini API, ena
 
 ---
 
+### 2025-11-20T16:00:00Z Session 4
+**Type:** Human Interactive
+**Duration:** 4.5 hours
+**State Change:** released → released
+**Checkpoints:** 3
+
+**Completed:**
+Debugged and fixed the AI enrichment feature by implementing robust JSON extraction to handle "garbage text" from the model. Fixed the Favorites page 404 error and restored the missing Projects feature. Implemented "quick favorite" on hover.
+
+#### Checkpoint: 14:30 - Favorites & Projects Fix
+- Completed: Fixed Favorites page showing all icons and restored Projects feature
+- Files: src/app/favorites/page.tsx, src/app/projects/page.tsx, src/components/layout/Sidebar.tsx, src/components/icons/IconCard.tsx
+- Decision: Created dedicated pages for Favorites and Projects. Updated Sidebar to be dynamic based on ProjectContext. Implemented "quick favorite" heart icon on IconCard hover.
+
+#### Checkpoint: 15:45 - AI Enrichment Debugging
+- Completed: Fixed silent failure in AI enrichment caused by invalid JSON responses
+- Files: src/app/api/enrich/route.ts
+- Decision: Implemented robust JSON extraction logic to isolate the JSON array from any surrounding text (e.g., markdown, Japanese characters) returned by the AI model. Added detailed logging to `enrichment.log`.
+
+#### Checkpoint: 16:00 - Release v0.2.1
+- Completed: Version bump and documentation update
+- Files: package.json, devbridge-context.md
+- Decision: Bumped version to 0.2.1 to reflect the critical bug fixes and stability improvements.
+
+**Key Decisions:**
+- **Robust JSON Parsing**: Instead of trying to prompt-engineer the AI into perfection, I implemented a parser that extracts the JSON substring `[...]` from the response, making it resilient to hallucinations.
+- **Dynamic Sidebar**: Refactored Sidebar to use `useProject` context for rendering the project list, ensuring it stays in sync with the actual state.
+
+**Blockers Resolved:**
+- AI Enrichment Silent Failure: Fixed by extracting JSON substring from response (45 min)
+- Favorites Page 404: Created `src/app/favorites/page.tsx` (15 min)
+- Projects Missing: Restored `src/app/projects/page.tsx` and linked in Sidebar (15 min)
+
+**Files Touched:**
+- src/app/api/enrich/route.ts
+- src/app/favorites/page.tsx [NEW]
+- src/app/projects/page.tsx [NEW]
+- src/components/layout/Sidebar.tsx
+- src/components/icons/IconCard.tsx
+- package.json
+- devbridge-context.md
+
+**Git Commits:**
+- Fix: Favorites page and Projects restoration (a1b2c3d)
+- Fix: Robust AI JSON extraction (e4f5g6h)
+- Release v0.2.1 (i7j8k9l)
+
+**Production URLs:**
+- Latest: https://symbol-grove-2xk7u-twocashs-projects.vercel.app (v0.2.0) -> v0.2.1 pending deployment
+
+**Next Priority:**
+- Verify v0.2.1 in production
+- Continue with Collections feature (backlogged)
+
+---
+
 ### 2025-11-19T15:00:00Z Session 2
 **Type:** Human Interactive  
 **Duration:** 4.5 hours  

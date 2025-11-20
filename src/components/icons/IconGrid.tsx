@@ -8,13 +8,20 @@ import { useSearch } from "@/lib/search-context";
 import Fuse from "fuse.js";
 import { useMemo } from "react";
 
-export function IconGrid() {
+interface IconGridProps {
+    icons?: Icon[];
+}
+
+export function IconGrid({ icons: propIcons }: IconGridProps) {
     const [selectedIcon, setSelectedIcon] = useState<Icon | null>(null);
-    const { query, icons, selectedLibrary } = useSearch();
+    const { query, icons: contextIcons, selectedLibrary } = useSearch();
+
+    // Use propIcons if available, otherwise use contextIcons
+    const sourceIcons = propIcons || contextIcons;
 
     // Filter icons based on search query and selected library
     const filteredIcons = useMemo(() => {
-        let result = icons;
+        let result = sourceIcons;
 
         // Filter by library first
         if (selectedLibrary && selectedLibrary !== "all") {
@@ -29,9 +36,10 @@ export function IconGrid() {
         });
 
         return fuse.search(query).map((result) => result.item);
-    }, [query, icons, selectedLibrary]);
+        return fuse.search(query).map((result) => result.item);
+    }, [query, sourceIcons, selectedLibrary]);
 
-    if (icons.length === 0) {
+    if (sourceIcons.length === 0) {
         return <div className="p-8 text-center text-muted-foreground">Loading icons...</div>;
     }
 

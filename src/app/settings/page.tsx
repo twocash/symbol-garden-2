@@ -171,34 +171,41 @@ export default function SettingsPage() {
             for (let i = 0; i < unenrichedIcons.length; i += BATCH_SIZE) {
                 const batch = unenrichedIcons.slice(i, i + BATCH_SIZE);
 
-                const res = await fetch("/api/enrich", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ icons: batch, apiKey })
-                });
+                let res;
+                try {
+                    res = await fetch("/api/enrich", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ icons: batch, apiKey })
+                    });
 
-                if (!res.ok) {
-                    throw new Error(`Batch ${i / BATCH_SIZE + 1} failed`);
+                    if (!res.ok) {
+                        throw new Error(`Batch ${i / BATCH_SIZE + 1} failed`);
+                    }
+
+                    const { data } = await res.json();
+
+                    // Merge enriched data back
+                    data.forEach((enrichedIcon: any) => {
+                        const iconIndex = allIcons.findIndex((icon: any) => icon.id === enrichedIcon.id);
+                        if (iconIndex !== -1) {
+                            allIcons[iconIndex].tags = [...new Set([...allIcons[iconIndex].tags, ...enrichedIcon.tags])];
+                            allIcons[iconIndex].aiDescription = enrichedIcon.description;
+                        }
+                    });
+
+                    enriched += batch.length;
+                } catch (batchError) {
+                    console.error(`Error processing batch ${i / BATCH_SIZE + 1}:`, batchError);
+                    // Continue to next batch
                 }
 
-                const { data } = await res.json();
-
-                // Merge enriched data back
-                data.forEach((enrichedIcon: any) => {
-                    const iconIndex = allIcons.findIndex((icon: any) => icon.id === enrichedIcon.id);
-                    if (iconIndex !== -1) {
-                        allIcons[iconIndex].tags = [...new Set([...allIcons[iconIndex].tags, ...enrichedIcon.tags])];
-                        allIcons[iconIndex].aiDescription = enrichedIcon.description;
-                    }
-                });
-
-                enriched += batch.length;
-                setEnrichmentProgress((enriched / unenrichedIcons.length) * 100);
+                setEnrichmentProgress(((i + BATCH_SIZE) / unenrichedIcons.length) * 100);
             }
 
             // Save updated icons
             localStorage.setItem("ingested_icons", JSON.stringify(allIcons));
-            alert("Enrichment complete!");
+            alert(`Enrichment complete! Successfully enriched ${enriched} icons.`);
             window.location.reload();
         } catch (error) {
             alert(`Enrichment failed: ${error instanceof Error ? error.message : "Unknown error"}`);

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { LayoutGrid, FolderOpen, Heart, Settings, Plus } from "lucide-react";
+import { useProject } from "@/lib/project-context";
 
 const sidebarItems = [
     { icon: LayoutGrid, label: "Library", href: "/" },
@@ -16,6 +17,7 @@ const sidebarItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { projects, currentProject, switchProject } = useProject();
 
     return (
         <div className="flex h-screen w-64 flex-col border-r bg-background">
@@ -56,19 +58,27 @@ export function Sidebar() {
                             <h2 className="text-xs font-semibold tracking-tight text-muted-foreground">
                                 Projects
                             </h2>
-                            <Button variant="ghost" size="icon" className="h-4 w-4">
-                                <Plus className="h-3 w-3" />
+                            <Button variant="ghost" size="icon" className="h-4 w-4" asChild>
+                                <Link href="/projects">
+                                    <Plus className="h-3 w-3" />
+                                </Link>
                             </Button>
                         </div>
                         <div className="mt-2 space-y-1">
-                            <Button variant="ghost" className="w-full justify-start text-muted-foreground">
-                                <div className="mr-2 h-2 w-2 rounded-full bg-blue-500" />
-                                Q4 Pitch Deck
-                            </Button>
-                            <Button variant="ghost" className="w-full justify-start text-muted-foreground">
-                                <div className="mr-2 h-2 w-2 rounded-full bg-purple-500" />
-                                Marketing Site
-                            </Button>
+                            {projects.map((project) => (
+                                <Button
+                                    key={project.id}
+                                    variant={currentProject?.id === project.id ? "secondary" : "ghost"}
+                                    className="w-full justify-start text-muted-foreground"
+                                    onClick={() => switchProject(project.id)}
+                                >
+                                    <div className={cn(
+                                        "mr-2 h-2 w-2 rounded-full",
+                                        currentProject?.id === project.id ? "bg-primary" : "bg-muted-foreground"
+                                    )} />
+                                    <span className="truncate">{project.name}</span>
+                                </Button>
+                            ))}
                         </div>
                     </div>
                 </div>
