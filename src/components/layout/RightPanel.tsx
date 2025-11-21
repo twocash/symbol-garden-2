@@ -212,9 +212,29 @@ export function RightPanel() {
                                     <Heart className={cn("mr-2 h-4 w-4", isFavorite && "fill-current")} />
                                     {isFavorite ? "Saved" : "Save"}
                                 </Button>
-                                <Button onClick={handleCopySvg} className="w-full">
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Copy SVG
+                                <Button
+                                    onClick={() => {
+                                        const format = currentProject.exportSettings?.format || 'svg';
+                                        if (format === 'png') {
+                                            handleCopyPng();
+                                        } else {
+                                            handleCopySvg();
+                                        }
+                                    }}
+                                    className="w-full"
+                                    disabled={copied}
+                                >
+                                    {copied ? (
+                                        <>
+                                            <Copy className="mr-2 h-4 w-4" />
+                                            Copied!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy className="mr-2 h-4 w-4" />
+                                            Copy {(currentProject.exportSettings?.format || 'svg').toUpperCase()}
+                                        </>
+                                    )}
                                 </Button>
                             </div>
 
