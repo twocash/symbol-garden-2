@@ -4,13 +4,16 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { LayoutGrid, Plus, FolderOpen } from "lucide-react";
+import { LayoutGrid, Plus, FolderOpen, Settings } from "lucide-react";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
+import { SettingsModal } from "@/components/layout/SettingsModal";
+import { useState } from "react";
 
 export function Sidebar() {
     const { projects, currentProject, switchProject, createProject } = useProject();
     const { setSelectedLibrary } = useSearch();
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     const handleSwitchToAll = () => {
         // "All Library" is effectively a null project context or a specific "all" state
@@ -102,10 +105,20 @@ export function Sidebar() {
                 </div>
             </ScrollArea>
 
-            {/* User / Meta (Optional footer) */}
-            <div className="p-4 border-t text-xs text-muted-foreground text-center">
-                v0.2.3
+            {/* Footer: Version + Settings */}
+            <div className="p-4 border-t flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">v0.3.0</span>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setSettingsOpen(true)}
+                >
+                    <Settings className="h-4 w-4" />
+                </Button>
             </div>
+
+            <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
         </div>
     );
 }
