@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { SearchProvider } from "@/lib/search-context";
 import { ProjectProvider } from "@/lib/project-context";
 import { RightPanel } from "@/components/layout/RightPanel";
+import { Toaster } from "sonner";
 
 interface AppShellProps {
     children: React.ReactNode;
@@ -17,6 +18,7 @@ export function AppShell({ children }: AppShellProps) {
                         {children}
                     </main>
                     <RightPanel />
+                    <Toaster />
                 </div>
             </SearchProvider>
         </ProjectProvider>

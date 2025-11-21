@@ -2,11 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Project } from "@/types/schema";
+import { nanoid } from "nanoid";
 
 interface ProjectContextType {
     projects: Project[];
     currentProject: Project | null;
     createProject: (name: string) => void;
+    renameProject: (projectId: string, newName: string) => void;
+    duplicateProject: (projectId: string, newName: string, copyFavorites: boolean) => void;
     switchProject: (projectId: string) => void;
     deleteProject: (projectId: string) => void;
     updateProject: (project: Project) => void;
@@ -26,12 +29,14 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
         if (storedProjects) {
             const parsedProjects = JSON.parse(storedProjects);
-            setProjects(parsedProjects);
+            // Filter out soft-deleted projects
+            const activeProjects = parsedProjects.filter((p: Project) => !p.deletedAt);
+            setProjects(activeProjects);
 
-            if (storedCurrentId && parsedProjects.find((p: Project) => p.id === storedCurrentId)) {
+            if (storedCurrentId && activeProjects.find((p: Project) => p.id === storedCurrentId)) {
                 setCurrentProjectId(storedCurrentId);
-            } else if (parsedProjects.length > 0) {
-                setCurrentProjectId(parsedProjects[0].id);
+            } else if (activeProjects.length > 0) {
+                setCurrentProjectId(activeProjects[0].id);
             }
         } else {
             // Create default project if none exist
@@ -62,7 +67,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
     const createProject = (name: string) => {
         const newProject: Project = {
-            id: Date.now().toString(),
+            id: nanoid(),
             name,
             slug: name.toLowerCase().replace(/\s+/g, "-"),
             primaryLibrary: "all",
@@ -72,9 +77,60 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
-        const updatedProjects = [...projects, newProject];
+
+        setProjects(prev => {
+            const updated = [...prev, newProject];
+            localStorage.setItem("projects", JSON.stringify(updated));
+            return updated;
+        });
+
+        // Delay context switch to ensure state is updated
+        setTimeout(() => switchProject(newProject.id), 0);
+    };
+
+    const renameProject = (projectId: string, newName: string) => {
+        // Validation
+        if (newName.length < 2 || newName.length > 40) {
+            throw new Error("Please enter 2–40 characters.");
+        }
+
+        if (projects.some(p => p.id !== projectId && p.name === newName)) {
+            throw new Error("That name is already in use.");
+        }
+
+        const updatedProjects = projects.map(p =>
+            p.id === projectId ? {
+                ...p,
+                name: newName,
+                slug: newName.toLowerCase().replace(/\s+/g, "-"),
+                updatedAt: new Date().toISOString()
+            } : p
+        );
+
         saveProjects(updatedProjects);
-        switchProject(newProject.id);
+    };
+
+    const duplicateProject = (projectId: string, newName: string, copyFavorites: boolean) => {
+        const source = projects.find(p => p.id === projectId);
+        if (!source) return;
+
+        const newProject: Project = {
+            ...source,
+            id: nanoid(),
+            name: newName,
+            slug: newName.toLowerCase().replace(/\s+/g, "-"),
+            favorites: copyFavorites ? [...source.favorites] : [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        setProjects(prev => {
+            const updated = [...prev, newProject];
+            localStorage.setItem("projects", JSON.stringify(updated));
+            return updated;
+        });
+
+        setTimeout(() => switchProject(newProject.id), 0);
     };
 
     const switchProject = (projectId: string) => {
@@ -83,11 +139,20 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     };
 
     const deleteProject = (projectId: string) => {
-        const updatedProjects = projects.filter(p => p.id !== projectId);
+        // Prevent deleting the last non-default workspace
+        const activeProjects = projects.filter(p => !p.deletedAt);
+        if (activeProjects.filter(p => p.id !== "default").length === 1 && projectId !== "default") {
+            throw new Error("You must have at least one workspace.");
+        }
+
+        // Soft-delete by adding deletedAt timestamp
+        const updatedProjects = projects.map(p =>
+            p.id === projectId ? { ...p, deletedAt: new Date().toISOString() } : p
+        );
         saveProjects(updatedProjects);
 
         if (currentProjectId === projectId) {
-            const nextProject = updatedProjects[0] || null;
+            const nextProject = updatedProjects.filter(p => !p.deletedAt)[0] || null;
             const nextId = nextProject ? nextProject.id : null;
             setCurrentProjectId(nextId);
             if (nextId) {
@@ -131,6 +196,8 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             projects,
             currentProject,
             createProject,
+            renameProject,
+            duplicateProject,
             switchProject,
             deleteProject,
             updateProject,

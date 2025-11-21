@@ -33,6 +33,7 @@ export const ProjectSchema = z.object({
   }).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  deletedAt: z.string().optional(), // Soft-delete support
 });
 
 export type Project = z.infer<typeof ProjectSchema>;
