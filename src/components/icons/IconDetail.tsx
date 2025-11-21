@@ -36,6 +36,9 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
     const [color, setColor] = useState("#ffffff"); // Default to white for dark mode contrast
     const [generating, setGenerating] = useState(false);
 
+    // Use the live icon from context if available to ensure updates are reflected immediately
+    const activeIcon = icons.find(i => i.id === icon?.id) || icon;
+
     // Reset defaults when icon changes
     // useEffect(() => {
     //     if (open) {
@@ -44,19 +47,19 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
     //     }
     // }, [open, icon]);
 
-    if (!icon) return null;
+    if (!activeIcon) return null;
 
-    const isFavorite = currentProject?.favorites.includes(icon.id);
+    const isFavorite = currentProject?.favorites.includes(activeIcon.id);
 
     const handleCopySvg = async () => {
-        await copySvg(icon, size, color);
+        await copySvg(activeIcon, size, color);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleCopyPng = async () => {
         try {
-            await copyPng(icon, size, color);
+            await copyPng(activeIcon, size, color);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
@@ -66,11 +69,11 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
     };
 
     const handleDownloadPng = () => {
-        downloadPng(icon, size, color);
+        downloadPng(activeIcon, size, color);
     };
 
     const handleDownloadSvg = () => {
-        downloadSvg(icon, size, color);
+        downloadSvg(activeIcon, size, color);
     };
 
     const handleGenerateDescription = async () => {
@@ -85,7 +88,7 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
             const res = await fetch("/api/enrich", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ icons: [icon], apiKey })
+                body: JSON.stringify({ icons: [activeIcon], apiKey })
             });
 
             if (!res.ok) {
@@ -99,26 +102,22 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
 
                 // Update local state
                 const updatedIcon = {
-                    ...icon,
-                    tags: [...new Set([...icon.tags, ...enriched.tags])],
+                    ...activeIcon,
+                    tags: [...new Set([...activeIcon.tags, ...enriched.tags])],
                     aiDescription: enriched.description
                 };
 
                 // Update context
-                const updatedIcons = icons.map(i => i.id === icon.id ? updatedIcon : i);
+                const updatedIcons = icons.map(i => i.id === activeIcon.id ? updatedIcon : i);
                 setIcons(updatedIcons);
 
                 // Update localStorage if it exists there
                 const storedIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
-                const storedIndex = storedIcons.findIndex((i: any) => i.id === icon.id);
+                const storedIndex = storedIcons.findIndex((i: any) => i.id === activeIcon.id);
                 if (storedIndex !== -1) {
                     storedIcons[storedIndex] = updatedIcon;
                     localStorage.setItem("ingested_icons", JSON.stringify(storedIcons));
                 }
-
-                // Force UI refresh by reloading the page
-                // This is a simple way to ensure the new data is fetched and displayed
-                window.location.reload();
             }
         } catch (error) {
             console.error(error);
@@ -133,9 +132,9 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
             <Sheet open={open} onOpenChange={onOpenChange}>
                 <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto p-6">
                     <SheetHeader>
-                        <SheetTitle>{icon.name}</SheetTitle>
+                        <SheetTitle>{activeIcon.name}</SheetTitle>
                         <SheetDescription>
-                            {icon.library} / {icon.style || "regular"}
+                            {activeIcon.library} / {activeIcon.style || "regular"}
                         </SheetDescription>
                     </SheetHeader>
 
@@ -152,18 +151,18 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
                             />
 
                             <svg
-                                viewBox={icon.viewBox}
-                                fill={icon.renderStyle === "fill" ? color : "none"}
-                                stroke={icon.renderStyle === "fill" ? "none" : color}
-                                strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
+                                viewBox={activeIcon.viewBox}
+                                fill={activeIcon.renderStyle === "fill" ? color : "none"}
+                                stroke={activeIcon.renderStyle === "fill" ? "none" : color}
+                                strokeWidth={activeIcon.renderStyle === "fill" ? "0" : "2"}
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 className="h-64 w-64 transition-colors duration-200 relative z-10"
                             >
                                 <path
-                                    d={icon.path}
-                                    fillRule={icon.fillRule as any}
-                                    clipRule={icon.clipRule as any}
+                                    d={activeIcon.path}
+                                    fillRule={activeIcon.fillRule as any}
+                                    clipRule={activeIcon.clipRule as any}
                                 />
                             </svg>
                         </div>
@@ -213,7 +212,7 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
                             <Button
                                 variant="outline"
                                 className={cn("w-full", isFavorite && "text-red-500 hover:text-red-600")}
-                                onClick={() => toggleFavorite(icon.id)}
+                                onClick={() => toggleFavorite(activeIcon.id)}
                             >
                                 <Heart className={cn("mr-2 h-4 w-4", isFavorite && "fill-current")} />
                                 {isFavorite ? "Favorited" : "Favorite"}
@@ -248,11 +247,11 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
 
                         {/* Metadata */}
                         <div className="space-y-4 pt-4 border-t">
-                            {icon.aiDescription ? (
+                            {activeIcon.aiDescription ? (
                                 <div>
                                     <h3 className="mb-2 text-sm font-medium text-muted-foreground">AI Description</h3>
                                     <p className="text-sm text-foreground leading-relaxed">
-                                        {icon.aiDescription}
+                                        {activeIcon.aiDescription}
                                     </p>
                                 </div>
                             ) : (
@@ -284,7 +283,7 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
                             <div>
                                 <h3 className="mb-2 text-sm font-medium text-muted-foreground">Tags</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {icon.tags.map((tag) => (
+                                    {activeIcon.tags.map((tag) => (
                                         <Badge key={tag} variant="secondary">
                                             {tag}
                                         </Badge>
@@ -297,7 +296,7 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
             </Sheet>
 
             <CompareModal
-                icon={icon}
+                icon={activeIcon}
                 open={compareOpen}
                 onOpenChange={setCompareOpen}
             />

@@ -5,10 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Github, Loader2, Plus, Trash2, Sparkles } from "lucide-react";
+import { Github, Loader2, Plus, Trash2, Sparkles, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { ingestGitHubRepo } from "@/lib/ingestion-service";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+    DialogClose
+} from "@/components/ui/dialog";
+import { useProject } from "@/lib/project-context";
 
 export default function SettingsPage() {
     const [repoUrl, setRepoUrl] = useState("");
@@ -19,6 +30,13 @@ export default function SettingsPage() {
     const [enriching, setEnriching] = useState(false);
     const [enrichmentProgress, setEnrichmentProgress] = useState(0);
     const [testingApi, setTestingApi] = useState(false);
+
+    // Enrichment Modal State
+    const [enrichmentModalOpen, setEnrichmentModalOpen] = useState(false);
+    const [enrichmentMode, setEnrichmentMode] = useState<"missing" | "favorites" | "all">("missing");
+    const [counts, setCounts] = useState({ missing: 0, favorites: 0, all: 0 });
+
+    const { currentProject: project } = useProject();
 
     // Load sources from localStorage on mount
     useEffect(() => {
@@ -39,6 +57,24 @@ export default function SettingsPage() {
             setApiKey(storedApiKey);
         }
     }, []);
+
+    // Calculate counts when modal opens
+    useEffect(() => {
+        if (enrichmentModalOpen) {
+            const allIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+            const missingCount = allIcons.filter((icon: any) => !icon.aiDescription).length;
+
+            // Get favorites from project context if available, otherwise empty
+            const favoriteIds = project?.favorites || [];
+            const favoritesCount = allIcons.filter((icon: any) => favoriteIds.includes(icon.id)).length;
+
+            setCounts({
+                missing: missingCount,
+                favorites: favoritesCount,
+                all: allIcons.length
+            });
+        }
+    }, [enrichmentModalOpen, project]);
 
     const handleAddSource = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -149,15 +185,22 @@ export default function SettingsPage() {
             return;
         }
 
-        const allIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
-        const unenrichedIcons = allIcons.filter((icon: any) => !icon.aiDescription);
+        setEnrichmentModalOpen(false); // Close modal
 
-        if (unenrichedIcons.length === 0) {
-            alert("All icons are already enriched!");
-            return;
+        const allIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+        let iconsToProcess: any[] = [];
+
+        if (enrichmentMode === "missing") {
+            iconsToProcess = allIcons.filter((icon: any) => !icon.aiDescription);
+        } else if (enrichmentMode === "favorites") {
+            const favoriteIds = project?.favorites || [];
+            iconsToProcess = allIcons.filter((icon: any) => favoriteIds.includes(icon.id));
+        } else {
+            iconsToProcess = [...allIcons];
         }
 
-        if (!confirm(`This will enrich ${unenrichedIcons.length} icons. Continue?`)) {
+        if (iconsToProcess.length === 0) {
+            alert("No icons found matching the selected criteria.");
             return;
         }
 
@@ -168,8 +211,8 @@ export default function SettingsPage() {
         let enriched = 0;
 
         try {
-            for (let i = 0; i < unenrichedIcons.length; i += BATCH_SIZE) {
-                const batch = unenrichedIcons.slice(i, i + BATCH_SIZE);
+            for (let i = 0; i < iconsToProcess.length; i += BATCH_SIZE) {
+                const batch = iconsToProcess.slice(i, i + BATCH_SIZE);
 
                 let res;
                 try {
@@ -185,7 +228,7 @@ export default function SettingsPage() {
 
                     const { data } = await res.json();
 
-                    // Merge enriched data back
+                    // Merge enriched data back into main list
                     data.forEach((enrichedIcon: any) => {
                         const iconIndex = allIcons.findIndex((icon: any) => icon.id === enrichedIcon.id);
                         if (iconIndex !== -1) {
@@ -200,7 +243,7 @@ export default function SettingsPage() {
                     // Continue to next batch
                 }
 
-                setEnrichmentProgress(((i + BATCH_SIZE) / unenrichedIcons.length) * 100);
+                setEnrichmentProgress(((i + BATCH_SIZE) / iconsToProcess.length) * 100);
             }
 
             // Save updated icons
@@ -332,14 +375,84 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Button
-                                    onClick={handleEnrichLibrary}
-                                    disabled={enriching || !apiKey}
-                                    className="w-full"
-                                >
-                                    {enriching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                    {enriching ? "Enriching..." : "Start Enrichment"}
-                                </Button>
+                                <Dialog open={enrichmentModalOpen} onOpenChange={setEnrichmentModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            disabled={enriching || !apiKey}
+                                            className="w-full"
+                                        >
+                                            {enriching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                            {enriching ? "Enriching..." : "Start Enrichment"}
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>AI Generate Metadata</DialogTitle>
+                                            <DialogDescription>
+                                                Use AI to automatically generate business-focused descriptions and UI context tags for your icons.
+                                            </DialogDescription>
+                                        </DialogHeader>
+
+                                        <div className="grid gap-6 py-4">
+                                            <Label className="text-base font-semibold">What to generate</Label>
+
+                                            <div className="grid gap-3">
+                                                <div
+                                                    className={`flex items-center space-x-4 rounded-lg border p-4 cursor-pointer transition-all hover:bg-accent/50 ${enrichmentMode === "missing" ? "border-primary bg-accent/30 ring-1 ring-primary/20" : "border-border"}`}
+                                                    onClick={() => setEnrichmentMode("missing")}
+                                                >
+                                                    <div className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${enrichmentMode === "missing" ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50"}`}>
+                                                        {enrichmentMode === "missing" && <div className="h-2.5 w-2.5 rounded-full bg-current" />}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium leading-none">Only icons without metadata</p>
+                                                        <p className="text-xs text-muted-foreground mt-1.5">Process {counts.missing} icons</p>
+                                                    </div>
+                                                </div>
+
+                                                <div
+                                                    className={`flex items-center space-x-4 rounded-lg border p-4 cursor-pointer transition-all hover:bg-accent/50 ${enrichmentMode === "favorites" ? "border-primary bg-accent/30 ring-1 ring-primary/20" : "border-border"}`}
+                                                    onClick={() => setEnrichmentMode("favorites")}
+                                                >
+                                                    <div className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${enrichmentMode === "favorites" ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50"}`}>
+                                                        {enrichmentMode === "favorites" && <div className="h-2.5 w-2.5 rounded-full bg-current" />}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium leading-none">Only favorites</p>
+                                                        <p className="text-xs text-muted-foreground mt-1.5">Process {counts.favorites} icons</p>
+                                                    </div>
+                                                </div>
+
+                                                <div
+                                                    className={`flex items-center space-x-4 rounded-lg border p-4 cursor-pointer transition-all hover:bg-accent/50 ${enrichmentMode === "all" ? "border-primary bg-accent/30 ring-1 ring-primary/20" : "border-border"}`}
+                                                    onClick={() => setEnrichmentMode("all")}
+                                                >
+                                                    <div className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${enrichmentMode === "all" ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50"}`}>
+                                                        {enrichmentMode === "all" && <div className="h-2.5 w-2.5 rounded-full bg-current" />}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium leading-none">All icons</p>
+                                                        <p className="text-xs text-muted-foreground mt-1.5">Process {counts.all} icons</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-sm text-muted-foreground">
+                                                This will process <strong className="text-foreground">{enrichmentMode === "missing" ? counts.missing : enrichmentMode === "favorites" ? counts.favorites : counts.all}</strong> icons.
+                                                This may take a few minutes.
+                                            </p>
+                                        </div>
+
+                                        <DialogFooter>
+                                            <Button variant="outline" onClick={() => setEnrichmentModalOpen(false)}>Cancel</Button>
+                                            <Button onClick={handleEnrichLibrary}>
+                                                <Sparkles className="mr-2 h-4 w-4" />
+                                                Generate
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+
                                 {enriching && (
                                     <div className="space-y-1">
                                         <Progress value={enrichmentProgress} />
