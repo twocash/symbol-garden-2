@@ -1,95 +1,110 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { LayoutGrid, FolderOpen, Heart, Settings, Plus } from "lucide-react";
+import { LayoutGrid, Plus, FolderOpen } from "lucide-react";
 import { useProject } from "@/lib/project-context";
-
-const sidebarItems = [
-    { icon: LayoutGrid, label: "Library", href: "/" },
-    { icon: FolderOpen, label: "Projects", href: "/projects" },
-    { icon: Heart, label: "Favorites", href: "/favorites" },
-];
+import { useSearch } from "@/lib/search-context";
 
 export function Sidebar() {
-    const pathname = usePathname();
-    const { projects, currentProject, switchProject } = useProject();
+    const { projects, currentProject, switchProject, createProject } = useProject();
+    const { setSelectedLibrary } = useSearch();
+
+    const handleSwitchToAll = () => {
+        // "All Library" is effectively a null project context or a specific "all" state
+        // For now, we might need a way to represent "No Project Selected" in ProjectContext,
+        // or we treat "All" as a special mode.
+        // Based on the plan: "All Library" -> Neutral Mode.
+        // We might need to update ProjectContext to allow currentProject to be null?
+        // Or we just switch to a "default" project?
+        // Let's assume for now we switch to the default project or handle it via a specific ID if needed.
+        // But wait, the requirement says "The Project is the Global Context".
+        // If "All Library" is selected, maybe we just clear the current project?
+        // Let's try switching to the 'default' project if it exists, or handle null.
+        // Actually, let's look at ProjectContext again. It has a 'default' project.
+        switchProject("default");
+        setSelectedLibrary("all");
+    };
+
+    const handleCreateProject = () => {
+        const name = prompt("Enter project name:");
+        if (name) {
+            createProject(name);
+        }
+    };
 
     return (
-        <div className="flex h-screen w-64 flex-col border-r bg-background">
+        <div className="flex h-screen w-60 flex-col border-r bg-background">
             <div className="p-6">
                 <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
                     <div className="h-6 w-6 rounded bg-primary" />
                     Symbol Garden
                 </h1>
             </div>
+
             <ScrollArea className="flex-1 px-4">
                 <div className="space-y-4">
-                    <div className="px-2 py-2">
-                        <h2 className="mb-2 px-2 text-xs font-semibold tracking-tight text-muted-foreground">
-                            Discover
-                        </h2>
-                        <div className="space-y-1">
-                            {sidebarItems.map((item) => (
-                                <Button
-                                    key={item.href}
-                                    variant={pathname === item.href ? "secondary" : "ghost"}
-                                    className={cn(
-                                        "w-full justify-start",
-                                        pathname === item.href && "bg-secondary"
-                                    )}
-                                    asChild
-                                >
-                                    <Link href={item.href}>
-                                        <item.icon className="mr-2 h-4 w-4" />
-                                        {item.label}
-                                    </Link>
-                                </Button>
-                            ))}
-                        </div>
+                    {/* Global Context */}
+                    <div className="py-2">
+                        <Button
+                            variant={currentProject?.id === "default" ? "secondary" : "ghost"}
+                            className="w-full justify-start"
+                            onClick={handleSwitchToAll}
+                        >
+                            <LayoutGrid className="mr-2 h-4 w-4" />
+                            All Library
+                        </Button>
                     </div>
+
                     <Separator />
-                    <div className="px-2 py-2">
-                        <div className="flex items-center justify-between px-2">
+
+                    {/* Project Contexts */}
+                    <div className="py-2">
+                        <div className="flex items-center justify-between px-2 mb-2">
                             <h2 className="text-xs font-semibold tracking-tight text-muted-foreground">
-                                Projects
+                                Workspaces
                             </h2>
-                            <Button variant="ghost" size="icon" className="h-4 w-4" asChild>
-                                <Link href="/projects">
-                                    <Plus className="h-3 w-3" />
-                                </Link>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4 hover:bg-transparent"
+                                onClick={handleCreateProject}
+                            >
+                                <Plus className="h-3 w-3" />
                             </Button>
                         </div>
-                        <div className="mt-2 space-y-1">
-                            {projects.map((project) => (
+                        <div className="space-y-1">
+                            {projects.filter(p => p.id !== "default").map((project) => (
                                 <Button
                                     key={project.id}
                                     variant={currentProject?.id === project.id ? "secondary" : "ghost"}
-                                    className="w-full justify-start text-muted-foreground"
+                                    className="w-full justify-start font-normal"
                                     onClick={() => switchProject(project.id)}
                                 >
-                                    <div className={cn(
-                                        "mr-2 h-2 w-2 rounded-full",
-                                        currentProject?.id === project.id ? "bg-primary" : "bg-muted-foreground"
-                                    )} />
+                                    <div
+                                        className="mr-2 h-2 w-2 rounded-full shrink-0"
+                                        style={{ backgroundColor: project.brandColor || "hsl(var(--primary))" }}
+                                    />
                                     <span className="truncate">{project.name}</span>
                                 </Button>
                             ))}
+                            {projects.length === 1 && ( // Only default project exists
+                                <div className="px-2 py-4 text-xs text-muted-foreground text-center border-dashed border rounded-md">
+                                    No projects yet.
+                                    <br />
+                                    Click + to create one.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </ScrollArea>
-            <div className="p-4 border-t">
-                <Button variant="ghost" className="w-full justify-start" asChild>
-                    <Link href="/settings">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                    </Link>
-                </Button>
+
+            {/* User / Meta (Optional footer) */}
+            <div className="p-4 border-t text-xs text-muted-foreground text-center">
+                v0.2.3
             </div>
         </div>
     );

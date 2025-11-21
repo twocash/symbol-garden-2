@@ -11,6 +11,8 @@ interface SearchContextType {
     selectedLibrary: string;
     setSelectedLibrary: (library: string) => void;
     libraries: string[];
+    selectedIconId: string | null;
+    setSelectedIconId: (id: string | null) => void;
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const [icons, setIcons] = useState<Icon[]>([]);
     const [selectedLibrary, setSelectedLibrary] = useState("all");
     const [libraries, setLibraries] = useState<string[]>([]);
+    const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadIcons() {
@@ -53,7 +56,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
             setIcons,
             selectedLibrary,
             setSelectedLibrary,
-            libraries
+            libraries,
+            selectedIconId,
+            setSelectedIconId
         }}>
             {children}
         </SearchContext.Provider>

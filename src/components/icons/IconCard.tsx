@@ -7,9 +7,10 @@ import { useProject } from "@/lib/project-context";
 
 interface IconCardProps {
     icon: Icon;
+    color?: string;
 }
 
-export function IconCard({ icon }: IconCardProps) {
+export function IconCard({ icon, color }: IconCardProps) {
     const { currentProject, toggleFavorite } = useProject();
     const isFavorite = currentProject?.favorites.includes(icon.id);
 
@@ -38,11 +39,11 @@ export function IconCard({ icon }: IconCardProps) {
                     </svg>
                 </button>
             </div>
-            <div className="relative flex h-1/2 w-1/2 items-center justify-center text-foreground transition-transform group-hover:scale-110">
+            <div className="relative flex h-1/2 w-1/2 items-center justify-center text-foreground transition-transform group-hover:scale-110" style={{ color: color }}>
                 <svg
                     viewBox={icon.viewBox}
-                    fill={icon.renderStyle === "fill" ? "currentColor" : "none"}
-                    stroke={icon.renderStyle === "fill" ? "none" : "currentColor"}
+                    fill={icon.renderStyle === "fill" ? (color || "currentColor") : "none"}
+                    stroke={icon.renderStyle === "fill" ? "none" : (color || "currentColor")}
                     strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
                     strokeLinecap="round"
                     strokeLinejoin="round"

@@ -171,6 +171,58 @@ Polished the UI with a new "cool" color scheme (Graphite, Neon Sprout, Safty Ora
 - Release v0.2.3 (b4c5d6e)
 
 **Next Priority:**
+- Context-First UI Refactor
+
+---
+
+### Session 6: Context-First Architecture (Nov 21, 2024)
+
+**Objective:** Refactor the application from an Object-Oriented UI to a Task-Oriented (Context-First) architecture where the "Project" is the global context that drives the entire UI state.
+
+#### Checkpoint: 12:45 - Schema & State Updates
+- Completed: Updated Project schema and SearchContext
+- Files: src/types/schema.ts, src/lib/search-context.tsx
+- Decision: Added `brandColor` and `exportSettings` to Project schema. Added `selectedIconId` to SearchContext to manage icon selection state across the app.
+
+#### Checkpoint: 12:50 - RightPanel Implementation
+- Completed: Created persistent Right Rail inspector
+- Files: src/components/layout/RightPanel.tsx, src/components/layout/AppShell.tsx
+- Decision: Built a dual-mode panel that switches between "Project Settings" (brand color, export rules) and "Icon Details" (preview, actions, metadata) based on selection state.
+
+#### Checkpoint: 12:55 - IconGrid & Sidebar Refactor
+- Completed: Refactored IconGrid and Sidebar for Context-First workflow
+- Files: src/components/icons/IconGrid.tsx, src/components/icons/IconCard.tsx, src/components/layout/Sidebar.tsx
+- Decision: Moved search and view toggles into IconGrid. Simplified Sidebar to a "Context Switcher" with project selection. Removed legacy navigation links.
+
+#### Checkpoint: 13:00 - Cleanup & Build Fix
+- Completed: Removed legacy pages and resolved build errors
+- Files: src/app/settings/page.tsx (deleted), src/app/favorites/page.tsx (deleted), src/components/ui/tabs.tsx (created)
+- Decision: Deleted obsolete Settings and Favorites pages. Added missing Tabs component and @radix-ui/react-tabs dependency.
+
+**Key Decisions:**
+- **3-Column Layout**: Sidebar (240px) | Main Content (flex) | RightPanel (320px)
+- **Context-Driven Rendering**: Icons in the grid render with the active project's brand color
+- **Unified Inspector**: RightPanel replaces the IconDetail side sheet, providing persistent access to both project and icon settings
+- **Favorites as Filter**: Converted "Favorites" from a separate page to a view toggle within the main workspace
+
+**Files Touched:**
+- src/types/schema.ts
+- src/lib/search-context.tsx
+- src/lib/project-context.tsx (schema updates)
+- src/components/layout/AppShell.tsx
+- src/components/layout/RightPanel.tsx (new)
+- src/components/layout/Sidebar.tsx
+- src/components/icons/IconGrid.tsx
+- src/components/icons/IconCard.tsx
+- src/components/ui/tabs.tsx (new)
+- src/app/settings/page.tsx (deleted)
+- src/app/favorites/page.tsx (deleted)
+- package.json
+
+**Git Commits:**
+- Feat: Context-First Architecture (v0.3.0)
+
+**Next Priority:**
 - Deploy v0.2.2 to production
 - Collections feature
 

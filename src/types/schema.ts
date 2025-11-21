@@ -26,6 +26,11 @@ export const ProjectSchema = z.object({
   fallbackLibraries: z.array(z.string()),
   icons: z.record(z.string(), z.string()), // concept -> iconId mapping
   favorites: z.array(z.string()),
+  brandColor: z.string().default("#000000").optional(),
+  exportSettings: z.object({
+    format: z.enum(["svg", "png", "jsx"]).default("svg"),
+    repoLink: z.string().optional(),
+  }).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
