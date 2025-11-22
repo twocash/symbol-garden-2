@@ -19,7 +19,14 @@ export function RightDrawer() {
         openDeleteWorkspace
     } = useUI();
 
-    const { projects, currentProject, updateProject } = useProject();
+    const {
+        projects,
+        currentProject,
+        updateProject,
+        addSecondaryColor,
+        updateSecondaryColor,
+        removeSecondaryColor
+    } = useProject();
     const { icons } = useSearch();
 
     // Global Esc key handler
@@ -89,6 +96,33 @@ export function RightDrawer() {
         }
     };
 
+    const handleAddSecondaryColor = (color: string) => {
+        if (!activeWorkspace) return;
+        try {
+            addSecondaryColor(activeWorkspace.id, color);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to add color");
+        }
+    };
+
+    const handleUpdateSecondaryColor = (index: number, color: string) => {
+        if (!activeWorkspace) return;
+        try {
+            updateSecondaryColor(activeWorkspace.id, index, color);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to update color");
+        }
+    };
+
+    const handleRemoveSecondaryColor = (index: number) => {
+        if (!activeWorkspace) return;
+        try {
+            removeSecondaryColor(activeWorkspace.id, index);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to remove color");
+        }
+    };
+
     return (
         <aside className="w-[320px] border-l border-border/60 bg-sidebar flex flex-col h-full shrink-0 pr-4">
             {/* Shared Header */}
@@ -147,6 +181,10 @@ export function RightDrawer() {
                         workspaceName={activeWorkspace.name}
                         primaryColor={activeWorkspace.brandColor || "#000000"}
                         onPrimaryColorChange={handleColorChange}
+                        secondaryColors={activeWorkspace.secondaryColors || []}
+                        onAddSecondaryColor={handleAddSecondaryColor}
+                        onUpdateSecondaryColor={handleUpdateSecondaryColor}
+                        onRemoveSecondaryColor={handleRemoveSecondaryColor}
                         exportFormat={activeWorkspace.exportSettings?.format || 'svg'}
                         onExportFormatChange={handleExportSettingChange}
                         repoUrl={activeWorkspace.exportSettings?.repoLink || ""}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { SecondaryColorPalette } from "@/components/ui/secondary-color-palette";
 import { cn } from "@/lib/utils";
 
 interface RightSidebarWorkspaceProps {
@@ -11,6 +12,10 @@ interface RightSidebarWorkspaceProps {
     workspaceName: string;
     primaryColor: string;
     onPrimaryColorChange: (value: string) => void;
+    secondaryColors: string[];
+    onAddSecondaryColor: (color: string) => void;
+    onUpdateSecondaryColor: (index: number, color: string) => void;
+    onRemoveSecondaryColor: (index: number) => void;
     exportFormat: "svg" | "png" | "jsx";
     onExportFormatChange: (value: "svg" | "png" | "jsx") => void;
     repoUrl: string;
@@ -27,6 +32,10 @@ export function RightSidebarWorkspace(props: RightSidebarWorkspaceProps) {
         workspaceName,
         primaryColor,
         onPrimaryColorChange,
+        secondaryColors,
+        onAddSecondaryColor,
+        onUpdateSecondaryColor,
+        onRemoveSecondaryColor,
         exportFormat,
         onExportFormatChange,
         repoUrl,
@@ -63,6 +72,18 @@ export function RightSidebarWorkspace(props: RightSidebarWorkspaceProps) {
                             <ColorPicker
                                 value={primaryColor}
                                 onChange={onPrimaryColorChange}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs font-medium">Secondary colors</p>
+                            <p className="text-[11px] text-muted-foreground">
+                                Save additional brand colors for quick access in this workspace.
+                            </p>
+                            <SecondaryColorPalette
+                                colors={secondaryColors}
+                                onAdd={onAddSecondaryColor}
+                                onUpdate={onUpdateSecondaryColor}
+                                onRemove={onRemoveSecondaryColor}
                             />
                         </div>
                     </CardContent>

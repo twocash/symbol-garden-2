@@ -14,6 +14,9 @@ interface ProjectContextType {
     deleteProject: (projectId: string) => void;
     updateProject: (project: Project) => void;
     toggleFavorite: (iconId: string) => void;
+    addSecondaryColor: (projectId: string, color: string) => void;
+    updateSecondaryColor: (projectId: string, index: number, color: string) => void;
+    removeSecondaryColor: (projectId: string, index: number) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -192,6 +195,73 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         updateProject(updatedProject);
     };
 
+    const addSecondaryColor = (projectId: string, color: string) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        const MAX_SECONDARY_COLORS = 8;
+        const currentColors = project.secondaryColors || [];
+
+        if (currentColors.length >= MAX_SECONDARY_COLORS) {
+            throw new Error(`Maximum of ${MAX_SECONDARY_COLORS} secondary colors allowed`);
+        }
+
+        // Validate hex color format
+        if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)) {
+            throw new Error("Invalid hex color format");
+        }
+
+        const updatedProject = {
+            ...project,
+            secondaryColors: [...currentColors, color],
+            updatedAt: new Date().toISOString()
+        };
+
+        updateProject(updatedProject);
+    };
+
+    const updateSecondaryColor = (projectId: string, index: number, color: string) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        const currentColors = project.secondaryColors || [];
+        if (index < 0 || index >= currentColors.length) return;
+
+        // Validate hex color format
+        if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)) {
+            throw new Error("Invalid hex color format");
+        }
+
+        const updatedColors = [...currentColors];
+        updatedColors[index] = color;
+
+        const updatedProject = {
+            ...project,
+            secondaryColors: updatedColors,
+            updatedAt: new Date().toISOString()
+        };
+
+        updateProject(updatedProject);
+    };
+
+    const removeSecondaryColor = (projectId: string, index: number) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        const currentColors = project.secondaryColors || [];
+        if (index < 0 || index >= currentColors.length) return;
+
+        const updatedColors = currentColors.filter((_, i) => i !== index);
+
+        const updatedProject = {
+            ...project,
+            secondaryColors: updatedColors,
+            updatedAt: new Date().toISOString()
+        };
+
+        updateProject(updatedProject);
+    };
+
     return (
         <ProjectContext.Provider value={{
             projects,
@@ -202,7 +272,10 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             switchProject,
             deleteProject,
             updateProject,
-            toggleFavorite
+            toggleFavorite,
+            addSecondaryColor,
+            updateSecondaryColor,
+            removeSecondaryColor
         }}>
             {children}
         </ProjectContext.Provider>

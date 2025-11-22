@@ -27,6 +27,7 @@ export const ProjectSchema = z.object({
   icons: z.record(z.string(), z.string()), // concept -> iconId mapping
   favorites: z.array(z.string()),
   brandColor: z.string().default("#000000").optional(),
+  secondaryColors: z.array(z.string()).optional(), // Additional brand colors for quick access
   exportSettings: z.object({
     format: z.enum(["svg", "png", "jsx"]).default("svg"),
     repoLink: z.string().optional(),

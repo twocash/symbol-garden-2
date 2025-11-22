@@ -5,7 +5,7 @@ A modern, AI-enhanced icon library manager with workspace organization, intellig
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Version](https://img.shields.io/badge/version-0.3.0-green)
+![Version](https://img.shields.io/badge/version-0.3.1-green)
 
 ## Overview
 
@@ -43,7 +43,9 @@ Import icon libraries directly from GitHub repositories:
 
 ### 🎨 **Workspace Branding**
 Context-aware customization per workspace:
-- **Brand Colors**: Visual color picker with hex input
+- **Primary Brand Color**: Visual color picker with hex input
+- **Secondary Color Palette**: Save up to 8 brand colors for quick access
+- **Quick-Select Swatches**: One-click color application in Icon Details
 - **Export Formats**: Default to SVG, PNG, or JSX per workspace
 - **Repository Links**: Connect workspaces to source repos
 - **Live Preview**: Icons render with workspace brand colors
@@ -186,6 +188,7 @@ npm run type-check  # if configured
 - [x] AI-Powered Enrichment (Gemini)
 - [x] Context-First Architecture
 - [x] Unified Right Drawer
+- [x] **Secondary Color Palettes**
 - [ ] **Collections** (organize icons within workspaces)
 - [ ] Advanced filtering (by style, category, tags)
 - [ ] Export presets and templates
@@ -210,4 +213,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Status**: 🚀 v0.3.0 Released | ✨ Active Development
+**Status**: 🚀 v0.3.1 Released | ✨ Active Development

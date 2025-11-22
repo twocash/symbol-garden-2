@@ -196,6 +196,46 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
                         <div className="space-y-2">
                             <label className="text-xs text-muted-foreground">Color</label>
                             <ColorPicker value={color} onChange={setColor} />
+
+                            {/* Workspace colors quick-select */}
+                            {currentProject && (currentProject.brandColor || (currentProject.secondaryColors && currentProject.secondaryColors.length > 0)) && (
+                                <div className="space-y-1 pt-1">
+                                    <label className="text-xs text-muted-foreground">Workspace colors</label>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {/* Primary color swatch */}
+                                        {currentProject.brandColor && (
+                                            <button
+                                                onClick={() => setColor(currentProject.brandColor!)}
+                                                className={cn(
+                                                    "h-6 w-6 rounded-full border-2 transition-all",
+                                                    color === currentProject.brandColor
+                                                        ? "border-primary scale-110"
+                                                        : "border-border hover:scale-110 hover:border-primary/50"
+                                                )}
+                                                style={{ backgroundColor: currentProject.brandColor }}
+                                                title={`Primary: ${currentProject.brandColor}`}
+                                                aria-label={`Use primary color ${currentProject.brandColor}`}
+                                            />
+                                        )}
+                                        {/* Secondary color swatches */}
+                                        {currentProject.secondaryColors?.map((secColor, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setColor(secColor)}
+                                                className={cn(
+                                                    "h-6 w-6 rounded-full border-2 transition-all",
+                                                    color === secColor
+                                                        ? "border-primary scale-110"
+                                                        : "border-border hover:scale-110 hover:border-primary/50"
+                                                )}
+                                                style={{ backgroundColor: secColor }}
+                                                title={secColor}
+                                                aria-label={`Use secondary color ${secColor}`}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
