@@ -23,7 +23,7 @@ import { Project } from "@/types/schema";
 export function Sidebar() {
     const { projects, currentProject, switchProject, createProject, renameProject } = useProject();
     const { setSelectedLibrary } = useSearch();
-    const { openDuplicateWorkspace, openDeleteWorkspace, openWorkspaceSettings } = useUI();
+    const { drawerMode, openDuplicateWorkspace, openDeleteWorkspace, openWorkspaceSettings } = useUI();
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Workspace management state
@@ -44,6 +44,15 @@ export function Sidebar() {
             } catch (error) {
                 toast.error(error instanceof Error ? error.message : "Failed to create workspace");
             }
+        }
+    };
+
+    const handleSwitchProject = (projectId: string) => {
+        switchProject(projectId);
+
+        // If workspace settings drawer is open, auto-update to show the new workspace
+        if (drawerMode === "workspace") {
+            openWorkspaceSettings(projectId);
         }
     };
 
@@ -135,7 +144,7 @@ export function Sidebar() {
                                                 <Button
                                                     variant={currentProject?.id === project.id ? "secondary" : "ghost"}
                                                     className="w-full justify-start font-normal pr-8"
-                                                    onClick={() => switchProject(project.id)}
+                                                    onClick={() => handleSwitchProject(project.id)}
                                                     onDoubleClick={() => startRenaming(project)}
                                                 >
                                                     <div
