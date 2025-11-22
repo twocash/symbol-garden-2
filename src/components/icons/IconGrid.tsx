@@ -5,6 +5,7 @@ import { Icon } from "@/types/schema";
 import { IconCard } from "@/components/icons/IconCard";
 import { useSearch } from "@/lib/search-context";
 import { useProject } from "@/lib/project-context";
+import { useUI } from "@/lib/ui-context";
 import Fuse from "fuse.js";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,8 @@ const prettifyLibraryName = (id: string): string => {
 };
 
 export function IconGrid({ icons: propIcons }: IconGridProps) {
-    const { query, setQuery, icons: contextIcons, selectedLibrary, setSelectedLibrary, libraries, setSelectedIconId, selectedIconId } = useSearch();
+    const { query, setQuery, icons: contextIcons, selectedLibrary, setSelectedLibrary, libraries } = useSearch();
+    const { openIconDetails, drawerIconId } = useUI();
     const { currentProject } = useProject();
     const [viewMode, setViewMode] = useState<"all" | "favorites">("all");
 
@@ -117,10 +119,10 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
                     {filteredIcons.map((icon) => (
                         <div
                             key={icon.id}
-                            onClick={() => setSelectedIconId(icon.id)}
+                            onClick={() => openIconDetails(icon.id)}
                             className={cn(
                                 "cursor-pointer rounded-xl transition-all duration-200",
-                                selectedIconId === icon.id && "ring-2 ring-primary ring-offset-2 bg-accent/50"
+                                drawerIconId === icon.id && "ring-2 ring-primary ring-offset-2 bg-accent/50"
                             )}
                         >
                             <IconCard

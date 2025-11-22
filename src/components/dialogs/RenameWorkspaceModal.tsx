@@ -6,21 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useProject } from "@/lib/project-context";
-import { useUI } from "@/lib/ui-context";
 import { toast } from "sonner";
 
-export function RenameWorkspaceModal() {
+interface RenameWorkspaceModalProps {
+    projectId: string;
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export function RenameWorkspaceModal({ projectId, isOpen, onClose }: RenameWorkspaceModalProps) {
     const { projects, renameProject } = useProject();
-    const { renameModalOpen, renameProjectId, closeRenameWorkspace } = useUI();
     const [name, setName] = useState("");
 
-    const project = projects.find((p) => p.id === renameProjectId);
+    const project = projects.find((p) => p.id === projectId);
 
     useEffect(() => {
         if (project) {
             setName(project.name);
         }
-    }, [project, renameModalOpen]);
+    }, [project, isOpen]);
 
     const handleRename = () => {
         if (!project || !name.trim()) return;
@@ -28,14 +32,14 @@ export function RenameWorkspaceModal() {
         try {
             renameProject(project.id, name.trim());
             toast.success("Workspace renamed");
-            closeRenameWorkspace();
+            onClose();
         } catch (error) {
             toast.error("Failed to rename workspace");
         }
     };
 
     return (
-        <Dialog open={renameModalOpen} onOpenChange={(open) => !open && closeRenameWorkspace()}>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Rename Workspace</DialogTitle>
@@ -56,7 +60,7 @@ export function RenameWorkspaceModal() {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={closeRenameWorkspace}>
+                    <Button variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Button onClick={handleRename}>Save Changes</Button>

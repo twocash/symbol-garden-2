@@ -1,88 +1,108 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { RenameWorkspaceModal } from "@/components/dialogs/RenameWorkspaceModal";
+import { DuplicateWorkspaceModal } from "@/components/dialogs/DuplicateWorkspaceModal";
+import { DeleteWorkspaceModal } from "@/components/dialogs/DeleteWorkspaceModal";
+
+type RightDrawerMode = "none" | "icon" | "workspace";
 
 interface UIContextType {
-    // Rename Modal
-    renameModalOpen: boolean;
-    renameProjectId: string | null;
+    // Drawer state
+    drawerMode: RightDrawerMode;
+    drawerIconId: string | null;
+    drawerWorkspaceId: string | null;
+
+    // Drawer Actions
+    openIconDetails: (iconId: string) => void;
+    openWorkspaceSettings: (workspaceId: string) => void;
+    closeDrawer: () => void;
+
+    // Modal Actions
     openRenameWorkspace: (projectId: string) => void;
-    closeRenameWorkspace: () => void;
-
-    // Duplicate Modal
-    duplicateModalOpen: boolean;
-    duplicateProjectId: string | null;
     openDuplicateWorkspace: (projectId: string) => void;
-    closeDuplicateWorkspace: () => void;
-
-    // Delete Modal
-    deleteModalOpen: boolean;
-    deleteProjectId: string | null;
     openDeleteWorkspace: (projectId: string) => void;
-    closeDeleteWorkspace: () => void;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
 export function UIProvider({ children }: { children: ReactNode }) {
-    // Rename State
-    const [renameModalOpen, setRenameModalOpen] = useState(false);
-    const [renameProjectId, setRenameProjectId] = useState<string | null>(null);
+    // Drawer State
+    const [drawerMode, setDrawerMode] = useState<RightDrawerMode>("none");
+    const [drawerIconId, setDrawerIconId] = useState<string | null>(null);
+    const [drawerWorkspaceId, setDrawerWorkspaceId] = useState<string | null>(null);
 
-    // Duplicate State
-    const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
-    const [duplicateProjectId, setDuplicateProjectId] = useState<string | null>(null);
+    // Modal State
+    const [renameId, setRenameId] = useState<string | null>(null);
+    const [duplicateId, setDuplicateId] = useState<string | null>(null);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
-    // Delete State
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
-
-    // Handlers
-    const openRenameWorkspace = (projectId: string) => {
-        setRenameProjectId(projectId);
-        setRenameModalOpen(true);
-    };
-    const closeRenameWorkspace = () => {
-        setRenameModalOpen(false);
-        setRenameProjectId(null);
+    // Drawer Actions
+    const openIconDetails = (iconId: string) => {
+        setDrawerMode("icon");
+        setDrawerIconId(iconId);
+        // We don't clear workspaceId, but it's ignored in "icon" mode
     };
 
-    const openDuplicateWorkspace = (projectId: string) => {
-        setDuplicateProjectId(projectId);
-        setDuplicateModalOpen(true);
-    };
-    const closeDuplicateWorkspace = () => {
-        setDuplicateModalOpen(false);
-        setDuplicateProjectId(null);
+    const openWorkspaceSettings = (workspaceId: string) => {
+        setDrawerMode("workspace");
+        setDrawerWorkspaceId(workspaceId);
+        setDrawerIconId(null); // Clear icon selection when switching to workspace mode
     };
 
-    const openDeleteWorkspace = (projectId: string) => {
-        setDeleteProjectId(projectId);
-        setDeleteModalOpen(true);
+    const closeDrawer = () => {
+        setDrawerMode("none");
+        setDrawerIconId(null);
+        // We keep workspaceId so it's ready if we switch back
     };
-    const closeDeleteWorkspace = () => {
-        setDeleteModalOpen(false);
-        setDeleteProjectId(null);
+
+    // Modal Actions
+    const openRenameWorkspace = (id: string) => setRenameId(id);
+    const openDuplicateWorkspace = (id: string) => setDuplicateId(id);
+    const openDeleteWorkspace = (id: string) => setDeleteId(id);
+
+    const closeModals = () => {
+        setRenameId(null);
+        setDuplicateId(null);
+        setDeleteId(null);
     };
 
     return (
         <UIContext.Provider
             value={{
-                renameModalOpen,
-                renameProjectId,
+                drawerMode,
+                drawerIconId,
+                drawerWorkspaceId,
+                openIconDetails,
+                openWorkspaceSettings,
+                closeDrawer,
                 openRenameWorkspace,
-                closeRenameWorkspace,
-                duplicateModalOpen,
-                duplicateProjectId,
                 openDuplicateWorkspace,
-                closeDuplicateWorkspace,
-                deleteModalOpen,
-                deleteProjectId,
                 openDeleteWorkspace,
-                closeDeleteWorkspace,
             }}
         >
             {children}
+            {renameId && (
+                <RenameWorkspaceModal
+                    projectId={renameId}
+                    isOpen={!!renameId}
+                    onClose={closeModals}
+                />
+            )}
+            {duplicateId && (
+                <DuplicateWorkspaceModal
+                    projectId={duplicateId}
+                    isOpen={!!duplicateId}
+                    onClose={closeModals}
+                />
+            )}
+            {deleteId && (
+                <DeleteWorkspaceModal
+                    projectId={deleteId}
+                    isOpen={!!deleteId}
+                    onClose={closeModals}
+                />
+            )}
         </UIContext.Provider>
     );
 }

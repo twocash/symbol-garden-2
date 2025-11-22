@@ -577,3 +577,44 @@ Implement project management features: create/load project UI, primary library s
 
 **Next Priority:**
 - Collections feature
+
+---
+
+### Session 9: Unified Right Drawer & UI Polish (Nov 21, 2024)
+
+**Objective:** Unify the right-side panel into a single "Drawer" component that handles both Icon Details and Workspace Settings, improving layout stability and user experience. Polish the UI with better spacing and refined header layouts.
+
+#### Checkpoint: 20:30 - Unified Right Drawer
+- Completed: Implemented `RightDrawer` and `IconDetailsPanel`
+- Files: `src/components/layout/RightDrawer.tsx`, `src/components/icons/IconDetailsPanel.tsx`, `src/lib/ui-context.tsx`
+- Decision: Replaced the persistent "Right Panel" with a conditional "Drawer" that pushes content. Centralized drawer state (`mode`, `iconId`, `workspaceId`) in `UIContext`. Extracted icon details logic into a standalone component.
+
+#### Checkpoint: 21:00 - Refinements & Polish
+- Completed: UI refinements and padding adjustments
+- Files: `src/components/layout/AppShell.tsx`, `src/components/layout/Sidebar.tsx`, `src/components/layout/RightDrawer.tsx`
+- Decision:
+    - **Padding**: Added `px-6` to main content for breathing room.
+    - **Triggers**: Moved "Workspace settings" to the top of the sidebar kebab menu.
+    - **Header**: Implemented a 3-row header in `RightDrawer` (Label, Title/Badge, Description) and removed the redundant header from `RightSidebarWorkspace`.
+    - **Color Picker**: Unified `IconDetailsPanel` to use the robust `ColorPicker` component.
+
+**Key Decisions:**
+- **Single Drawer Source of Truth**: `UIContext` now fully manages the right drawer state, ensuring only one mode (Icon vs Workspace) is active at a time.
+- **Push vs Overlay**: Confirmed the drawer should *push* the main content to maintain layout visibility, rather than overlaying it.
+- **Header Hierarchy**: Established a clear hierarchy in the drawer header to show context (Workspace vs Icon) and status (Active badge).
+
+**Files Touched:**
+- `src/lib/ui-context.tsx` (updated)
+- `src/components/layout/RightDrawer.tsx` (new)
+- `src/components/icons/IconDetailsPanel.tsx` (new)
+- `src/components/layout/AppShell.tsx`
+- `src/components/layout/Sidebar.tsx`
+- `src/components/layout/RightSidebarWorkspace.tsx`
+- `src/components/icons/IconGrid.tsx`
+- `src/components/layout/RightPanel.tsx` (deleted)
+
+**Git Commits:**
+- Feat: Unified Right Drawer & UI Polish (session 9)
+
+**Next Priority:**
+- Collections feature

@@ -1,29 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProject } from "@/lib/project-context";
-import { useUI } from "@/lib/ui-context";
 import { toast } from "sonner";
 
-export function DuplicateWorkspaceModal() {
+interface DuplicateWorkspaceModalProps {
+    projectId: string;
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export function DuplicateWorkspaceModal({ projectId, isOpen, onClose }: DuplicateWorkspaceModalProps) {
     const { projects, duplicateProject } = useProject();
-    const { duplicateModalOpen, duplicateProjectId, closeDuplicateWorkspace } = useUI();
     const [name, setName] = useState("");
     const [copyFavorites, setCopyFavorites] = useState(true);
 
-    const project = projects.find((p) => p.id === duplicateProjectId);
+    const project = projects.find((p) => p.id === projectId);
 
     useEffect(() => {
         if (project) {
-            setName(`${project.name} Copy`);
+            setName(`${project.name} (Copy)`);
             setCopyFavorites(true);
         }
-    }, [project, duplicateModalOpen]);
+    }, [project, isOpen]);
 
     const handleDuplicate = () => {
         if (!project || !name.trim()) return;
@@ -31,32 +35,30 @@ export function DuplicateWorkspaceModal() {
         try {
             duplicateProject(project.id, name.trim(), copyFavorites);
             toast.success("Workspace duplicated");
-            closeDuplicateWorkspace();
+            onClose();
         } catch (error) {
             toast.error("Failed to duplicate workspace");
         }
     };
 
     return (
-        <Dialog open={duplicateModalOpen} onOpenChange={(open) => !open && closeDuplicateWorkspace()}>
-            <DialogContent className="sm:max-w-md">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Duplicate workspace</DialogTitle>
+                    <DialogTitle>Duplicate Workspace</DialogTitle>
                     <DialogDescription>
-                        Create a copy of {project?.name} and its settings.
+                        Create a copy of this workspace. You can choose to include favorited icons.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="workspace-name">New workspace name</Label>
+                <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="dup-name">Name</Label>
                         <Input
-                            id="workspace-name"
+                            id="dup-name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Enter workspace name"
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") handleDuplicate();
-                            }}
+                            onKeyDown={(e) => e.key === "Enter" && handleDuplicate()}
+                            autoFocus
                         />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -65,21 +67,16 @@ export function DuplicateWorkspaceModal() {
                             checked={copyFavorites}
                             onCheckedChange={(checked) => setCopyFavorites(checked as boolean)}
                         />
-                        <Label
-                            htmlFor="copy-favorites"
-                            className="text-sm font-normal cursor-pointer"
-                        >
-                            Include favorited icons
+                        <Label htmlFor="copy-favorites" className="text-sm font-normal">
+                            Copy favorited icons
                         </Label>
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={closeDuplicateWorkspace}>
+                    <Button variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
-                    <Button onClick={handleDuplicate} disabled={!name.trim()}>
-                        Create copy
-                    </Button>
+                    <Button onClick={handleDuplicate}>Duplicate</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

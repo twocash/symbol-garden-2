@@ -41,21 +41,7 @@ export function RightSidebarWorkspace(props: RightSidebarWorkspaceProps) {
     return (
         <aside className="w-[320px] border-l border-border/60 bg-sidebar flex flex-col h-full">
             {/* Header */}
-            <header className="p-4 border-b border-border/60 space-y-1">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    Workspace
-                </p>
-                <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold truncate">{workspaceName}</h2>
-                    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                        Active
-                    </span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                    Defaults and exports for this workspace.
-                </p>
-            </header>
+
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Brand Defaults */}

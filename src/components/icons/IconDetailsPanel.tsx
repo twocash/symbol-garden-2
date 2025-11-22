@@ -1,8 +1,6 @@
 "use client";
 
-import { useProject } from "@/lib/project-context";
-import { useSearch } from "@/lib/search-context";
-import { useUI } from "@/lib/ui-context";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -14,120 +12,70 @@ import {
     Copy,
     ArrowLeftRight,
     Sparkles,
-    Loader2,
-    X
+    Loader2
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { copySvg, copyPng, downloadPng, downloadSvg } from "@/lib/export-utils";
 import { cn } from "@/lib/utils";
 import { CompareModal } from "@/components/icons/CompareModal";
-import { RightSidebarWorkspace } from "@/components/layout/RightSidebarWorkspace";
 import { toast } from "sonner";
+import { Icon } from "@/types/schema";
+import { useProject } from "@/lib/project-context";
+import { useSearch } from "@/lib/search-context";
 
-export function RightPanel() {
-    const { currentProject, updateProject, toggleFavorite } = useProject();
-    const { selectedIconId, setSelectedIconId, icons, setIcons } = useSearch();
-    const { openRenameWorkspace, openDuplicateWorkspace, openDeleteWorkspace } = useUI();
+interface IconDetailsPanelProps {
+    icon: Icon;
+}
 
-    // Icon Mode State
+export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
+    const { currentProject, toggleFavorite } = useProject();
+    const { setIcons, icons } = useSearch(); // Needed for AI enrichment update
+
+    // Local State
     const [size, setSize] = useState(256);
     const [color, setColor] = useState("#ffffff");
     const [compareOpen, setCompareOpen] = useState(false);
     const [generating, setGenerating] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // Derived State
-    const activeIcon = selectedIconId ? icons.find(i => i.id === selectedIconId) : null;
-    const isFavorite = activeIcon && currentProject?.favorites.includes(activeIcon.id);
+    const isFavorite = currentProject?.favorites.includes(icon.id);
 
-    // Effect to sync color with project brand color when switching to icon mode
+    // Sync color with project brand color on mount or when project changes
     useEffect(() => {
-        if (activeIcon && currentProject?.brandColor) {
+        if (currentProject?.brandColor) {
             setColor(currentProject.brandColor);
         }
-    }, [activeIcon, currentProject?.brandColor]);
+    }, [currentProject?.brandColor]);
 
-    if (!currentProject) return null;
-
-    // --- Project Mode Handlers ---
-    const handleColorChange = (newColor: string) => {
-        updateProject({
-            ...currentProject,
-            brandColor: newColor
-        });
-        toast.success("Workspace updated");
-    };
-
-    const handleExportSettingChange = (key: 'format', value: 'svg' | 'png' | 'jsx') => {
-        updateProject({
-            ...currentProject,
-            exportSettings: {
-                repoLink: currentProject.exportSettings?.repoLink,
-                ...currentProject.exportSettings,
-                format: value
-            }
-        });
-        toast.success("Workspace updated");
-    };
-
-    const handleRepoUrlChange = (value: string) => {
-        updateProject({
-            ...currentProject,
-            exportSettings: {
-                format: currentProject.exportSettings?.format || 'svg',
-                ...currentProject.exportSettings,
-                repoLink: value
-            }
-        });
-    };
-
-    const handleCopyRepoUrl = () => {
-        if (currentProject.exportSettings?.repoLink) {
-            navigator.clipboard.writeText(currentProject.exportSettings.repoLink);
-            toast.success("Repo URL copied");
-        }
-    };
-
-    const handleOpenRepo = () => {
-        if (currentProject.exportSettings?.repoLink) {
-            window.open(currentProject.exportSettings.repoLink, '_blank');
-        }
-    };
-
-    // --- Icon Mode Handlers ---
     const handleCopySvg = async () => {
-        if (!activeIcon) return;
-        await copySvg(activeIcon, size, color);
+        await copySvg(icon, size, color);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleCopyPng = async () => {
-        if (!activeIcon) return;
         try {
-            await copyPng(activeIcon, size, color);
+            await copyPng(icon, size, color);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
             console.error("Failed to copy PNG", err);
-            alert("Failed to copy PNG to clipboard");
+            toast.error("Failed to copy PNG to clipboard");
         }
     };
 
     const handleDownload = () => {
-        if (!activeIcon) return;
-        if (currentProject.exportSettings?.format === 'png') {
-            downloadPng(activeIcon, size, color);
+        if (currentProject?.exportSettings?.format === 'png') {
+            downloadPng(icon, size, color);
         } else {
-            downloadSvg(activeIcon, size, color);
+            downloadSvg(icon, size, color);
         }
     };
 
     const handleGenerateDescription = async () => {
-        if (!activeIcon) return;
         const apiKey = localStorage.getItem("gemini_api_key");
         if (!apiKey) {
-            alert("Please enter a Gemini API Key in Settings first."); // TODO: Move API key to global settings?
+            toast.error("Please enter a Gemini API Key in Settings first.");
             return;
         }
 
@@ -136,7 +84,7 @@ export function RightPanel() {
             const res = await fetch("/api/enrich", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ icons: [activeIcon], apiKey })
+                body: JSON.stringify({ icons: [icon], apiKey })
             });
 
             if (!res.ok) {
@@ -148,74 +96,34 @@ export function RightPanel() {
             if (data && data[0]) {
                 const enriched = data[0];
                 const updatedIcon = {
-                    ...activeIcon,
-                    tags: [...new Set([...activeIcon.tags, ...enriched.tags])],
+                    ...icon,
+                    tags: [...new Set([...icon.tags, ...enriched.tags])],
                     aiDescription: enriched.description
                 };
 
-                const updatedIcons = icons.map(i => i.id === activeIcon.id ? updatedIcon : i);
+                // Update in SearchContext (live view)
+                const updatedIcons = icons.map(i => i.id === icon.id ? updatedIcon : i);
                 setIcons(updatedIcons);
 
+                // Update in localStorage (persistence)
                 const storedIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
-                const storedIndex = storedIcons.findIndex((i: any) => i.id === activeIcon.id);
+                const storedIndex = storedIcons.findIndex((i: any) => i.id === icon.id);
                 if (storedIndex !== -1) {
                     storedIcons[storedIndex] = updatedIcon;
                     localStorage.setItem("ingested_icons", JSON.stringify(storedIcons));
                 }
+                toast.success("Description generated");
             }
         } catch (error) {
             console.error(error);
-            alert(`Failed to generate description: ${error instanceof Error ? error.message : "Unknown error"}`);
+            toast.error(`Failed to generate description: ${error instanceof Error ? error.message : "Unknown error"}`);
         } finally {
             setGenerating(false);
         }
     };
 
-    // --- Render ---
-
-    if (!activeIcon) {
-        return (
-            <RightSidebarWorkspace
-                workspaceId={currentProject.id}
-                workspaceName={currentProject.name}
-                primaryColor={currentProject.brandColor || "#000000"}
-                onPrimaryColorChange={handleColorChange}
-                exportFormat={currentProject.exportSettings?.format || 'svg'}
-                onExportFormatChange={(val) => handleExportSettingChange('format', val)}
-                repoUrl={currentProject.exportSettings?.repoLink || ""}
-                onRepoUrlChange={handleRepoUrlChange}
-                onOpenRepo={handleOpenRepo}
-                onCopyRepoUrl={handleCopyRepoUrl}
-                onRenameWorkspace={() => openRenameWorkspace(currentProject.id)}
-                onDuplicateWorkspace={() => openDuplicateWorkspace(currentProject.id)}
-                onDeleteWorkspace={() => openDeleteWorkspace(currentProject.id)}
-            />
-        );
-    }
-
     return (
-        <div className="w-[320px] border-l bg-card flex flex-col h-full">
-            {/* --- Icon Mode --- */}
-            <div className="p-4 border-b flex items-center justify-between">
-                <div className="flex items-center gap-2 overflow-hidden">
-                    <div className="h-8 w-8 rounded bg-muted flex items-center justify-center shrink-0">
-                        <img
-                            src={`/data/${activeIcon.library}.svg`} // Assuming library icons exist, fallback needed?
-                            alt={activeIcon.library}
-                            className="h-4 w-4 opacity-50"
-                            onError={(e) => (e.currentTarget.style.display = 'none')}
-                        />
-                    </div>
-                    <div className="truncate">
-                        <h2 className="font-semibold truncate">{activeIcon.name}</h2>
-                        <p className="text-xs text-muted-foreground truncate">{activeIcon.library}</p>
-                    </div>
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedIconId(null)}>
-                    <X className="h-4 w-4" />
-                </Button>
-            </div>
-
+        <div className="flex flex-col h-full">
             <ScrollArea className="flex-1">
                 <div className="p-4 space-y-6">
                     {/* Preview */}
@@ -228,18 +136,18 @@ export function RightPanel() {
                             }}
                         />
                         <svg
-                            viewBox={activeIcon.viewBox}
-                            fill={activeIcon.renderStyle === "fill" ? color : "none"}
-                            stroke={activeIcon.renderStyle === "fill" ? "none" : color}
-                            strokeWidth={activeIcon.renderStyle === "fill" ? "0" : "2"}
+                            viewBox={icon.viewBox}
+                            fill={icon.renderStyle === "fill" ? color : "none"}
+                            stroke={icon.renderStyle === "fill" ? "none" : color}
+                            strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             className="h-32 w-32 transition-colors duration-200 relative z-10"
                         >
                             <path
-                                d={activeIcon.path}
-                                fillRule={activeIcon.fillRule as any}
-                                clipRule={activeIcon.clipRule as any}
+                                d={icon.path}
+                                fillRule={icon.fillRule as any}
+                                clipRule={icon.clipRule as any}
                             />
                         </svg>
                     </div>
@@ -249,14 +157,14 @@ export function RightPanel() {
                         <Button
                             variant={isFavorite ? "default" : "outline"}
                             className={cn("w-full", isFavorite && "bg-red-500 hover:bg-red-600 text-white")}
-                            onClick={() => toggleFavorite(activeIcon.id)}
+                            onClick={() => toggleFavorite(icon.id)}
                         >
                             <Heart className={cn("mr-2 h-4 w-4", isFavorite && "fill-current")} />
                             {isFavorite ? "Saved" : "Save"}
                         </Button>
                         <Button
                             onClick={() => {
-                                const format = currentProject.exportSettings?.format || 'svg';
+                                const format = currentProject?.exportSettings?.format || 'svg';
                                 if (format === 'png') {
                                     handleCopyPng();
                                 } else {
@@ -274,7 +182,7 @@ export function RightPanel() {
                             ) : (
                                 <>
                                     <Copy className="mr-2 h-4 w-4" />
-                                    Copy {(currentProject.exportSettings?.format || 'svg').toUpperCase()}
+                                    Copy {(currentProject?.exportSettings?.format || 'svg').toUpperCase()}
                                 </>
                             )}
                         </Button>
@@ -287,21 +195,7 @@ export function RightPanel() {
                         <h3 className="text-sm font-medium">Overrides</h3>
                         <div className="space-y-2">
                             <label className="text-xs text-muted-foreground">Color</label>
-                            <div className="flex items-center gap-2">
-                                <div className="relative h-8 w-8 rounded-md border overflow-hidden shrink-0">
-                                    <input
-                                        type="color"
-                                        value={color}
-                                        onChange={(e) => setColor(e.target.value)}
-                                        className="absolute -top-2 -left-2 h-12 w-12 cursor-pointer p-0 border-0"
-                                    />
-                                </div>
-                                <Input
-                                    value={color}
-                                    onChange={(e) => setColor(e.target.value)}
-                                    className="h-8 font-mono text-xs"
-                                />
-                            </div>
+                            <ColorPicker value={color} onChange={setColor} />
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -324,7 +218,7 @@ export function RightPanel() {
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-medium">AI Description</h3>
-                            {!activeIcon.aiDescription && (
+                            {!icon.aiDescription && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -336,9 +230,9 @@ export function RightPanel() {
                                 </Button>
                             )}
                         </div>
-                        {activeIcon.aiDescription ? (
+                        {icon.aiDescription ? (
                             <p className="text-xs text-muted-foreground leading-relaxed">
-                                {activeIcon.aiDescription}
+                                {icon.aiDescription}
                             </p>
                         ) : (
                             <p className="text-xs text-muted-foreground italic">
@@ -347,7 +241,7 @@ export function RightPanel() {
                         )}
 
                         <div className="flex flex-wrap gap-1">
-                            {activeIcon.tags.map((tag) => (
+                            {icon.tags.map((tag) => (
                                 <Badge key={tag} variant="secondary" className="text-[10px] px-1 py-0">
                                     {tag}
                                 </Badge>
@@ -367,7 +261,7 @@ export function RightPanel() {
             </ScrollArea>
 
             <CompareModal
-                icon={activeIcon}
+                icon={icon}
                 open={compareOpen}
                 onOpenChange={setCompareOpen}
             />

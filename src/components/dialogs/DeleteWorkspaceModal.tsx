@@ -1,48 +1,47 @@
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
 import { useProject } from "@/lib/project-context";
-import { useUI } from "@/lib/ui-context";
 import { toast } from "sonner";
 
-export function DeleteWorkspaceModal() {
+interface DeleteWorkspaceModalProps {
+    projectId: string;
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export function DeleteWorkspaceModal({ projectId, isOpen, onClose }: DeleteWorkspaceModalProps) {
     const { projects, deleteProject } = useProject();
-    const { deleteModalOpen, deleteProjectId, closeDeleteWorkspace } = useUI();
-
-    const project = projects.find((p) => p.id === deleteProjectId);
-
-    if (!project) return null;
+    const project = projects.find((p) => p.id === projectId);
 
     const handleDelete = () => {
+        if (!project) return;
+
         try {
             deleteProject(project.id);
             toast.success("Workspace deleted");
-            closeDeleteWorkspace();
+            onClose();
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Failed to delete workspace");
+            toast.error("Failed to delete workspace");
         }
     };
 
     return (
-        <Dialog open={deleteModalOpen} onOpenChange={(open) => !open && closeDeleteWorkspace()}>
-            <DialogContent className="sm:max-w-md">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-destructive" />
-                        Delete "{project.name}"?
-                    </DialogTitle>
+                    <DialogTitle>Delete Workspace</DialogTitle>
                     <DialogDescription>
-                        This removes the workspace and its settings. Files in your repo won't be deleted.
+                        Are you sure you want to delete <span className="font-semibold">{project?.name}</span>? This action cannot be undone.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" onClick={closeDeleteWorkspace}>
+                    <Button variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Button variant="destructive" onClick={handleDelete}>
-                        Delete
+                        Delete Workspace
                     </Button>
                 </DialogFooter>
             </DialogContent>

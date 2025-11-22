@@ -23,7 +23,7 @@ import { Project } from "@/types/schema";
 export function Sidebar() {
     const { projects, currentProject, switchProject, createProject, renameProject } = useProject();
     const { setSelectedLibrary } = useSearch();
-    const { openDuplicateWorkspace, openDeleteWorkspace } = useUI();
+    const { openDuplicateWorkspace, openDeleteWorkspace, openWorkspaceSettings } = useUI();
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Workspace management state
@@ -110,69 +110,76 @@ export function Sidebar() {
                         </div>
                         <div className="space-y-1">
                             {projects.filter(p => p.id !== "default").map((project) => (
-                                <div key={project.id} className="group flex items-center relative">
-                                    {editingProjectId === project.id ? (
-                                        <div className="w-full px-2 py-1">
-                                            <Input
-                                                value={editingName}
-                                                onChange={(e) => setEditingName(e.target.value)}
-                                                onBlur={handleRenameSubmit}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") handleRenameSubmit();
-                                                    if (e.key === "Escape") setEditingProjectId(null);
-                                                }}
-                                                autoFocus
-                                                className="h-8 text-sm"
-                                                onFocus={(e) => e.target.select()}
-                                            />
-                                            <div className="text-[10px] text-muted-foreground mt-1 px-1">
-                                                Enter to save · Esc to cancel
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Button
-                                                variant={currentProject?.id === project.id ? "secondary" : "ghost"}
-                                                className="w-full justify-start font-normal pr-8"
-                                                onClick={() => switchProject(project.id)}
-                                                onDoubleClick={() => startRenaming(project)}
-                                            >
-                                                <div
-                                                    className="mr-2 h-2 w-2 rounded-full shrink-0"
-                                                    style={{ backgroundColor: project.brandColor || "hsl(var(--primary))" }}
+                                <div key={project.id}>
+                                    <div className="group flex items-center relative">
+                                        {editingProjectId === project.id ? (
+                                            <div className="w-full px-2 py-1">
+                                                <Input
+                                                    value={editingName}
+                                                    onChange={(e) => setEditingName(e.target.value)}
+                                                    onBlur={handleRenameSubmit}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") handleRenameSubmit();
+                                                        if (e.key === "Escape") setEditingProjectId(null);
+                                                    }}
+                                                    autoFocus
+                                                    className="h-8 text-sm"
+                                                    onFocus={(e) => e.target.select()}
                                                 />
-                                                <span className="truncate">{project.name}</span>
-                                            </Button>
-
-                                            <div className="absolute right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-6 w-6">
-                                                            <MoreVertical className="h-3 w-3" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48">
-                                                        <DropdownMenuItem onClick={() => startRenaming(project)}>
-                                                            <Edit className="mr-2 h-4 w-4" />
-                                                            Rename workspace...
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => openDuplicateWorkspace(project.id)}>
-                                                            <Copy className="mr-2 h-4 w-4" />
-                                                            Duplicate workspace...
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            onClick={() => openDeleteWorkspace(project.id)}
-                                                            className="text-destructive focus:text-destructive"
-                                                        >
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            Delete workspace...
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                <div className="text-[10px] text-muted-foreground mt-1 px-1">
+                                                    Enter to save · Esc to cancel
+                                                </div>
                                             </div>
-                                        </>
-                                    )}
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    variant={currentProject?.id === project.id ? "secondary" : "ghost"}
+                                                    className="w-full justify-start font-normal pr-8"
+                                                    onClick={() => switchProject(project.id)}
+                                                    onDoubleClick={() => startRenaming(project)}
+                                                >
+                                                    <div
+                                                        className="mr-2 h-2 w-2 rounded-full shrink-0"
+                                                        style={{ backgroundColor: project.brandColor || "hsl(var(--primary))" }}
+                                                    />
+                                                    <span className="truncate">{project.name}</span>
+                                                </Button>
+
+                                                <div className="absolute right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                                <MoreVertical className="h-3 w-3" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="w-48">
+                                                            <DropdownMenuItem onClick={() => openWorkspaceSettings(project.id)}>
+                                                                <Settings className="mr-2 h-4 w-4" />
+                                                                Workspace settings...
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => startRenaming(project)}>
+                                                                <Edit className="mr-2 h-4 w-4" />
+                                                                Rename workspace...
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => openDuplicateWorkspace(project.id)}>
+                                                                <Copy className="mr-2 h-4 w-4" />
+                                                                Duplicate workspace...
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() => openDeleteWorkspace(project.id)}
+                                                                className="text-destructive focus:text-destructive"
+                                                            >
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete workspace...
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                    {/* Workspace Settings Trigger for Active Workspace */}
                                 </div>
                             ))}
                             {projects.filter(p => p.id !== "default").length === 0 && (
@@ -185,10 +192,10 @@ export function Sidebar() {
                         </div>
                     </div>
                 </div>
-            </ScrollArea>
+            </ScrollArea >
 
             {/* Footer: Version + Settings */}
-            <div className="p-4 border-t flex items-center justify-between">
+            < div className="p-4 border-t flex items-center justify-between" >
                 <span className="text-xs text-muted-foreground">v0.3.0</span>
                 <Button
                     variant="ghost"
@@ -198,9 +205,9 @@ export function Sidebar() {
                 >
                     <Settings className="h-4 w-4" />
                 </Button>
-            </div>
+            </div >
 
             <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
-        </div>
+        </div >
     );
 }
