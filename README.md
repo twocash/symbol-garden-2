@@ -182,6 +182,7 @@ npm run type-check  # if configured
 
 ## Roadmap
 
+### ✅ Completed
 - [x] Core UI Components & Search
 - [x] GitHub Ingestion Pipeline
 - [x] Multi-Workspace Management
@@ -189,6 +190,15 @@ npm run type-check  # if configured
 - [x] Context-First Architecture
 - [x] Unified Right Drawer
 - [x] **Secondary Color Palettes**
+
+### 🎯 Next Sprint (v0.4.0)
+- [ ] **AI Icon Generator** (Nano Banana Pro)
+  - Generate custom icons from text prompts
+  - Style-matched to workspace favorites
+  - PNG → SVG vectorization pipeline
+  - 4-8 variants per generation
+
+### 📋 Backlog
 - [ ] **Collections** (organize icons within workspaces)
 - [ ] Advanced filtering (by style, category, tags)
 - [ ] Export presets and templates
