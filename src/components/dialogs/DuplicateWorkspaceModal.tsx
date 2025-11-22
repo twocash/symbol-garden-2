@@ -6,39 +6,39 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Project } from "@/types/schema";
+import { useProject } from "@/lib/project-context";
+import { useUI } from "@/lib/ui-context";
+import { toast } from "sonner";
 
-interface DuplicateWorkspaceModalProps {
-    project: Project | null;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    onDuplicate: (newName: string, copyFavorites: boolean) => void;
-}
-
-export function DuplicateWorkspaceModal({
-    project,
-    open,
-    onOpenChange,
-    onDuplicate
-}: DuplicateWorkspaceModalProps) {
+export function DuplicateWorkspaceModal() {
+    const { projects, duplicateProject } = useProject();
+    const { duplicateModalOpen, duplicateProjectId, closeDuplicateWorkspace } = useUI();
     const [name, setName] = useState("");
     const [copyFavorites, setCopyFavorites] = useState(true);
+
+    const project = projects.find((p) => p.id === duplicateProjectId);
 
     useEffect(() => {
         if (project) {
             setName(`${project.name} Copy`);
             setCopyFavorites(true);
         }
-    }, [project]);
+    }, [project, duplicateModalOpen]);
 
     const handleDuplicate = () => {
-        if (!name.trim()) return;
-        onDuplicate(name, copyFavorites);
-        onOpenChange(false);
+        if (!project || !name.trim()) return;
+
+        try {
+            duplicateProject(project.id, name.trim(), copyFavorites);
+            toast.success("Workspace duplicated");
+            closeDuplicateWorkspace();
+        } catch (error) {
+            toast.error("Failed to duplicate workspace");
+        }
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={duplicateModalOpen} onOpenChange={(open) => !open && closeDuplicateWorkspace()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Duplicate workspace</DialogTitle>
@@ -74,7 +74,7 @@ export function DuplicateWorkspaceModal({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button variant="outline" onClick={closeDuplicateWorkspace}>
                         Cancel
                     </Button>
                     <Button onClick={handleDuplicate} disabled={!name.trim()}>

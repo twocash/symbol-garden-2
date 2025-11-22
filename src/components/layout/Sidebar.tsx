@@ -1,12 +1,12 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { LayoutGrid, Plus, FolderOpen, Settings, MoreVertical, Edit, Copy, Trash2 } from "lucide-react";
+import { LayoutGrid, Plus, Settings, MoreVertical, Edit, Copy, Trash2 } from "lucide-react";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
+import { useUI } from "@/lib/ui-context";
 import { SettingsModal } from "@/components/layout/SettingsModal";
 import { useState } from "react";
 import {
@@ -17,22 +17,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { DuplicateWorkspaceModal } from "@/components/dialogs/DuplicateWorkspaceModal";
-import { DeleteWorkspaceModal } from "@/components/dialogs/DeleteWorkspaceModal";
 import { toast } from "sonner";
 import { Project } from "@/types/schema";
 
 export function Sidebar() {
-    const { projects, currentProject, switchProject, createProject, renameProject, duplicateProject, deleteProject } = useProject();
+    const { projects, currentProject, switchProject, createProject, renameProject } = useProject();
     const { setSelectedLibrary } = useSearch();
+    const { openDuplicateWorkspace, openDeleteWorkspace } = useUI();
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Workspace management state
     const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState("");
-    const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
     const handleSwitchToAll = () => {
         switchProject("default");
@@ -70,16 +66,6 @@ export function Sidebar() {
             return;
         }
         setEditingProjectId(null);
-    };
-
-    const openDuplicateModal = (project: Project) => {
-        setSelectedProject(project);
-        setDuplicateModalOpen(true);
-    };
-
-    const openDeleteModal = (project: Project) => {
-        setSelectedProject(project);
-        setDeleteModalOpen(true);
     };
 
     return (
@@ -170,13 +156,13 @@ export function Sidebar() {
                                                             <Edit className="mr-2 h-4 w-4" />
                                                             Rename workspace...
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => openDuplicateModal(project)}>
+                                                        <DropdownMenuItem onClick={() => openDuplicateWorkspace(project.id)}>
                                                             <Copy className="mr-2 h-4 w-4" />
                                                             Duplicate workspace...
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
-                                                            onClick={() => openDeleteModal(project)}
+                                                            onClick={() => openDeleteWorkspace(project.id)}
                                                             className="text-destructive focus:text-destructive"
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" />
@@ -215,32 +201,6 @@ export function Sidebar() {
             </div>
 
             <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
-
-            <DuplicateWorkspaceModal
-                project={selectedProject}
-                open={duplicateModalOpen}
-                onOpenChange={setDuplicateModalOpen}
-                onDuplicate={(newName, copyFavorites) => {
-                    if (selectedProject) {
-                        duplicateProject(selectedProject.id, newName, copyFavorites);
-                        toast.success("Workspace duplicated");
-                    }
-                }}
-            />
-
-            <DeleteWorkspaceModal
-                project={selectedProject}
-                open={deleteModalOpen}
-                onOpenChange={setDeleteModalOpen}
-                onDelete={(projectId) => {
-                    try {
-                        deleteProject(projectId);
-                        toast.success("Workspace deleted");
-                    } catch (error) {
-                        toast.error(error instanceof Error ? error.message : "Failed to delete workspace");
-                    }
-                }}
-            />
         </div>
     );
 }

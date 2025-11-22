@@ -462,3 +462,118 @@ Implement project management features: create/load project UI, primary library s
 - Sessions: 0
 - Cost: $0.00
 - Success: N/A
+
+---
+
+### Session 7: Workspace Context Menu (Nov 21, 2024)
+
+**Objective:** Implement robust workspace management with rename, duplicate, delete, and soft-delete capabilities directly in the Sidebar.
+
+#### Checkpoint: 14:00 - Architectural Improvements
+- Completed: Enhanced ProjectContext with robust ID generation and soft-delete
+- Files: src/lib/project-context.tsx, src/types/schema.ts
+- Decision: Adopted `nanoid` for collision-proof IDs and added `deletedAt` field for soft-deletion, enabling future undo/restore functionality. Implemented transactional state updates to prevent race conditions.
+
+#### Checkpoint: 14:30 - Modal Components
+- Completed: Created reusable modals for workspace actions
+- Files: src/components/dialogs/DuplicateWorkspaceModal.tsx, src/components/dialogs/DeleteWorkspaceModal.tsx
+- Decision: Created dedicated modal components for complex actions (Duplicate, Delete) to ensure user intent and provide options (e.g., "Include favorited icons").
+
+#### Checkpoint: 15:00 - Sidebar Implementation
+- Completed: Integrated context menu and inline rename into Sidebar
+- Files: src/components/layout/Sidebar.tsx, src/components/layout/AppShell.tsx
+- Decision: Implemented a kebab menu (⋮) for each workspace row. Added inline renaming with auto-focus and "Enter to save" UX. Integrated `sonner` for beautiful toast notifications on all actions.
+
+**Key Decisions:**
+- **Soft Delete**: Preserves data for potential undo/restore features.
+- **Inline Rename**: Provides a seamless UX without modals for simple name changes.
+- **Transactional State**: Ensures data integrity during rapid updates.
+- **Context-First Actions**: Kept all workspace actions within the Sidebar context menu for quick access.
+
+**Files Touched:**
+- src/lib/project-context.tsx
+- src/components/layout/Sidebar.tsx
+- src/components/dialogs/DuplicateWorkspaceModal.tsx (new)
+- src/components/dialogs/DeleteWorkspaceModal.tsx (new)
+- src/components/layout/AppShell.tsx (added Toaster)
+- package.json (added sonner, nanoid)
+
+**Git Commits:**
+- Feat: Workspace context menu with rename, duplicate, delete actions
+
+**Next Priority:**
+- Collections feature
+### Session 8: Library Header UI Update (Nov 21, 2024)
+
+**Objective:** Implement a unified "Library Header" to consolidate search, library filtering, and view toggling into a single, cohesive control bar, and remove legacy UI controls.
+
+#### Checkpoint: 17:30 - Library Header Component
+- Completed: Created `LibraryHeader` component with unified controls
+- Files: src/components/icons/LibraryHeader.tsx
+- Decision: Implemented a single component containing Search, Library Dropdown, and View Toggle (All vs Favorites). Used `shadcn/ui` components for a polished look and ensured accessibility with ARIA labels.
+
+#### Checkpoint: 17:40 - IconGrid Integration & Cleanup
+- Completed: Refactored `IconGrid` and removed legacy controls from `page.tsx`
+- Files: src/components/icons/IconGrid.tsx, src/app/page.tsx
+- Decision: Moved filtering logic (Library -> View -> Query) into `IconGrid`. Mapped raw library IDs to display names (e.g., "lucide-icons" -> "Lucide Icons"). Removed duplicate "Library" title and standalone selector from the main page layout.
+
+**Key Decisions:**
+- **Unified Control Surface**: Consolidating all filters into one header clarifies the relationship between them (Search within Library within View).
+- **Explicit Filtering Chain**: Defined strict order: Library Filter -> View Filter (Favorites) -> Search Query.
+- **Display Name Mapping**: Implemented a mapping layer in `IconGrid` to convert raw library IDs into human-readable labels for the dropdown.
+
+**Files Touched:**
+- src/components/icons/LibraryHeader.tsx (new)
+- src/components/icons/IconGrid.tsx
+- src/app/page.tsx
+- package.json (added toggle-group)
+
+**Git Commits:**
+- Feat: Unified Library Header UI
+
+**Next Priority:**
+- Awaiting next sprint brief from user
+
+---
+
+### Session 8: Right Sidebar Refactor (Nov 21, 2024)
+
+**Objective:** Refactor the Right Panel into a dedicated "Workspace Sidebar" with centralized modal management and improved UI for project settings.
+
+#### Checkpoint: 19:30 - UI Infrastructure & Modals
+- Completed: Created `UIContext` and centralized workspace modals
+- Files: `src/lib/ui-context.tsx`, `src/components/dialogs/RenameWorkspaceModal.tsx`, `src/components/layout/AppShell.tsx`
+- Decision: Created a UI-only context (`UIContext`) to manage the open/close state of `Rename`, `Duplicate`, and `Delete` modals globally. This removes the need for prop drilling or local state in the Sidebar.
+
+#### Checkpoint: 20:00 - Right Sidebar Workspace
+- Completed: Implemented card-based Workspace settings panel
+- Files: `src/components/layout/RightSidebarWorkspace.tsx`, `src/components/layout/RightPanel.tsx`
+- Decision: Created a dedicated component for workspace settings with distinct cards for Brand Defaults, Export Rules, Repository, and Management. Integrated this into `RightPanel` to appear when no icon is selected.
+
+#### Checkpoint: 20:15 - Color Picker Enhancement
+- Completed: Implemented robust Color Picker with `react-colorful`
+- Files: `src/components/ui/color-picker.tsx`, `src/components/layout/RightSidebarWorkspace.tsx`
+- Decision: Replaced the simple HTML color input with a custom `ColorPicker` component using `react-colorful`. Added a visual popover picker, editable hex input, and improved contrast/labeling based on user feedback.
+
+**Key Decisions:**
+- **Centralized Modals**: Moving modal state to `UIContext` simplifies the architecture and allows any component (Sidebar, Right Panel, Command Palette) to trigger workspace actions.
+- **Card-Based Layout**: Grouping settings into cards improves readability and visual hierarchy compared to a flat list.
+- **Visual Color Picker**: Providing a robust picker improves the UX for defining brand colors, a key feature for workspace customization.
+
+**Files Touched:**
+- `src/lib/ui-context.tsx` (new)
+- `src/components/dialogs/RenameWorkspaceModal.tsx` (new)
+- `src/components/layout/RightSidebarWorkspace.tsx` (new)
+- `src/components/ui/color-picker.tsx` (new)
+- `src/components/layout/AppShell.tsx`
+- `src/components/layout/RightPanel.tsx`
+- `src/components/layout/Sidebar.tsx`
+- `src/components/dialogs/DuplicateWorkspaceModal.tsx`
+- `src/components/dialogs/DeleteWorkspaceModal.tsx`
+- `package.json` (added `react-colorful`, `shadcn/ui popover`)
+
+**Git Commits:**
+- Feat: Right Sidebar Refactor & Color Picker (session 8)
+
+**Next Priority:**
+- Collections feature

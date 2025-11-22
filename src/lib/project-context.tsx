@@ -56,6 +56,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem("projects", JSON.stringify([defaultProject]));
             localStorage.setItem("currentProjectId", "default");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const currentProject = projects.find(p => p.id === currentProjectId) || null;

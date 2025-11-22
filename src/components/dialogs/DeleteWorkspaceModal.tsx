@@ -3,30 +3,30 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import { Project } from "@/types/schema";
+import { useProject } from "@/lib/project-context";
+import { useUI } from "@/lib/ui-context";
+import { toast } from "sonner";
 
-interface DeleteWorkspaceModalProps {
-    project: Project | null;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    onDelete: (projectId: string) => void;
-}
+export function DeleteWorkspaceModal() {
+    const { projects, deleteProject } = useProject();
+    const { deleteModalOpen, deleteProjectId, closeDeleteWorkspace } = useUI();
 
-export function DeleteWorkspaceModal({
-    project,
-    open,
-    onOpenChange,
-    onDelete
-}: DeleteWorkspaceModalProps) {
+    const project = projects.find((p) => p.id === deleteProjectId);
+
     if (!project) return null;
 
     const handleDelete = () => {
-        onDelete(project.id);
-        onOpenChange(false);
+        try {
+            deleteProject(project.id);
+            toast.success("Workspace deleted");
+            closeDeleteWorkspace();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to delete workspace");
+        }
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={deleteModalOpen} onOpenChange={(open) => !open && closeDeleteWorkspace()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export function DeleteWorkspaceModal({
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button variant="outline" onClick={closeDeleteWorkspace}>
                         Cancel
                     </Button>
                     <Button variant="destructive" onClick={handleDelete}>

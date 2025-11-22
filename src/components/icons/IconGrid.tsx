@@ -6,24 +6,58 @@ import { IconCard } from "@/components/icons/IconCard";
 import { useSearch } from "@/lib/search-context";
 import { useProject } from "@/lib/project-context";
 import Fuse from "fuse.js";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Heart, LayoutGrid } from "lucide-react";
+import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LibraryHeader, LibraryOption } from "@/components/icons/LibraryHeader";
 
 interface IconGridProps {
     icons?: Icon[];
 }
 
+// Library label mapping configuration
+const LIBRARY_LABELS: Record<string, string> = {
+    "all": "All Libraries",
+    "lucide-icons": "Lucide Icons",
+    "fontawesome": "Font Awesome",
+    "bootstrap-icons": "Bootstrap Icons",
+    "heroicons": "Heroicons",
+    "radix-icons": "Radix Icons",
+    "feather-icons": "Feather Icons",
+    "material-icons": "Material Icons",
+    "ionicons": "Ionicons",
+    "simple-icons": "Simple Icons",
+};
+
+// Helper to prettify library names if not in config
+const prettifyLibraryName = (id: string): string => {
+    if (LIBRARY_LABELS[id]) return LIBRARY_LABELS[id];
+    return id
+        .split("-")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+};
+
 export function IconGrid({ icons: propIcons }: IconGridProps) {
-    const { query, setQuery, icons: contextIcons, selectedLibrary, setSelectedIconId, selectedIconId } = useSearch();
+    const { query, setQuery, icons: contextIcons, selectedLibrary, setSelectedLibrary, libraries, setSelectedIconId, selectedIconId } = useSearch();
     const { currentProject } = useProject();
     const [viewMode, setViewMode] = useState<"all" | "favorites">("all");
 
     // Use propIcons if available, otherwise use contextIcons
     const sourceIcons = propIcons || contextIcons;
 
-    // Filter icons based on search query, selected library, and view mode
+    // Prepare library options for the header
+    const libraryOptions: LibraryOption[] = useMemo(() => {
+        const options = [
+            { id: "all", label: "All Libraries" },
+            ...libraries.map(lib => ({
+                id: lib,
+                label: prettifyLibraryName(lib)
+            }))
+        ];
+        return options;
+    }, [libraries]);
+
+    // Filter icons based on library, view mode, and search query
     const filteredIcons = useMemo(() => {
         let result = sourceIcons;
 
@@ -51,31 +85,17 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
 
     return (
         <div className="flex flex-col h-full gap-6">
-            {/* Top Bar: Integrated into the Workspace */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search icons..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        className="pl-8 bg-muted/50 border-transparent focus:bg-background focus:border-input transition-all"
-                    />
-                </div>
-
-                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "all" | "favorites")} className="w-full sm:w-auto">
-                    <TabsList className="grid w-full grid-cols-2 sm:w-auto">
-                        <TabsTrigger value="all" className="gap-2">
-                            <LayoutGrid className="h-4 w-4" />
-                            All Icons
-                        </TabsTrigger>
-                        <TabsTrigger value="favorites" className="gap-2">
-                            <Heart className={cn("h-4 w-4", viewMode === "favorites" && "fill-current")} />
-                            Favorites
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
-            </div>
+            {/* Unified Library Header */}
+            <LibraryHeader
+                query={query}
+                onQueryChange={setQuery}
+                libraryFilter={selectedLibrary}
+                onLibraryChange={setSelectedLibrary}
+                libraryOptions={libraryOptions}
+                viewFilter={viewMode}
+                onViewChange={setViewMode}
+                totalCount={filteredIcons.length}
+            />
 
             {/* The Grid */}
             {sourceIcons.length === 0 ? (
@@ -83,12 +103,14 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
                     Loading icons...
                 </div>
             ) : filteredIcons.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2">
+                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2 py-12">
                     <Search className="h-8 w-8 opacity-20" />
                     <p>No icons found matching your criteria.</p>
-                    {viewMode === "favorites" && (
-                        <p className="text-sm">Try switching to "All Icons" to find more.</p>
-                    )}
+                    {viewMode === "favorites" ? (
+                        <p className="text-sm">Try switching to "All" to find more.</p>
+                    ) : selectedLibrary !== "all" ? (
+                        <p className="text-sm">Try switching to "All Libraries".</p>
+                    ) : null}
                 </div>
             ) : (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 pb-8">
