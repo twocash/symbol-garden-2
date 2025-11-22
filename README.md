@@ -1,149 +1,161 @@
 # Symbol Garden 2.0
 
-A modern icon library manager with GitHub ingestion, intelligent SVG parsing, and customizable exports.
+A modern, AI-enhanced icon library manager with workspace organization, intelligent search, and context-first design.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-green)
 
 ## Overview
 
-Symbol Garden 2.0 is a Next.js application for managing and exploring icon libraries across projects. It features a dark-mode-first UI with powerful search, GitHub repository ingestion, and flexible export options.
+Symbol Garden 2.0 is a Next.js application for managing and exploring icon libraries across multiple workspaces. Built with a context-first architecture, it features AI-powered semantic search, GitHub repository ingestion, and workspace-specific branding and export settings.
 
-## Features
+## Key Features
 
-### 🔍 **Fuzzy Search**
-Fast client-side search across icon names, tags, categories, and synonyms using Fuse.js.
+### 🤖 **AI-Powered Enrichment**
+Enhance your icon library with Google Gemini AI:
+- **Semantic Descriptions**: Auto-generate business-context descriptions for icons
+- **Smart Tagging**: Automatically add relevant tags and keywords
+- **Batch Processing**: Enrich entire libraries or individual icons on-demand
+- **Persistent Storage**: AI-generated metadata saved locally for instant search
+
+### 🏢 **Multi-Workspace Management**
+Organize icons across separate workspaces:
+- **Independent Favorites**: Each workspace maintains its own favorited icons
+- **Brand Customization**: Set workspace-specific brand colors and export formats
+- **Quick Switching**: Seamless context switching between projects
+- **Workspace Actions**: Rename, duplicate, and soft-delete workspaces
+
+### 🔍 **Advanced Fuzzy Search**
+Fast client-side search powered by Fuse.js:
+- Search across icon names, tags, AI descriptions, and categories
+- Filter by library or workspace
+- Toggle between "All Icons" and "Favorites" views
+- Real-time results as you type
 
 ### 📦 **GitHub Ingestion**
-Import icon libraries directly from GitHub repositories. Supports popular libraries like:
-- Bootstrap Icons (twbs/icons)
-- Lucide Icons
-- Phosphor Icons
-- Heroicons
-- And any other SVG-based icon library on GitHub
+Import icon libraries directly from GitHub repositories:
+- **Auto-Detection**: Smart SVG parsing with fill vs stroke detection
+- **Popular Libraries**: Bootstrap Icons, Lucide, Phosphor, Heroicons, and more
+- **Custom Repos**: Support for any SVG-based icon library on GitHub
+- **Conflict Handling**: Full path IDs prevent duplicates
 
-### 🎨 **Smart SVG Parsing**
-Automatically detects fill vs stroke rendering styles for accurate display across different icon libraries.
+### 🎨 **Workspace Branding**
+Context-aware customization per workspace:
+- **Brand Colors**: Visual color picker with hex input
+- **Export Formats**: Default to SVG, PNG, or JSX per workspace
+- **Repository Links**: Connect workspaces to source repos
+- **Live Preview**: Icons render with workspace brand colors
 
-### 🎛️ **Customizable Exports**
-- **Size Control**: Adjust from 16px to 1024px with a slider
-- **Color Picker**: Choose any color for your icons
-- **Multiple Formats**: Export as PNG or SVG
-- **Copy to Clipboard**: One-click copy as SVG code or PNG image
+### 🎛️ **Powerful Export Tools**
+Flexible export options with instant preview:
+- **Size Control**: 16px to 1024px with smooth slider
+- **Color Override**: Per-icon color customization
+- **Multiple Formats**: Copy/Download as SVG or PNG
+- **Clipboard Integration**: One-click copy to clipboard
 
-### 🏷️ **Library Filtering**
-Filter and browse icons by specific libraries for easy QA and focused exploration.
-
-### 💾 **Local-First**
-All data stored in browser localStorage - no backend required, fully Vercel-compatible.
+### 🖥️ **Modern UI/UX**
+Clean, polished interface with:
+- **Unified Right Drawer**: Context-sensitive panel for icon details or workspace settings
+- **3-Column Layout**: Sidebar | Main Content | Drawer
+- **Keyboard Shortcuts**: `Esc` to close drawer
+- **Dark Mode**: Premium Graphite/Neon Sprout color scheme
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router) with TypeScript
-- **Styling**: Tailwind CSS with shadcn/ui components
+- **Framework**: Next.js 16 (App Router) + TypeScript
+- **AI**: Google Gemini API (gemini-2.5-flash)
+- **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Search**: Fuse.js for fuzzy matching
-- **State Management**: React Context API
-- **Storage**: Browser localStorage
-- **Icons**: Lucide React (UI icons)
+- **State**: React Context API (UIContext, ProjectContext, SearchContext)
+- **Storage**: Browser localStorage (local-first, no backend)
+- **Icons**: Lucide React (UI components)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 18+
+- npm or yarn
+- Google Gemini API key (optional, for AI enrichment)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/symbol-garden-2.git
+git clone https://github.com/twocash/symbol-garden-2.git
 cd symbol-garden-2
 
 # Install dependencies
 npm install
 
-# Run the development server
+# Run development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### First Steps
+### Quick Start Guide
 
-1. Navigate to **Settings** (bottom-left sidebar)
-2. Add a GitHub repository URL (e.g., `https://github.com/twbs/icons`)
-3. Specify the path to icons within the repo (e.g., `icons`)
-4. Click **Add Source** to ingest the library
-5. Browse and search your imported icons!
+1. **Import Icons**
+   - Navigate to the left sidebar
+   - Click the `+` button next to "Workspaces" to create a workspace
+   - Add a GitHub repository (e.g., `https://github.com/twbs/icons`)
+   - Icons will auto-ingest and appear in the grid
 
-## Usage
+2. **Enable AI Enrichment** (Optional)
+   - Open the workspace settings (kebab menu → "Workspace settings...")
+   - Scroll to "AI Enrichment" section
+   - Add your Gemini API key
+   - Click "Start Enrichment" to batch-process icons
 
-### Importing Icons
+3. **Customize Your Workspace**
+   - Set brand color for icon previews
+   - Choose default export format (SVG/PNG/JSX)
+   - Add repository link for reference
 
-1. Go to **Settings** page
-2. Enter a GitHub repository URL
-3. Specify the path to the SVG files (optional)
-4. Click **Add Source**
+4. **Export Icons**
+   - Click any icon to open details
+   - Adjust size and color as needed
+   - Copy or download in your preferred format
 
-The app will fetch all SVG files and parse them automatically.
+## Architecture
 
-### Searching Icons
+### Context-First Design
 
-Use the search bar in the header to search across:
-- Icon names
-- Tags
-- Categories
-- Synonyms
+Symbol Garden uses a **context-driven architecture** where the active workspace determines the entire UI state:
 
-### Exporting Icons
+- **UIContext**: Manages drawer state (Icon Details vs Workspace Settings)
+- **ProjectContext**: Handles workspace CRUD, favorites, and brand settings
+- **SearchContext**: Powers search, filtering, and icon selection
 
-1. Click any icon to open the detail panel
-2. Adjust size with the slider (16-1024px)
-3. Choose a color with the color picker
-4. Export options:
-   - **Copy SVG**: Copies SVG code to clipboard
-   - **Copy PNG**: Copies PNG image to clipboard
-   - **Download SVG**: Downloads SVG file
-   - **Download PNG**: Downloads PNG file
-
-### Filtering by Library
-
-Use the dropdown in the top-right to filter icons by library. This is useful for:
-- Validating imported libraries
-- Browsing a specific icon set
-- QA testing
-
-## Project Structure
+### Component Structure
 
 ```
-symbol-garden-2/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── layout.tsx         # Root layout
-│   │   ├── page.tsx           # Home page with icon grid
-│   │   └── settings/          # Settings page
-│   ├── components/
-│   │   ├── icons/             # Icon-related components
-│   │   │   ├── IconCard.tsx   # Grid item
-│   │   │   ├── IconGrid.tsx   # Main grid view
-│   │   │   └── IconDetail.tsx # Detail panel with exports
-│   │   ├── layout/            # Layout components
-│   │   │   ├── AppShell.tsx   # Main layout wrapper
-│   │   │   ├── Header.tsx     # Search header
-│   │   │   └── Sidebar.tsx    # Navigation sidebar
-│   │   └── ui/                # shadcn/ui components
-│   ├── lib/
-│   │   ├── search-context.tsx # Global search state
-│   │   ├── github-api.ts      # GitHub API client
-│   │   ├── ingestion-service.ts # SVG parsing & normalization
-│   │   └── export-utils.ts    # PNG/SVG export utilities
-│   └── types/
-│       └── schema.ts          # TypeScript schemas
-├── public/
-│   └── data/
-│       └── icons.json         # Seed data (optional)
-└── devbridge-context.md       # Project context tracking
+src/
+├── app/                          # Next.js App Router
+│   ├── page.tsx                 # Main grid view
+│   └── api/
+│       └── enrich/              # AI enrichment endpoint
+├── components/
+│   ├── icons/
+│   │   ├── IconDetailsPanel.tsx # Right drawer: Icon details
+│   │   ├── IconGrid.tsx         # Main icon grid
+│   │   └── LibraryHeader.tsx    # Search + filters
+│   ├── layout/
+│   │   ├── AppShell.tsx         # 3-column layout
+│   │   ├── Sidebar.tsx          # Workspace switcher
+│   │   ├── RightDrawer.tsx      # Unified right panel
+│   │   └── RightSidebarWorkspace.tsx # Workspace settings cards
+│   └── dialogs/                 # Modals for workspace actions
+├── lib/
+│   ├── ui-context.tsx           # Drawer + modal state
+│   ├── project-context.tsx      # Workspace management
+│   ├── search-context.tsx       # Search + filtering
+│   └── ingestion-service.ts     # GitHub SVG parsing
+└── types/
+    └── schema.ts                # TypeScript schemas
 ```
 
 ## Development
@@ -160,17 +172,25 @@ npm run build
 npm run lint
 ```
 
+### Type Check
+
+```bash
+npm run type-check  # if configured
+```
+
 ## Roadmap
 
-- [x] Core UI Components
-- [x] Search Engine
+- [x] Core UI Components & Search
 - [x] GitHub Ingestion Pipeline
-- [x] Enhanced Export Tools
-- [x] Library Filtering
-- [ ] Project Management (Favorites, Collections)
-- [ ] Multi-project support
-- [ ] Synonym expansion (AI integration)
-- [ ] Concept clusters visualization
+- [x] Multi-Workspace Management
+- [x] AI-Powered Enrichment (Gemini)
+- [x] Context-First Architecture
+- [x] Unified Right Drawer
+- [ ] **Collections** (organize icons within workspaces)
+- [ ] Advanced filtering (by style, category, tags)
+- [ ] Export presets and templates
+- [ ] Keyboard navigation and shortcuts
+- [ ] Icon comparison tool enhancements
 
 ## Contributing
 
@@ -178,15 +198,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - see LICENSE file for details.
 
 ## Acknowledgments
 
 - Built with [Next.js](https://nextjs.org/)
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Search powered by [Fuse.js](https://fusejs.io/)
+- AI enrichment via [Google Gemini API](https://ai.google.dev/)
 - Icons from various open-source libraries
 
 ---
 
-**Status**: ✅ MVP Complete | 🚧 Active Development
+**Status**: 🚀 v0.3.0 Released | ✨ Active Development

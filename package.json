@@ -1,6 +1,7 @@
 {
   "name": "symbol-garden-2",
   "version": "0.3.0",
+  "description": "AI-enhanced icon library manager with workspace organization, intelligent search, and context-first design",
   "private": true,
   "scripts": {
     "dev": "next dev",
