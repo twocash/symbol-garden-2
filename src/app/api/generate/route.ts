@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
             })
         );
 
+        console.log('Starting icon generation with prompt:', prompt);
         const generatedBuffers = await generateIconVariants(prompt, styleReferences);
 
         // Return images as base64 strings
@@ -40,8 +41,16 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('Generation API error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error message:', errorMessage);
+        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+
         return NextResponse.json(
-            { error: 'Failed to generate icons' },
+            {
+                error: 'Failed to generate icons',
+                details: errorMessage,
+                timestamp: new Date().toISOString()
+            },
             { status: 500 }
         );
     }

@@ -76,7 +76,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Generation failed");
+                const errorMsg = error.details || error.error || "Generation failed";
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();
@@ -84,7 +85,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             toast.success("Icons generated successfully!");
         } catch (error) {
             console.error(error);
-            toast.error(error instanceof Error ? error.message : "Failed to generate icons");
+            const errorMessage = error instanceof Error ? error.message : "Failed to generate icons";
+            toast.error(errorMessage);
         } finally {
             setIsGenerating(false);
         }
