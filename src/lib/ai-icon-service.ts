@@ -6,7 +6,6 @@ import { promisify } from 'util';
 // Initialize Vertex AI
 const project = process.env.GOOGLE_CLOUD_PROJECT_ID;
 const location = 'us-central1';
-const vertex_ai = new VertexAI({ project: project || 'test-project', location });
 
 // Instantiate Imagen 3 model for image generation
 const model = 'imagen-3.0-generate-001';
@@ -63,6 +62,10 @@ export async function vectorizeImage(imageBuffer: Buffer): Promise<string> {
  */
 export async function generateIconVariants(prompt: string, styleReferences: Buffer[]): Promise<Buffer[]> {
     try {
+        if (!project) {
+            throw new Error("GOOGLE_CLOUD_PROJECT_ID environment variable is not set.");
+        }
+
         // Create enhanced prompt that incorporates style matching
         const enhancedPrompt = `Create a minimalist vector-style icon of: ${prompt}
 
@@ -102,6 +105,7 @@ Style requirements:
             throw new Error('Failed to get access token');
         }
 
+        console.log(`Calling Vertex AI endpoint: ${endpoint}`);
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -113,6 +117,7 @@ Style requirements:
 
         if (!response.ok) {
             const errorText = await response.text();
+            console.error(`Imagen 3 API Error: ${response.status}`, errorText);
             throw new Error(`Imagen 3 API error: ${response.status} - ${errorText}`);
         }
 
