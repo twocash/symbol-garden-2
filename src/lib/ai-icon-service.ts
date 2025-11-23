@@ -96,22 +96,26 @@ Style requirements:
         // Get access token for authentication
         const { GoogleAuth } = await import('google-auth-library');
 
+        // Build auth options
+        const authOptions: {
+            scopes: string[];
+            credentials?: any;
+        } = {
+            scopes: ['https://www.googleapis.com/auth/cloud-platform']
+        };
+
         // Check for credentials in environment variable (for Vercel)
         const credsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-        let credentials;
-
         if (credsJson) {
             try {
-                credentials = JSON.parse(credsJson);
+                authOptions.credentials = JSON.parse(credsJson);
+                console.log('Using credentials from GOOGLE_APPLICATION_CREDENTIALS_JSON');
             } catch (e) {
-                throw new Error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON');
+                throw new Error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON: ' + (e instanceof Error ? e.message : 'Unknown'));
             }
         }
 
-        const auth = new GoogleAuth({
-            credentials: credentials,
-            scopes: ['https://www.googleapis.com/auth/cloud-platform']
-        });
+        const auth = new GoogleAuth(authOptions);
         const client = await auth.getClient();
         const accessToken = await client.getAccessToken();
 
