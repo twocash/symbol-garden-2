@@ -25,6 +25,7 @@ export const ProjectSchema = z.object({
   primaryLibrary: z.string(),
   fallbackLibraries: z.array(z.string()),
   icons: z.record(z.string(), z.string()), // concept -> iconId mapping
+  customIcons: z.array(IconSchema).default([]), // User-generated icons specific to this project
   favorites: z.array(z.string()),
   brandColor: z.string().default("#000000").optional(),
   secondaryColors: z.array(z.string()).optional(), // Additional brand colors for quick access

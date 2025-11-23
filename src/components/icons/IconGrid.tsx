@@ -44,11 +44,16 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
     const { currentProject } = useProject();
     const [viewMode, setViewMode] = useState<"all" | "favorites">("all");
 
-    // Use propIcons if available, otherwise use contextIcons
-    const sourceIcons = propIcons || contextIcons;
+    // Use propIcons if available, otherwise use contextIcons + customIcons
+    const sourceIcons = useMemo(() => {
+        if (propIcons) return propIcons;
+        const custom = currentProject?.customIcons || [];
+        return [...contextIcons, ...custom];
+    }, [propIcons, contextIcons, currentProject?.customIcons]);
 
     // Prepare library options for the header
     const libraryOptions: LibraryOption[] = useMemo(() => {
+        const hasCustomIcons = (currentProject?.customIcons?.length || 0) > 0;
         const options = [
             { id: "all", label: "All Libraries" },
             ...libraries.map(lib => ({
@@ -56,8 +61,14 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
                 label: prettifyLibraryName(lib)
             }))
         ];
+
+        // Add "custom" library option if there are custom icons
+        if (hasCustomIcons) {
+            options.push({ id: "custom", label: "AI Generated" });
+        }
+
         return options;
-    }, [libraries]);
+    }, [libraries, currentProject?.customIcons?.length]);
 
     // Filter icons based on library, view mode, and search query
     const filteredIcons = useMemo(() => {
@@ -97,6 +108,7 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
                 viewFilter={viewMode}
                 onViewChange={setViewMode}
                 totalCount={filteredIcons.length}
+                onOpenAIIconGenerator={useUI().openAIIconGenerator}
             />
 
             {/* The Grid */}

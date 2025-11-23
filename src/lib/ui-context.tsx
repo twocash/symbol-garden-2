@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { RenameWorkspaceModal } from "@/components/dialogs/RenameWorkspaceModal";
 import { DuplicateWorkspaceModal } from "@/components/dialogs/DuplicateWorkspaceModal";
 import { DeleteWorkspaceModal } from "@/components/dialogs/DeleteWorkspaceModal";
+import { AIIconGeneratorModal } from "@/components/dialogs/AIIconGeneratorModal";
 
 type RightDrawerMode = "none" | "icon" | "workspace";
 
@@ -22,6 +23,7 @@ interface UIContextType {
     openRenameWorkspace: (projectId: string) => void;
     openDuplicateWorkspace: (projectId: string) => void;
     openDeleteWorkspace: (projectId: string) => void;
+    openAIIconGenerator: () => void;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
@@ -36,6 +38,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
     const [renameId, setRenameId] = useState<string | null>(null);
     const [duplicateId, setDuplicateId] = useState<string | null>(null);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isAIGeneratorOpen, setIsAIGeneratorOpen] = useState(false);
 
     // Drawer Actions
     const openIconDetails = (iconId: string) => {
@@ -60,11 +63,13 @@ export function UIProvider({ children }: { children: ReactNode }) {
     const openRenameWorkspace = (id: string) => setRenameId(id);
     const openDuplicateWorkspace = (id: string) => setDuplicateId(id);
     const openDeleteWorkspace = (id: string) => setDeleteId(id);
+    const openAIIconGenerator = () => setIsAIGeneratorOpen(true);
 
     const closeModals = () => {
         setRenameId(null);
         setDuplicateId(null);
         setDeleteId(null);
+        setIsAIGeneratorOpen(false);
     };
 
     return (
@@ -79,6 +84,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
                 openRenameWorkspace,
                 openDuplicateWorkspace,
                 openDeleteWorkspace,
+                openAIIconGenerator,
             }}
         >
             {children}
@@ -103,6 +109,11 @@ export function UIProvider({ children }: { children: ReactNode }) {
                     onClose={closeModals}
                 />
             )}
+            {/* We will import and render AIIconGeneratorModal here once created */}
+            <AIIconGeneratorModal
+                isOpen={isAIGeneratorOpen}
+                onClose={() => setIsAIGeneratorOpen(false)}
+            />
         </UIContext.Provider>
     );
 }

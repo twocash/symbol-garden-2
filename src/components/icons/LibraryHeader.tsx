@@ -19,6 +19,7 @@ import {
     Library as LibraryIcon,
     Grid2x2,
     Heart,
+    Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,9 @@ interface LibraryHeaderProps {
 
     // Optional: count to show on the right
     totalCount?: number;
+
+    // AI Trigger
+    onOpenAIIconGenerator: () => void;
 }
 
 export function LibraryHeader({
@@ -56,6 +60,7 @@ export function LibraryHeader({
     viewFilter,
     onViewChange,
     totalCount,
+    onOpenAIIconGenerator,
 }: LibraryHeaderProps) {
     const activeLibrary = libraryOptions.find(
         (opt) => opt.id === libraryFilter
@@ -144,6 +149,17 @@ export function LibraryHeader({
                             <span>Favorites</span>
                         </ToggleGroupItem>
                     </ToggleGroup>
+
+                    {/* AI Generator Trigger */}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-2 text-xs border-dashed border-primary/40 hover:border-primary hover:bg-primary/5"
+                        onClick={onOpenAIIconGenerator}
+                    >
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        Sprout Icon
+                    </Button>
                 </div>
 
                 {/* Optional count / status */}

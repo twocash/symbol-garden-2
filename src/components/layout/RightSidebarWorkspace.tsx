@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { SecondaryColorPalette } from "@/components/ui/secondary-color-palette";
 import { cn } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 
 interface RightSidebarWorkspaceProps {
     workspaceId: string;
@@ -25,6 +26,7 @@ interface RightSidebarWorkspaceProps {
     onRenameWorkspace: () => void;
     onDuplicateWorkspace: () => void;
     onDeleteWorkspace: () => void;
+    onOpenAIIconGenerator: () => void;
 }
 
 export function RightSidebarWorkspace(props: RightSidebarWorkspaceProps) {
@@ -53,6 +55,29 @@ export function RightSidebarWorkspace(props: RightSidebarWorkspaceProps) {
 
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* AI Tools */}
+                <Card className="border-primary/20 bg-primary/5">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-xs font-semibold tracking-tight flex items-center gap-2">
+                            <Sparkles className="w-3 h-3 text-primary" />
+                            AI Tools
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                            Generate custom icons using your favorites as style seeds.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button
+                            size="sm"
+                            className="w-full justify-start h-8 text-xs"
+                            onClick={props.onOpenAIIconGenerator}
+                        >
+                            <Sparkles className="w-3 h-3 mr-2" />
+                            Sprout Icon
+                        </Button>
+                    </CardContent>
+                </Card>
+
                 {/* Brand Defaults */}
                 <Card>
                     <CardHeader className="pb-3">

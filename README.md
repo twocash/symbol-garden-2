@@ -20,6 +20,14 @@ Enhance your icon library with Google Gemini AI:
 - **Batch Processing**: Enrich entire libraries or individual icons on-demand
 - **Persistent Storage**: AI-generated metadata saved locally for instant search
 
+### 🌱 **Sprout: AI Icon Generator**
+Generate custom SVG icons from text prompts using Google's Imagen 3:
+- **Text-to-Icon**: Describe what you need, get 4 unique variants
+- **Style Matching**: Icons generated to match your library's aesthetic
+- **Vector Pipeline**: Automatic PNG-to-SVG conversion with `potrace`
+- **Smart Management**: "Remix" and "Delete" generated icons
+- **Project Integration**: Generated icons are automatically saved to your project
+
 ### 🏢 **Multi-Workspace Management**
 Organize icons across separate workspaces:
 - **Independent Favorites**: Each workspace maintains its own favorited icons
@@ -67,7 +75,8 @@ Clean, polished interface with:
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router) + TypeScript
-- **AI**: Google Gemini API (gemini-2.5-flash)
+- **AI**: Google Gemini API (gemini-2.5-flash) + Vertex AI (Imagen 3)
+- **Vectorization**: Potrace + Sharp
 - **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Search**: Fuse.js for fuzzy matching
 - **State**: React Context API (UIContext, ProjectContext, SearchContext)
@@ -81,6 +90,7 @@ Clean, polished interface with:
 - Node.js 18+
 - npm or yarn
 - Google Gemini API key (optional, for AI enrichment)
+- Google Cloud Credentials (optional, for Sprout generation)
 
 ### Installation
 
@@ -106,18 +116,23 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Add a GitHub repository (e.g., `https://github.com/twbs/icons`)
    - Icons will auto-ingest and appear in the grid
 
-2. **Enable AI Enrichment** (Optional)
+2. **Enable AI Features** (Optional)
    - Open the workspace settings (kebab menu → "Workspace settings...")
    - Scroll to "AI Enrichment" section
    - Add your Gemini API key
    - Click "Start Enrichment" to batch-process icons
 
-3. **Customize Your Workspace**
+3. **Generate Icons with Sprout**
+   - Click the "Sprout" button in the sidebar
+   - Enter a prompt (e.g., "futuristic rocket ship")
+   - Select a variant and save it to your project
+
+4. **Customize Your Workspace**
    - Set brand color for icon previews
    - Choose default export format (SVG/PNG/JSX)
    - Add repository link for reference
 
-4. **Export Icons**
+5. **Export Icons**
    - Click any icon to open details
    - Adjust size and color as needed
    - Copy or download in your preferred format
@@ -139,7 +154,8 @@ src/
 ├── app/                          # Next.js App Router
 │   ├── page.tsx                 # Main grid view
 │   └── api/
-│       └── enrich/              # AI enrichment endpoint
+│       ├── enrich/              # AI enrichment endpoint
+│       └── vectorize/           # Image-to-SVG endpoint
 ├── components/
 │   ├── icons/
 │   │   ├── IconDetailsPanel.tsx # Right drawer: Icon details
@@ -155,7 +171,8 @@ src/
 │   ├── ui-context.tsx           # Drawer + modal state
 │   ├── project-context.tsx      # Workspace management
 │   ├── search-context.tsx       # Search + filtering
-│   └── ingestion-service.ts     # GitHub SVG parsing
+│   ├── ingestion-service.ts     # GitHub SVG parsing
+│   └── ai-icon-service.ts       # Sprout generation logic
 └── types/
     └── schema.ts                # TypeScript schemas
 ```
@@ -190,13 +207,14 @@ npm run type-check  # if configured
 - [x] Context-First Architecture
 - [x] Unified Right Drawer
 - [x] **Secondary Color Palettes**
+- [x] **AI Icon Generator (Sprout)**
 
 ### 🎯 Next Sprint (v0.4.0)
-- [ ] **AI Icon Generator** (Nano Banana Pro)
-  - Generate custom icons from text prompts
-  - Style-matched to workspace favorites
-  - PNG → SVG vectorization pipeline
-  - 4-8 variants per generation
+- [ ] **Collections** (organize icons within workspaces)
+- [ ] Advanced filtering (by style, category, tags)
+- [ ] Export presets and templates
+- [ ] Keyboard navigation and shortcuts
+- [ ] Icon comparison tool enhancements
 
 ### 📋 Backlog
 - [ ] **Collections** (organize icons within workspaces)

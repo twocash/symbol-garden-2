@@ -16,7 +16,8 @@ export function RightDrawer() {
         closeDrawer,
         openRenameWorkspace,
         openDuplicateWorkspace,
-        openDeleteWorkspace
+        openDeleteWorkspace,
+        openAIIconGenerator
     } = useUI();
 
     const {
@@ -44,7 +45,7 @@ export function RightDrawer() {
 
     // Resolve Data
     const activeIcon = drawerMode === "icon" && drawerIconId
-        ? icons.find(i => i.id === drawerIconId)
+        ? (icons.find(i => i.id === drawerIconId) || currentProject?.customIcons?.find(i => i.id === drawerIconId))
         : null;
 
     const activeWorkspace = drawerMode === "workspace" && drawerWorkspaceId
@@ -194,6 +195,7 @@ export function RightDrawer() {
                         onRenameWorkspace={() => openRenameWorkspace(activeWorkspace.id)}
                         onDuplicateWorkspace={() => openDuplicateWorkspace(activeWorkspace.id)}
                         onDeleteWorkspace={() => openDeleteWorkspace(activeWorkspace.id)}
+                        onOpenAIIconGenerator={openAIIconGenerator}
                     />
                 )}
             </div>

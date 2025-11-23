@@ -12,7 +12,9 @@ import {
     Copy,
     ArrowLeftRight,
     Sparkles,
-    Loader2
+    Loader2,
+    Trash2,
+    RefreshCw
 } from "lucide-react";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { copySvg, copyPng, downloadPng, downloadSvg } from "@/lib/export-utils";
@@ -22,14 +24,24 @@ import { toast } from "sonner";
 import { Icon } from "@/types/schema";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
+import { useUI } from "@/lib/ui-context";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 interface IconDetailsPanelProps {
     icon: Icon;
 }
 
 export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
-    const { currentProject, toggleFavorite } = useProject();
+    const { currentProject, toggleFavorite, deleteIconFromProject } = useProject();
     const { setIcons, icons } = useSearch(); // Needed for AI enrichment update
+    const { closeDrawer } = useUI();
 
     // Local State
     const [size, setSize] = useState(256);
@@ -37,8 +49,10 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
     const [compareOpen, setCompareOpen] = useState(false);
     const [generating, setGenerating] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     const isFavorite = currentProject?.favorites.includes(icon.id);
+    const isCustomIcon = currentProject?.customIcons?.some(i => i.id === icon.id);
 
     // Sync color with project brand color on mount or when project changes
     useEffect(() => {
@@ -120,6 +134,13 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
         } finally {
             setGenerating(false);
         }
+    };
+
+    const handleDelete = () => {
+        deleteIconFromProject(icon.id);
+        setDeleteDialogOpen(false);
+        closeDrawer();
+        toast.success("Icon deleted");
     };
 
     return (
@@ -257,7 +278,7 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
                     {/* Metadata & AI */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-medium">AI Description</h3>
+                            <h3 className="text-sm font-medium">Sprout Description</h3>
                             {!icon.aiDescription && (
                                 <Button
                                     variant="ghost"
@@ -297,6 +318,32 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
                         <ArrowLeftRight className="mr-2 h-4 w-4" />
                         Compare Variants
                     </Button>
+
+                    {/* Custom Icon Actions */}
+                    {isCustomIcon && (
+                        <div className="pt-4 border-t space-y-3">
+                            <h3 className="text-sm font-medium">Sprout Actions</h3>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button
+                                    variant="outline"
+                                    className="w-full"
+                                    disabled
+                                    title="Coming soon"
+                                >
+                                    <RefreshCw className="mr-2 h-4 w-4" />
+                                    Remix
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    className="w-full"
+                                    onClick={() => setDeleteDialogOpen(true)}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </ScrollArea>
 
@@ -305,6 +352,25 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
                 open={compareOpen}
                 onOpenChange={setCompareOpen}
             />
+
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Icon</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{icon.name}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="destructive" onClick={handleDelete}>
+                            Delete
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

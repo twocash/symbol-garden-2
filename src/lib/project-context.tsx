@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Project } from "@/types/schema";
+import { Project, Icon } from "@/types/schema";
 import { nanoid } from "nanoid";
 
 interface ProjectContextType {
@@ -17,6 +17,8 @@ interface ProjectContextType {
     addSecondaryColor: (projectId: string, color: string) => void;
     updateSecondaryColor: (projectId: string, index: number, color: string) => void;
     removeSecondaryColor: (projectId: string, index: number) => void;
+    addIconToProject: (icon: Icon, shouldFavorite?: boolean) => void;
+    deleteIconFromProject: (iconId: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -50,6 +52,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
                 primaryLibrary: "all",
                 fallbackLibraries: [],
                 icons: {},
+                customIcons: [],
                 favorites: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -77,6 +80,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             primaryLibrary: "all",
             fallbackLibraries: [],
             icons: {},
+            customIcons: [],
             favorites: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
@@ -123,6 +127,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             id: nanoid(),
             name: newName,
             slug: newName.toLowerCase().replace(/\s+/g, "-"),
+            customIcons: copyFavorites ? [...(source.customIcons || [])] : [], // Copy custom icons if copying favorites? Or always? Let's assume copy favorites implies copying content.
             favorites: copyFavorites ? [...source.favorites] : [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
@@ -262,6 +267,35 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         updateProject(updatedProject);
     };
 
+    const addIconToProject = (icon: Icon, shouldFavorite: boolean = false) => {
+        if (!currentProject) return;
+
+        let updatedProject = {
+            ...currentProject,
+            customIcons: [...(currentProject.customIcons || []), icon],
+            updatedAt: new Date().toISOString()
+        };
+
+        if (shouldFavorite) {
+            updatedProject.favorites = [...updatedProject.favorites, icon.id];
+        }
+
+        updateProject(updatedProject);
+    };
+
+    const deleteIconFromProject = (iconId: string) => {
+        if (!currentProject) return;
+
+        const updatedProject = {
+            ...currentProject,
+            customIcons: (currentProject.customIcons || []).filter(i => i.id !== iconId),
+            favorites: currentProject.favorites.filter(id => id !== iconId),
+            updatedAt: new Date().toISOString()
+        };
+
+        updateProject(updatedProject);
+    };
+
     return (
         <ProjectContext.Provider value={{
             projects,
@@ -275,7 +309,9 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             toggleFavorite,
             addSecondaryColor,
             updateSecondaryColor,
-            removeSecondaryColor
+            removeSecondaryColor,
+            addIconToProject,
+            deleteIconFromProject
         }}>
             {children}
         </ProjectContext.Provider>

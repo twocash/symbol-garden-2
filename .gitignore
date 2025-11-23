@@ -42,3 +42,4 @@ enrichment.log
 next-env.d.ts
 
 .vercel
+service-account.json
