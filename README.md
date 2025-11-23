@@ -197,6 +197,38 @@ npm run lint
 npm run type-check  # if configured
 ```
 
+## Deployment
+
+### Vercel Deployment
+
+This project is optimized for deployment on Vercel. After connecting your repository:
+
+1. **Set Environment Variables** in Vercel Project Settings:
+
+```bash
+# Required for Sprout (AI Icon Generator)
+GOOGLE_CLOUD_PROJECT_ID=your-gcp-project-id
+GOOGLE_APPLICATION_CREDENTIALS_JSON={"type":"service_account",...}
+```
+
+> **Note:** For `GOOGLE_APPLICATION_CREDENTIALS_JSON`, paste the **entire contents** of your Google Cloud service account JSON file as the value.
+
+2. **Deploy**: Vercel will automatically deploy on push to `main`.
+
+3. **Verify**: Check Vercel Function Logs if you encounter issues with AI generation.
+
+### Local Development with AI Features
+
+To use AI features locally:
+
+1. Create a `.env.local` file:
+```bash
+GOOGLE_CLOUD_PROJECT_ID=your-gcp-project-id
+# For local development, you can use GOOGLE_APPLICATION_CREDENTIALS pointing to a file
+```
+
+2. Place your `service-account.json` in the project root (it's gitignored).
+
 ## Roadmap
 
 ### ✅ Completed
