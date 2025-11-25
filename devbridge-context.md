@@ -13,19 +13,45 @@ created: 2025-11-19T16:21:00Z
 **Next Priority:**
 Collections feature
 
-### 2025-11-24T21:30:00Z Session 10
+### 2025-11-25T11:30:00Z Session 11
 **Type:** Human Interactive
 **Duration:** 2.0 hours
 **State Change:** released → released
-**Checkpoints:** 3
+**Checkpoints:** 4
 
 **Completed:**
-Refined AI Icon Generation pipeline. Upgraded to Gemini 2.0 Flash, implemented Meta-Prompting strategy, and added Library Override logic to fix "filled vs outline" issues.
+Fixed critical vectorization bugs where outlined icons were rendered as filled shapes. Implemented full end-to-end strategy passing (Generation -> Frontend -> Vectorization) and fixed SVG parsing to correctly handle `fill-rule`.
 
+#### Checkpoint: 10:30
+- Completed: Implemented Meta-Prompting for Imagen 3
+- Files: src/lib/ai-icon-service.ts
+- Decision: Use Gemini to write Imagen prompts based on style analysis.
+
+#### Checkpoint: 11:00
+- Completed: Fixed Vectorization Strategy Mismatch
+- Files: src/app/api/generate/route.ts, src/app/api/vectorize/route.ts, src/components/dialogs/AIIconGeneratorModal.tsx
+- Decision: Pass `strategy` ("FILLED" | "OUTLINED") through the entire pipeline.
+
+#### Checkpoint: 11:30
+- Completed: Fixed "Filled Outline" Rendering Bug
+- Files: src/components/dialogs/AIIconGeneratorModal.tsx
+- Decision: Extract and save `fill-rule` from generated SVGs to preserve holes in shapes.
+
+**Key Decisions:**
+- Meta-Prompting: Dynamic prompting yields better style adherence than static templates.
+- Explicit Fill Rules: `fill-rule="evenodd"` is required for correct outline rendering.
+
+**Blockers Resolved:**
+- Filled Hexagon Bug: Missing `fill-rule` extraction (1 hour debugging).
+
+**Files Touched:**
+- src/lib/ai-icon-service.ts
 - src/components/dialogs/AIIconGeneratorModal.tsx
+- src/app/api/generate/route.ts
+- src/app/api/vectorize/route.ts
 
 **Next Priority:**
-SVG Conversion Fidelity
+Collections feature
 
 ---
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import {
     parseStrokeWidth,
     parseStrokeCap,
@@ -7,8 +7,8 @@ import {
     inferGeometry,
     calculateDetailLevel,
     analyzeIconStyle,
-    type StyleSummary,
 } from '../style-analysis';
+import type { StyleSummary } from '../style-analysis';
 import { Icon } from '@/types/schema';
 
 describe('parseStrokeWidth', () => {

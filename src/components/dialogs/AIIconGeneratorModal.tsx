@@ -24,6 +24,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     const [prompt, setPrompt] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+    const [generatedStrategy, setGeneratedStrategy] = useState<string | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [guidanceScale, setGuidanceScale] = useState<number>(50); // DEV: Tunable prompt adherence parameter
@@ -39,6 +40,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         if (isOpen) {
             setPrompt("");
             setGeneratedImages([]);
+            setGeneratedStrategy(null);
             setSelectedImageIndex(null);
         }
     }, [isOpen]);
@@ -102,6 +104,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
             const data = await response.json();
             setGeneratedImages(data.images);
+            setGeneratedStrategy(data.strategy);
             toast.success("Icons generated successfully!");
         } catch (error) {
             console.error(error);
@@ -126,6 +129,9 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             // Send to vectorize API
             const formData = new FormData();
             formData.append("image", blob, "generated-icon.png");
+            if (generatedStrategy) {
+                formData.append("strategy", generatedStrategy);
+            }
 
             const vectorizeRes = await fetch("/api/vectorize", {
                 method: "POST",
@@ -145,6 +151,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             // Extract path and viewBox
             const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
             const pathMatch = svg.match(/d="([^"]+)"/);
+            const fillRuleMatch = svg.match(/fill-rule="([^"]+)"/);
 
             // If we have a path, use path-based icon
             const newIcon: any = {
@@ -155,6 +162,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                 tags: ["ai-generated", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "fill",
+                fillRule: fillRuleMatch ? fillRuleMatch[1] : undefined,
             };
 
             if (pathMatch) {

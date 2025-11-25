@@ -4,6 +4,7 @@ import { VertexAI } from '@google-cloud/vertexai';
 import { promisify } from 'util';
 import { StyleSummary } from './style-analysis';
 import { convertSvgToPng } from './image-converter';
+import { optimizeSvg } from './svg-optimizer';
 
 // Initialize Vertex AI
 const project = process.env.GOOGLE_CLOUD_PROJECT_ID;
@@ -22,37 +23,47 @@ const trace = promisify(potrace.trace) as (buffer: Buffer, options?: any) => Pro
  * @param imageBuffer The PNG image buffer.
  * @returns A Promise that resolves to the SVG string.
  */
-export async function vectorizeImage(imageBuffer: Buffer): Promise<string> {
+export async function vectorizeImage(
+    imageBuffer: Buffer,
+    fillStrategy: 'FILLED' | 'OUTLINED' = 'FILLED'
+): Promise<string> {
     try {
-        console.log('Vectorizing image with Potrace...');
-        console.log('Input buffer size:', imageBuffer.length);
-
+        console.log(`Vectorizing image with Potrace (Strategy: ${fillStrategy})...`);
         // 1. Preprocess with Sharp
         // We need a high-contrast, monochrome image for Potrace to work best.
-        // Goal: Black shape (0) on White background (255)
+        // Upscaling helps Potrace capture finer details.
         console.log('Starting Sharp preprocessing...');
         const processedBuffer = await sharp(imageBuffer)
-            .resize(512, 512, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
+            .resize(2048, 2048, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } }) // 4x upscale
+            .flatten({ background: { r: 255, g: 255, b: 255 } }) // Ensure no transparency
             .grayscale()
-            .threshold(128)
+            .threshold(128) // Higher threshold (128) to ensure thin gray lines become black
             .toFormat('png')
             .toBuffer();
         console.log('Sharp preprocessing complete. Buffer size:', processedBuffer.length);
 
         // 2. Vectorize with Potrace
+        // Dynamic configuration based on fill strategy
         const params = {
             threshold: 128,
             optCurve: true,
-            optTolerance: 0.4, // Increased from 0.2 to smooth out "scribbles"
-            turdSize: 100,      // Increased from 2 to remove small noise artifacts
-            alphaMax: 1,       // Corner threshold
+            alphaMax: 1,
+            // Dynamic params
+            turdSize: fillStrategy === 'OUTLINED' ? 2 : 100,       // Very small turdSize for outlines to preserve details
+            optTolerance: fillStrategy === 'OUTLINED' ? 0.2 : 0.4, // High precision for outlines
+            turnPolicy: 'minority',                                // Default policy is safest
         };
 
-        console.log('Starting Potrace trace...');
-        const svg = await trace(processedBuffer, params);
+        console.log('Starting Potrace trace with params:', JSON.stringify(params));
+        const rawSvg = await trace(processedBuffer, params);
+        console.log('Potrace complete. Raw SVG length:', rawSvg.length);
 
-        console.log('Vectorization complete, SVG length:', svg.length);
-        return svg;
+        // 3. Optimize SVG
+        console.log('Optimizing SVG with SVGO...');
+        const optimizedSvg = optimizeSvg(rawSvg);
+        console.log('Optimization complete. Final SVG length:', optimizedSvg.length);
+
+        return optimizedSvg;
 
     } catch (error) {
         console.error('Vectorization error:', error);
@@ -236,12 +247,17 @@ CONSTRAINTS TO AVOID:
 - ${Array.isArray(styleAnalysis.consistencyInstructions) ? styleAnalysis.consistencyInstructions.join('\n- ') : styleAnalysis.consistencyInstructions}
 
 CORE REQUIREMENTS (ABSOLUTE):
-1. Pure, single silhouette shape
+${styleAnalysis.fillStrategy === "OUTLINED" ?
+                `1. Pure, single continuous line art (hollow outline)
+2. NO filled shapes, NO solid masses, NO internal details, NO shadows
+3. CRITICAL: Rendered as a hollow outline with a single uniform stroke
+4. Absolute black stroke on absolute white background` :
+                `1. Pure, single silhouette shape
 2. NO internal lines, NO segmentation, NO fine details, NO shadows
 3. CRITICAL: Rendered as a pure, single silhouette shape with no internal lines, shadows, segmentation, or details
-4. Absolute black (#000000) on absolute white (#FFFFFF)
+4. Absolute black (#000000) on absolute white (#FFFFFF)`}
 5. Flat 2D, NOT realistic or 3D
-6. Think: rubber stamp, cookie cutter, stencil
+6. Think: ${styleAnalysis.fillStrategy === "OUTLINED" ? "wireframe, technical drawing, icon font" : "rubber stamp, cookie cutter, stencil"}
 
 Write a concise, powerful prompt (max 150 words) for Imagen 3.
 ONLY output the prompt text - no preamble or explanation.`;
@@ -284,7 +300,7 @@ export async function generateIconVariants(
     libraryHint?: string,
     guidanceScale: number = 50,
     useMetaPrompt: boolean = false
-): Promise<Buffer[]> {
+): Promise<{ images: Buffer[], strategy: "FILLED" | "OUTLINED" }> {
     // TRACER BULLET: Check your console for this specific line
     console.log("!!! 🟢 CLONER LOGIC IS ACTIVE - SPRINT v2 LOADED 🟢 !!!");
 
@@ -425,7 +441,10 @@ FINAL OUTPUT:
             throw new Error('No images generated from Imagen 3');
         }
 
-        return generatedImages;
+        return {
+            images: generatedImages,
+            strategy: styleAnalysis.fillStrategy
+        };
 
     } catch (error) {
         console.error('Generation error:', error);

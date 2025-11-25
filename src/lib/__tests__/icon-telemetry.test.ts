@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
     logGeneration,
     updateSelection,
@@ -8,8 +8,8 @@ import {
     getWorkspaceStats,
     clearWorkspaceTelemetry,
     clearAllTelemetry,
-    type GenerationEvent,
 } from '../icon-telemetry';
+import type { GenerationEvent } from '../icon-telemetry';
 import { StyleSummary } from '../style-analysis';
 
 // Mock localStorage
@@ -181,6 +181,10 @@ describe('icon-telemetry', () => {
 
     describe('getGenerationHistory', () => {
         it('should return events sorted by timestamp (newest first)', () => {
+            vi.useFakeTimers();
+
+            // First event at t=0
+            vi.setSystemTime(new Date(2023, 1, 1, 10, 0, 0));
             const id1 = logGeneration({
                 workspaceId: 'workspace-1',
                 userPrompt: 'first',
@@ -192,7 +196,8 @@ describe('icon-telemetry', () => {
                 rating: null,
             });
 
-            // Wait a bit to ensure different timestamp
+            // Second event at t=1000
+            vi.setSystemTime(new Date(2023, 1, 1, 10, 0, 1));
             const id2 = logGeneration({
                 workspaceId: 'workspace-1',
                 userPrompt: 'second',
@@ -207,6 +212,8 @@ describe('icon-telemetry', () => {
             const history = getGenerationHistory('workspace-1');
             expect(history[0].userPrompt).toBe('second'); // Newest first
             expect(history[1].userPrompt).toBe('first');
+
+            vi.useRealTimers();
         });
 
         it('should respect limit parameter', () => {

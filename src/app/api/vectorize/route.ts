@@ -15,8 +15,9 @@ export async function POST(req: NextRequest) {
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+        const strategy = (formData.get('strategy') as 'FILLED' | 'OUTLINED') || 'FILLED';
 
-        const svg = await vectorizeImage(buffer);
+        const svg = await vectorizeImage(buffer, strategy);
 
         return NextResponse.json({ svg });
     } catch (error) {

@@ -33,6 +33,7 @@ You must adhere to these visual constraints regardless of the subject:
 ## GENERATION INSTRUCTION
 Synthesize the **User Subject** using the visual language defined in the **Style DNA**.
 - If the Style DNA says "Line Art," ensure strokes are uniform width and unclosed shapes are capped.
+- **Stroke Weight:** Pay close attention to the "weight" in the Style DNA. If it says "Bold" or "Heavy", use thick, confident strokes. Do NOT use fine hairlines.
 - If the Style DNA says "Solid/Glyph," ensure shapes are filled and weighty.
 - If the Style DNA is "Playful," use rounded corners and exaggerated proportions.
 - If the Style DNA is "Technical," use sharp angles and geometric precision.
@@ -64,10 +65,15 @@ function generateStyleDNA(summary: StyleSummary): string {
     else if (summary.strokeStyle === 'mixed') fillType = "Hybrid/Duotone";
 
     // Map stroke weight
+    // Map stroke weight
     let strokeWeight = "Medium";
-    if (summary.avgStrokeWidth < 1.5) strokeWeight = "Hairline";
-    else if (summary.avgStrokeWidth > 3.0) strokeWeight = "Thick/Chunky";
-    if (summary.strokeStyle === 'filled') strokeWeight = "None";
+    if (summary.avgStrokeWidth <= 1.0) strokeWeight = "Ultra-Thin/Hairline";
+    else if (summary.avgStrokeWidth <= 1.5) strokeWeight = "Thin/Light";
+    else if (summary.avgStrokeWidth <= 2.5) strokeWeight = "Medium/Regular";
+    else if (summary.avgStrokeWidth <= 3.5) strokeWeight = "Bold/Heavy";
+    else strokeWeight = "Extra-Bold/Chunky";
+
+    if (summary.strokeStyle === 'filled') strokeWeight = "None (Filled Shapes)";
 
     // Map corner radius
     let cornerRadius = "Soft/Rounded";
@@ -94,6 +100,9 @@ export function buildWrapperPrompt(config: PromptConfig): string {
     }
     if (!userPrompt || userPrompt.trim().length === 0) {
         throw new Error('User prompt cannot be empty');
+    }
+    if (styleStrictness < 0 || styleStrictness > 100) {
+        throw new Error('Style strictness must be between 0 and 100');
     }
 
     const styleDNA = generateStyleDNA(styleSummary);

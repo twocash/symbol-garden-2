@@ -29,12 +29,12 @@ async function main() {
     console.log('Generating icons with Style-Aware Pipeline...');
     try {
         // Pass a library hint to test the new parameter
-        const results = await generateIconVariants("A simple hexagon", buffers, undefined, 50, "Phosphor Icons");
-        console.log(`Success! Generated ${results.length} icons.`);
+        const { images, strategy } = await generateIconVariants("A simple hexagon", buffers, undefined, 50, "Phosphor Icons");
+        console.log(`Success! Generated ${images.length} icons with strategy: ${strategy}`);
 
         // Check if results are buffers
-        if (results.length > 0 && Buffer.isBuffer(results[0])) {
-            console.log('Result 0 size:', results[0].length);
+        if (images.length > 0 && Buffer.isBuffer(images[0])) {
+            console.log('Result 0 size:', images[0].length);
         }
 
     } catch (error) {
