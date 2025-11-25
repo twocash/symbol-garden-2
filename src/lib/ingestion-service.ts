@@ -77,39 +77,59 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
 
     const viewBox = svgElement.getAttribute("viewBox") || "0 0 24 24";
 
-    // Heuristic to determine render style
-    // 1. Check SVG attributes
-    const svgFill = svgElement.getAttribute("fill");
-    const svgStroke = svgElement.getAttribute("stroke");
+    // Library-specific defaults
+    // Some libraries (like Simple Icons) rely on default black fill and don't specify attributes.
+    const LIBRARY_DEFAULTS: Record<string, "fill" | "stroke"> = {
+        "simple-icons": "fill",
+        "material-design-icons": "fill",
+        "font-awesome": "fill",
+        "lucide": "stroke",
+        "feather": "stroke",
+        "heroicons": "stroke",
+        "tabler": "stroke"
+    };
 
-    // 2. Check Path attributes (first path)
+    // 1. Check Library Default first
+    let renderStyle: "stroke" | "fill" | undefined = undefined;
+
+    // Fuzzy match library name
+    const lowerLib = libraryName.toLowerCase();
+    for (const [key, style] of Object.entries(LIBRARY_DEFAULTS)) {
+        if (lowerLib.includes(key)) {
+            renderStyle = style;
+            break;
+        }
+    }
+
+    // 2. If no library default, check SVG attributes
     const firstPath = doc.querySelector("path");
-    const pathFill = firstPath?.getAttribute("fill");
-    const pathStroke = firstPath?.getAttribute("stroke");
     const fillRule = firstPath?.getAttribute("fill-rule") || undefined;
     const clipRule = firstPath?.getAttribute("clip-rule") || undefined;
 
-    let renderStyle: "stroke" | "fill" = "stroke"; // Default to stroke (Lucide style)
+    if (!renderStyle) {
+        const svgFill = svgElement.getAttribute("fill");
+        const svgStroke = svgElement.getAttribute("stroke");
+        const pathFill = firstPath?.getAttribute("fill");
+        const pathStroke = firstPath?.getAttribute("stroke");
 
-    // If explicit fill is set (and not none), or stroke is none/null while fill is present
-    if (
-        (svgFill && svgFill !== "none") ||
-        (pathFill && pathFill !== "none") ||
-        (svgElement.getAttribute("class")?.includes("bi")) // Bootstrap Icons specific check
-    ) {
-        renderStyle = "fill";
-    }
-
-    // If explicit stroke is set, prefer stroke (unless it's Bootstrap which mixes them but is primarily fill for shapes)
-    if (svgStroke && svgStroke !== "none") {
-        renderStyle = "stroke";
-    }
-
-    // Bootstrap Icons (twbs) are fill-based usually, even if they have stroke sometimes.
-    // But let's trust the attributes. 
-    // If fill="currentColor" is present, it's likely fill.
-    if (svgFill === "currentColor" || pathFill === "currentColor") {
-        renderStyle = "fill";
+        // If explicit fill is set (and not none)
+        if (
+            (svgFill && svgFill !== "none") ||
+            (pathFill && pathFill !== "none") ||
+            (svgElement.getAttribute("class")?.includes("bi")) || // Bootstrap
+            (svgFill === "currentColor" || pathFill === "currentColor")
+        ) {
+            renderStyle = "fill";
+        }
+        // If explicit stroke is set
+        else if (svgStroke && svgStroke !== "none") {
+            renderStyle = "stroke";
+        }
+        // If NOTHING is set, default to FILL (SVG spec default is black fill)
+        // Stroke-based icons usually MUST specify stroke to be visible.
+        else {
+            renderStyle = "fill";
+        }
     }
 
     // Extract all paths and convert shapes to paths

@@ -26,6 +26,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     const [generatedImages, setGeneratedImages] = useState<string[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [guidanceScale, setGuidanceScale] = useState<number>(50); // DEV: Tunable prompt adherence parameter
+
 
     // Derive favorites from currentProject and globalIcons
     const favorites = currentProject?.favorites
@@ -59,15 +61,33 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         setSelectedImageIndex(null);
 
         try {
+            // Detect library from seeds
+            const seedLibraries = favorites.slice(0, 12).map(icon => icon.library).filter(Boolean);
+            const libraryCount: Record<string, number> = {};
+            seedLibraries.forEach(lib => libraryCount[lib] = (libraryCount[lib] || 0) + 1);
+            const dominantLibrary = Object.entries(libraryCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+
+            console.log('[Modal] Seed libraries:', libraryCount);
+            console.log('[Modal] Dominant library:', dominantLibrary);
+
             // Prepare form data
             const formData = new FormData();
             formData.append("prompt", prompt);
+            if (dominantLibrary) {
+                formData.append("libraryHint", dominantLibrary);
+            }
 
             favorites.slice(0, 12).forEach((icon, index) => {
                 const svgString = getSvgString(icon);
                 const blob = new Blob([svgString], { type: "image/svg+xml" });
                 formData.append("styleReferences", blob, `seed-${index}.svg`);
             });
+
+            formData.append('guidanceScale', guidanceScale.toString());
+
+            // Check global setting for legacy pipeline
+            const useLegacy = localStorage.getItem("use_legacy_prompt") === "true";
+            formData.append('useMetaPrompt', (!useLegacy).toString());
 
             const response = await fetch("/api/generate", {
                 method: "POST",
@@ -181,6 +201,21 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                 onChange={(e) => setPrompt(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                                 disabled={isGenerating}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="flex justify-between">
+                                <span>Prompt Adherence (Dev)</span>
+                                <span className="text-xs text-muted-foreground">{guidanceScale}</span>
+                            </Label>
+                            <input
+                                type="range"
+                                min="15"
+                                max="100"
+                                step="5"
+                                value={guidanceScale}
+                                onChange={(e) => setGuidanceScale(Number(e.target.value))}
+                                className="w-full"
                             />
                         </div>
 

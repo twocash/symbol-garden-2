@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateIconVariants } from '@/lib/ai-icon-service';
+import { analyzeSvgStyle } from '@/lib/style-analysis';
 
 export async function POST(req: NextRequest) {
     try {
@@ -29,8 +30,28 @@ export async function POST(req: NextRequest) {
             })
         );
 
+        // Compute style summary from the uploaded SVGs
+        let styleSummary;
+        try {
+            const svgStrings = styleReferences.map(buf => buf.toString('utf-8'));
+            styleSummary = await analyzeSvgStyle(svgStrings);
+            console.log(`[API] Computed style summary from ${svgStrings.length} references. Confidence: ${styleSummary.confidenceScore}`);
+        } catch (e) {
+            console.warn('[API] Failed to compute style summary from references:', e);
+            // Continue without style summary (will use fallback prompt)
+        }
+
+        // Extract library hint, guidanceScale, and useMetaPrompt from form data
+        const libraryHint = formData.get('libraryHint') as string | undefined;
+        const guidanceScaleStr = formData.get('guidanceScale') as string | undefined;
+        const guidanceScale = guidanceScaleStr ? parseInt(guidanceScaleStr, 10) : 50;
+        const useMetaPromptStr = formData.get('useMetaPrompt') as string | undefined;
+        const useMetaPrompt = useMetaPromptStr === 'true';
+
         console.log('Starting icon generation with prompt:', prompt);
-        const generatedBuffers = await generateIconVariants(prompt, styleReferences);
+        console.log('[API] GuidanceScale:', guidanceScale);
+        console.log('[API] UseMetaPrompt:', useMetaPrompt);
+        const generatedBuffers = await generateIconVariants(prompt, styleReferences, styleSummary, 50, libraryHint, guidanceScale, useMetaPrompt);
 
         // Return images as base64 strings
         const images = generatedBuffers.map(buffer =>

@@ -14,7 +14,8 @@ import { useSearch } from "@/lib/search-context";
 import { useProject } from "@/lib/project-context";
 import { ingestGitHubRepo } from "@/lib/ingestion-service";
 import { Icon } from "@/types/schema";
-import { Sparkles, Key, Loader2, Github, Trash2, AlertTriangle } from "lucide-react";
+import { Sparkles, Key, Loader2, Github, Trash2, AlertTriangle, Wand2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface SettingsModalProps {
     open: boolean;
@@ -43,6 +44,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     const [repoUrl, setRepoUrl] = useState("");
     const [pathInRepo, setPathInRepo] = useState("");
     const [sources, setSources] = useState<Source[]>([]);
+    const [useLegacyPrompt, setUseLegacyPrompt] = useState(false);
 
     // Calculate icon counts for enrichment options
     const allCount = icons.length;
@@ -56,7 +58,15 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
         const storedSources = localStorage.getItem("icon_sources");
         if (storedSources) setSources(JSON.parse(storedSources));
+
+        const storedLegacy = localStorage.getItem("use_legacy_prompt");
+        if (storedLegacy) setUseLegacyPrompt(storedLegacy === "true");
     }, []);
+
+    const handleToggleLegacyPrompt = (checked: boolean) => {
+        setUseLegacyPrompt(checked);
+        localStorage.setItem("use_legacy_prompt", String(checked));
+    };
 
     const handleSaveApiKey = () => {
         localStorage.setItem("gemini_api_key", apiKey);
@@ -255,9 +265,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 </DialogHeader>
 
                 <Tabs defaultValue="library" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="library">Library</TabsTrigger>
                         <TabsTrigger value="ai">AI Enrichment</TabsTrigger>
+                        <TabsTrigger value="generation">Generation</TabsTrigger>
                         <TabsTrigger value="api">API Key</TabsTrigger>
                     </TabsList>
 
@@ -481,6 +492,33 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                         Google AI Studio
                                     </a>
                                 </p>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Generation Settings */}
+                    <TabsContent value="generation" className="space-y-4 mt-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Generation Pipeline</CardTitle>
+                                <CardDescription>
+                                    Configure how the AI generates icons
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex items-center justify-between space-x-2">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="legacy-mode">Legacy Prompt Pipeline</Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Disable the experimental "Meta-Prompting" engine and use the original template-based prompts.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="legacy-mode"
+                                        checked={useLegacyPrompt}
+                                        onCheckedChange={handleToggleLegacyPrompt}
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
