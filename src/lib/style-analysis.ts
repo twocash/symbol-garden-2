@@ -1,7 +1,7 @@
 import { Icon } from '../types/schema';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export async function generateLibraryManifest(icons: Icon[], apiKey: string): Promise<string> {
+export async function generateLibraryManifest(icons: Icon[], apiKey?: string): Promise<string> {
     console.log("generateLibraryManifest called with", icons.length, "icons");
 
     if (icons.length === 0) {
