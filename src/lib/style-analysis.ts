@@ -13,6 +13,9 @@ export interface StyleSummary {
     fillUsage: 'none' | 'solid' | 'partial';
     dominantShapes: string;  // e.g., "circles and rounded rectangles"
     detailLevel: 'low' | 'medium' | 'high';
+    visualWeight?: number; // 0-100 (Density percentage)
+    targetFillRatio?: number; // 0-1 (Content/Canvas ratio)
+    targetGrid?: number; // e.g., 24, 16, 512
     confidenceScore: number; // 0-1, how reliable the analysis is
 }
 
@@ -317,6 +320,10 @@ export async function analyzeSvgStyle(svgs: string[], overrideStrokeStyle?: 'out
         totalIcons: svgs.length,
     });
 
+    // Detect target grid (mode of all grids)
+    const grids = svgs.map(detectGridSize);
+    const targetGrid = mode(grids) || 24;
+
     return {
         avgStrokeWidth,
         strokeStyle,
@@ -327,6 +334,7 @@ export async function analyzeSvgStyle(svgs: string[], overrideStrokeStyle?: 'out
         dominantShapes,
         detailLevel,
         confidenceScore,
+        targetGrid
     };
 }
 
@@ -375,4 +383,84 @@ function calculateConfidence(params: {
     }
 
     return Math.max(0, Math.min(1, confidence));
+}
+
+/**
+ * Calculates the "Visual Weight" of an image (percentage of black pixels).
+ * Used to determine if an icon style is Light, Regular, or Bold.
+ * @param buffer Image buffer (PNG/JPEG)
+ * @returns Density percentage (0-100)
+ */
+export async function calculateVisualWeight(buffer: Buffer): Promise<number> {
+    const sharp = require('sharp');
+
+    // 1. Convert to raw pixel data (grayscale)
+    const { data, info } = await sharp(buffer)
+        .resize(100, 100, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } }) // Normalize size
+        .grayscale()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+    // 2. Count "ink" pixels (pixels darker than threshold)
+    let inkPixels = 0;
+    const threshold = 128; // Mid-gray
+
+    for (let i = 0; i < data.length; i++) {
+        // In grayscale, 0 is black, 255 is white.
+        // We count pixels that are closer to black.
+        if (data[i] < threshold) {
+            inkPixels++;
+        }
+    }
+
+    // 3. Calculate percentage
+    const totalPixels = info.width * info.height;
+    const density = (inkPixels / totalPixels) * 100;
+
+    return Math.round(density * 10) / 10; // Round to 1 decimal place
+}
+
+/**
+ * Calculates the "Fill Ratio" of an image (Content Size / Canvas Size).
+ * Used to normalize the scale of generated icons.
+ * @param buffer Image buffer (PNG/JPEG)
+ * @returns Ratio (0-1), e.g., 0.85
+ */
+export async function calculateFillRatio(buffer: Buffer): Promise<number> {
+    const sharp = require('sharp');
+
+    // 1. Get image metadata
+    const image = sharp(buffer);
+    const metadata = await image.metadata();
+    const width = metadata.width || 1024;
+    const height = metadata.height || 1024;
+
+    // 2. Trim whitespace to find bounding box
+    // We use a threshold to detect "empty" pixels (white/transparent)
+    const { info } = await image
+        .trim({ threshold: 10 }) // Tolerance for compression noise
+        .toBuffer({ resolveWithObject: true });
+
+    // 3. Calculate ratio
+    // We care about the largest dimension (fitting within the square)
+    const contentSize = Math.max(info.width, info.height);
+    const canvasSize = Math.max(width, height);
+
+    const ratio = contentSize / canvasSize;
+    return Math.round(ratio * 100) / 100; // Round to 2 decimal places
+}
+
+/**
+ * Detects the grid size from an SVG viewBox.
+ * Defaults to 24 if not found or invalid.
+ */
+export function detectGridSize(svg: string): number {
+    const viewBoxMatch = svg.match(/viewBox=["']\s*0\s+0\s+(\d+)\s+(\d+)\s*["']/);
+    if (viewBoxMatch) {
+        const width = parseFloat(viewBoxMatch[1]);
+        const height = parseFloat(viewBoxMatch[2]);
+        // Return the larger dimension as the grid size
+        return Math.max(width, height);
+    }
+    return 24; // Default standard grid
 }

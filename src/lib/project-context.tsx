@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Project, Icon } from "@/types/schema";
 import { nanoid } from "nanoid";
 
@@ -69,7 +70,12 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
     const saveProjects = (newProjects: Project[]) => {
         setProjects(newProjects);
-        localStorage.setItem("projects", JSON.stringify(newProjects));
+        try {
+            localStorage.setItem("projects", JSON.stringify(newProjects));
+        } catch (error) {
+            console.error("Failed to save projects to localStorage:", error);
+            toast.error("Storage full! Your changes are not saved locally.");
+        }
     };
 
     const createProject = (name: string) => {

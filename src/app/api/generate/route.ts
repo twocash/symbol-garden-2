@@ -51,14 +51,15 @@ export async function POST(req: NextRequest) {
         console.log('Starting icon generation with prompt:', prompt);
         console.log('[API] GuidanceScale:', guidanceScale);
         console.log('[API] UseMetaPrompt:', useMetaPrompt);
-        const { images: generatedBuffers, strategy } = await generateIconVariants(prompt, styleReferences, styleSummary, 50, libraryHint, guidanceScale, useMetaPrompt);
+
+        const { images: generatedBuffers, strategy, visualWeight } = await generateIconVariants(prompt, styleReferences, styleSummary, 50, libraryHint, guidanceScale, useMetaPrompt);
 
         // Return images as base64 strings
         const images = generatedBuffers.map(buffer =>
             `data:image/png;base64,${buffer.toString('base64')}`
         );
 
-        return NextResponse.json({ images, strategy });
+        return NextResponse.json({ images, strategy, visualWeight });
 
     } catch (error) {
         console.error('Generation API error:', error);

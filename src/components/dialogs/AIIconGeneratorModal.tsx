@@ -19,21 +19,26 @@ interface AIIconGeneratorModalProps {
 }
 
 export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalProps) {
-    const { currentProject, addIconToProject, toggleFavorite } = useProject();
+    const { currentProject, addIconToProject } = useProject();
     const { icons: globalIcons } = useSearch();
     const [prompt, setPrompt] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedImages, setGeneratedImages] = useState<string[]>([]);
     const [generatedStrategy, setGeneratedStrategy] = useState<string | null>(null);
+    const [visualWeight, setVisualWeight] = useState<number | null>(null);
+    const [targetFillRatio, setTargetFillRatio] = useState<number | null>(null);
+    const [targetGrid, setTargetGrid] = useState<number | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [guidanceScale, setGuidanceScale] = useState<number>(50); // DEV: Tunable prompt adherence parameter
-
 
     // Derive favorites from currentProject and globalIcons
     const favorites = currentProject?.favorites
         .map(id => globalIcons.find(i => i.id === id))
         .filter((icon): icon is NonNullable<typeof icon> => !!icon) || [];
+
+    const seedsCount = favorites.length;
+    const canGenerate = seedsCount >= 8;
 
     // Reset state when opening
     useEffect(() => {
@@ -41,6 +46,9 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setPrompt("");
             setGeneratedImages([]);
             setGeneratedStrategy(null);
+            setVisualWeight(null);
+            setTargetFillRatio(null);
+            setTargetGrid(null);
             setSelectedImageIndex(null);
         }
     }, [isOpen]);
@@ -105,6 +113,9 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             const data = await response.json();
             setGeneratedImages(data.images);
             setGeneratedStrategy(data.strategy);
+            setVisualWeight(data.visualWeight);
+            setTargetFillRatio(data.targetFillRatio);
+            setTargetGrid(data.targetGrid);
             toast.success("Icons generated successfully!");
         } catch (error) {
             console.error(error);
@@ -129,8 +140,21 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             // Send to vectorize API
             const formData = new FormData();
             formData.append("image", blob, "generated-icon.png");
+
             if (generatedStrategy) {
                 formData.append("strategy", generatedStrategy);
+            }
+
+            if (visualWeight !== null && visualWeight !== undefined) {
+                formData.append("visualWeight", visualWeight.toString());
+            }
+
+            if (targetFillRatio !== null && targetFillRatio !== undefined) {
+                formData.append("targetFillRatio", targetFillRatio.toString());
+            }
+
+            if (targetGrid !== null && targetGrid !== undefined) {
+                formData.append("targetGrid", targetGrid.toString());
             }
 
             const vectorizeRes = await fetch("/api/vectorize", {
@@ -181,9 +205,6 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setIsSaving(false);
         }
     };
-
-    const seedsCount = favorites.length;
-    const canGenerate = seedsCount >= 8;
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>

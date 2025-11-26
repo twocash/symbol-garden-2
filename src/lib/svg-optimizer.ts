@@ -1,44 +1,47 @@
 import { optimize } from 'svgo';
 
-/**
- * Optimizes an SVG string using SVGO.
- * Removes useless groups, collapses paths, and ensures cleaner markup.
- */
-export function optimizeSvg(svgString: string): string {
+export async function optimizeSvg(svgString: string, targetGridSize: number = 24): Promise<string> {
     try {
         const result = optimize(svgString, {
-            multipass: true, // Run multiple passes for better optimization
+            multipass: true,
+            floatPrecision: 2,
             plugins: [
                 {
                     name: 'preset-default',
                     params: {
                         overrides: {
-                            // Customize default plugins here if needed
+                            removeViewBox: false, // Keep the viewBox!
                         },
                     },
+                } as any,
+                {
+                    name: 'convertPathData',
+                    params: {
+                        floatPrecision: 1, // Rounds coordinates to 1 decimal place (Grid Snap effect)
+                        transformPrecision: 1,
+                        makeArcs: undefined,
+                        noSpaceAfterFlags: undefined,
+                    }
                 },
-                'removeDimensions', // Remove width/height attributes, rely on viewBox
-                'convertStyleToAttrs', // Convert inline styles to attributes
-                'sortAttrs', // Sort attributes for consistency
                 {
                     name: 'addAttributesToSVGElement',
                     params: {
                         attributes: [
-                            { fill: 'currentColor' }, // Ensure fill is currentColor for easy styling
-                        ],
-                    },
-                },
+                            { viewBox: `0 0 ${targetGridSize} ${targetGridSize}` },
+                            { width: "256" },
+                            { height: "256" }
+                        ]
+                    }
+                }
             ],
         });
 
         if ('data' in result) {
             return result.data;
-        } else {
-            console.warn('SVGO optimization failed:', result);
-            return svgString; // Return original if optimization fails
         }
+        return svgString; // Fallback to original if optimization fails
     } catch (error) {
-        console.error('Error optimizing SVG:', error);
+        console.error('[SVG Optimizer] Warning:', error);
         return svgString;
     }
 }

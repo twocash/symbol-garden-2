@@ -16,8 +16,16 @@ export async function POST(req: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         const strategy = (formData.get('strategy') as 'FILLED' | 'OUTLINED') || 'FILLED';
+        const visualWeightStr = formData.get('visualWeight');
+        const visualWeight = visualWeightStr ? parseFloat(visualWeightStr as string) : 10;
 
-        const svg = await vectorizeImage(buffer, strategy);
+        const targetFillRatioStr = formData.get('targetFillRatio');
+        const targetFillRatio = targetFillRatioStr ? parseFloat(targetFillRatioStr as string) : 0.85;
+
+        const targetGridStr = formData.get('targetGrid');
+        const targetGrid = targetGridStr ? parseFloat(targetGridStr as string) : 24;
+
+        const svg = await vectorizeImage(buffer, strategy, { visualWeight, targetFillRatio, targetGrid });
 
         return NextResponse.json({ svg });
     } catch (error) {
