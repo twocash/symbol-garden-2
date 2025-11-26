@@ -67,6 +67,18 @@ export async function POST(req: NextRequest) {
         console.error('Error message:', errorMessage);
         console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
 
+        // Propagate 429 Quota Exceeded
+        if (errorMessage.includes("Quota exceeded") || (error as any).code === 429) {
+            return NextResponse.json(
+                {
+                    error: 'API Quota Exceeded',
+                    details: 'The AI service is currently busy. Please wait a moment and try again.',
+                    timestamp: new Date().toISOString()
+                },
+                { status: 429 }
+            );
+        }
+
         return NextResponse.json(
             {
                 error: 'Failed to generate icons',

@@ -6,13 +6,13 @@ const potrace = require('potrace');
 import { optimizeSvg } from './svg-optimizer';
 import { convertSvgToPng } from './image-converter';
 import { StyleSummary } from './style-analysis';
-
+import { StyleJuryService } from './style-jury-service';
 const project = process.env.GOOGLE_CLOUD_PROJECT_ID;
 const location = 'us-central1';
 const STANDARD_MODEL = 'imagen-3.0-generate-001';
 
-// V9 NEGATIVE PROMPT: Banning "Artistic Flair"
-const NEGATIVE_PROMPT = "calligraphy, variable stroke, tapered lines, brush strokes, decorative flourishes, artistic, ornamental, sketch, pencil, texture, noise, shading, gradient, color, photorealistic, 3d, thin, hairline, complex, detailed, filled shape, solid mass, silhouette";
+// V10 NEGATIVE PROMPT: "Anti-Solid" Focus
+const NEGATIVE_PROMPT = "solid fill, silhouette, filled circle, color, orange, red, blue, gray, shading, gradient, texture, realistic, photo, 3d, sketch, pencil, complex, background, border, frame";
 
 const trace = promisify(potrace.trace) as (buffer: Buffer, options?: any) => Promise<string>;
 
@@ -26,22 +26,41 @@ export async function vectorizeImage(
     const targetGridSize = typeof options === 'number' ? 24 : (options.targetGrid || 24);
 
     try {
-        console.log(`Vectorizing V9 (Weight: ${targetVisualWeight.toFixed(1)}%, Grid: ${targetGridSize})...`);
+        console.log(`Vectorizing V10 (Weight: ${targetVisualWeight.toFixed(1)}%, Grid: ${targetGridSize})...`);
 
-        // 1. PREPROCESS: The "Contrast King" Pipeline (V8 Logic Preserved)
         const isBold = targetVisualWeight > 12;
-        const processRes = isBold ? 512 : 1024;
 
-        const cleanBuffer = await sharp(imageBuffer)
-            .resize(1024, 1024, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
+        // 1. PREPROCESS: The "Ink Extraction" Pipeline
+        // We need to process at a moderate resolution (1024) to keep lines solid.
+        // 2048 was too high (caught noise), 512 is too low (loses shape).
+
+        const processRes = 1024;
+
+        // Blur/Threshold logic to manage line weight
+        const blurSigma = isBold ? 2.0 : 1.0;
+        const thresholdLevel = 90; // Lowered to 90 to aggressively remove fine details (replaces gamma 0.6)
+
+        // Initial Load & Grayscale
+        let pipeline = sharp(imageBuffer)
+            .resize(processRes, processRes, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
             .flatten({ background: { r: 255, g: 255, b: 255 } })
-            .grayscale()
-            .normalize()
-            .resize(processRes, processRes, { fit: 'contain' }) // Downsample to thicken
-            .gamma(2.2) // Darken mid-tones to solid black (Fixed from 0.5 to 2.2 for sharp range)
-            .threshold(128)
-            .resize(1024, 1024, { fit: 'contain', kernel: 'nearest' })
-            .blur(0.5)
+            .grayscale();
+
+        // SAFETY CROP: Remove the outer 10 pixels to kill the "Square Border" artifact
+        // This fixes the bug where Potrace traces the image frame.
+        const metadata = await pipeline.metadata();
+        const w = metadata.width || processRes;
+        const h = metadata.height || processRes;
+        const margin = 10;
+        pipeline = pipeline.extract({ left: margin, top: margin, width: w - (margin * 2), height: h - (margin * 2) });
+
+        // Continue Processing
+        const cleanBuffer = await pipeline
+            .resize(processRes, processRes, { fit: 'contain', background: { r: 255, g: 255, b: 255 } }) // Pad back to full size
+            .resize(processRes, processRes, { fit: 'contain', background: { r: 255, g: 255, b: 255 } }) // Pad back to full size
+            // .gamma(0.6) removed: sharp requires 1.0-3.0 range. Lowered threshold achieves same "wash out" effect.
+            .blur(blurSigma) // Dilate lines (make them thicker)
+            .threshold(thresholdLevel) // Cut to pure B&W
             .toBuffer();
 
         // 3. SCALE NORMALIZATION
@@ -69,7 +88,7 @@ export async function vectorizeImage(
         const params = {
             threshold: 128,
             optCurve: true,
-            alphaMax: 1.0,
+            alphaMax: 0.5,  // Balanced: 0.2 was too jagged, 1.0 was too round. 0.5 is Lineicons style.
             turdSize: 100,
             optTolerance: 0.2,
             blackOnWhite: true
@@ -81,7 +100,7 @@ export async function vectorizeImage(
         try {
             return await optimizeSvg(rawSvg, targetGridSize);
         } catch (optError) {
-            console.error("Optimization failed, using fallback:", optError);
+            console.error("Optimization failed, using manual fallback:", optError);
 
             const scale = (targetGridSize / CANVAS_SIZE).toFixed(5);
             let scaledSvg = rawSvg
@@ -127,37 +146,67 @@ async function analyzeStyleReferences(styleReferences: Buffer[], libraryHint?: s
  * V9 PROMPT: "FIXED WIDTH"
  * Forces the AI to simulate a single brush size, killing flourishes.
  */
-async function askGeminiToWriteImagenPrompt(
+/**
+ * V10 PROMPT: "INK FIRST"
+ * We place the style constraints BEFORE the subject to override object bias.
+ */
+/**
+ * V10 PROMPT: "INK FIRST"
+ * We place the style constraints BEFORE the subject to override object bias.
+ */
+export async function askGeminiToWriteImagenPrompt(
     userSubject: string,
     styleAnalysis: any
 ): Promise<string> {
     try {
+        const project = process.env.GOOGLE_CLOUD_PROJECT_ID;
         const vertex_ai = new VertexAI({ project: project, location: location });
-        const model = vertex_ai.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const model = vertex_ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const weight = styleAnalysis.visualWeight || 10;
         const isBold = weight > 12;
+        const manifest = styleAnalysis.styleManifest || "";
+
+        let styleInstruction = "";
+        if (manifest) {
+            styleInstruction = `
+    CRITICAL STYLE SOURCE (THE DNA):
+    "${manifest}"
+    
+    INSTRUCTIONS:
+    1. Read the "Stroke Architecture" and "Grid System" from the DNA above.
+    2. Apply those EXACT constraints to the "${userSubject}".
+    3. If the DNA says "Squared Terminals", explicitly demand "Butt Caps" in the prompt.
+    4. If the DNA says "2px Radius", explicitly demand "Small rounded corners".
+            `;
+        } else {
+            // Fallback to V10 "Ink First" logic if no manifest
+            styleInstruction = `
+    STYLE DEFINITION:
+    1. TYPE: "Black and White Vector Line Art".
+    2. WEIGHT: ${isBold ? "Thick, bold, heavy marker strokes" : "Uniform medium strokes"}.
+    3. FILL: "Hollow Interior". "No Fill". "White Negative Space".
+    4. CONSTRUCTION: "Geometric". "Technical". "Icon".
+            `;
+        }
 
         const systemInstruction = `
-    Act as a Technical Icon Designer.
+    Act as a Technical Illustrator.
     
-    TASK: Write a prompt for Imagen 3 for: "${userSubject}".
+    TASK: Write a prompt for Imagen 3.
     
-    STRICT CONSTRAINTS (NO FLOURISHES):
-    1. TOOL: "Fixed-Width Round Tip Marker". (Use a single brush size for the entire image).
-    2. STROKE: ${isBold ? "Constant 20px width" : "Constant 10px width"}. NO Tapering. NO Variable Pressure.
-    3. STYLE: "Technical Line Art". Minimalist geometry.
-    4. FILLS: NONE. Hollow interior. White negative space.
-    5. COLOR: Pure Black ink on White background.
+    CRITICAL RULE: You must describe the STYLE first, then the SUBJECT.
     
-    FORBIDDEN:
-    - "Calligraphy" (Variable width)
-    - "Sketch" (Rough edges)
-    - "Hand-drawn" (Imperfect lines)
-    - "Silhouette" (Filled shapes)
+    TARGET: "${userSubject}"
+    
+    ${styleInstruction}
+    
+    AVOID:
+    - "Basketball" (Alone) -> Generates Orange Ball.
+    - "Silhouette" -> Generates Solid Ball.
     
     OUTPUT FORMAT:
-    Return ONLY the raw prompt.
+    Return ONLY the raw prompt. Start with "Black and white line art..."
         `;
 
         const result = await model.generateContent({
@@ -165,11 +214,11 @@ async function askGeminiToWriteImagenPrompt(
         });
 
         const prompt = result.response.candidates?.[0].content.parts[0].text?.trim() || "";
-        console.log('[AI Icon Service] 🤖 Generated V9 Prompt:', prompt);
+        console.log('[AI Icon Service] 🤖 Generated V11 Prompt:', prompt);
         return prompt;
 
     } catch (error) {
-        return `icon of ${userSubject}, fixed width thick black outline, white background, no fill, geometric`;
+        return `black and white line art icon of ${userSubject}, thick stroke, white background, no fill`;
     }
 }
 
@@ -182,9 +231,10 @@ export async function generateIconVariants(
     guidanceScale: number = 50,
     useMetaPrompt: boolean = true
 ) {
-    console.log("!!! 🟢 CLONER LOGIC V9 - FIXED WIDTH MARKER LOADED 🟢 !!!");
+    console.log("!!! 🟢 CLONER LOGIC V10 - INK FIRST LOADED 🟢 !!!");
 
     try {
+        const project = process.env.GOOGLE_CLOUD_PROJECT_ID;
         if (!project) throw new Error("GOOGLE_CLOUD_PROJECT_ID not set.");
 
         let styleAnalysis = {
@@ -203,7 +253,7 @@ export async function generateIconVariants(
         if (useMetaPrompt) {
             finalPrompt = await askGeminiToWriteImagenPrompt(prompt, styleAnalysis);
         } else {
-            finalPrompt = `icon of ${prompt}, thick fixed width black outline, white background`;
+            finalPrompt = `black and white line art of ${prompt}, thick outline`;
         }
 
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -219,7 +269,7 @@ export async function generateIconVariants(
                 personGeneration: "dont_allow",
                 negativePrompt: NEGATIVE_PROMPT,
                 aspectRatio: "1:1",
-                guidanceScale: 60
+                guidanceScale: guidanceScale
             }
         };
 
@@ -228,31 +278,79 @@ export async function generateIconVariants(
         const client = await auth.getClient();
         const accessToken = await client.getAccessToken();
 
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken.token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-        });
+        // Helper to run a single batch
+        const generateBatch = async (): Promise<Buffer[]> => {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
 
-        if (!response.ok) throw new Error(await response.text());
-        const result = await response.json();
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`[AI Service] Batch generation failed: ${errorText}`);
+                throw new Error(errorText);
+            }
+            const result = await response.json();
 
-        const generatedImages: Buffer[] = [];
-        if (result.predictions) {
-            for (const prediction of result.predictions) {
-                if (prediction.bytesBase64Encoded) {
-                    generatedImages.push(Buffer.from(prediction.bytesBase64Encoded, 'base64'));
+            const images: Buffer[] = [];
+            if (result.predictions) {
+                for (const prediction of result.predictions) {
+                    if (prediction.bytesBase64Encoded) {
+                        images.push(Buffer.from(prediction.bytesBase64Encoded, 'base64'));
+                    }
                 }
             }
+            return images;
+        };
+
+        // Sprint 04: Pipelined Parallelism & Jury
+        // Launch 2 batches (Total 8 images) and evaluate in parallel
+        const jury = new StyleJuryService();
+
+        // Convert SVG seeds to PNG for the Jury (Gemini Vision needs raster)
+        const seeds = styleReferences || [];
+        const pngSeeds = await Promise.all(seeds.map(async (svgBuffer) => {
+            try {
+                return await convertSvgToPng(svgBuffer.toString('utf-8'));
+            } catch (e) {
+                console.warn("[AI Service] Failed to convert seed SVG to PNG for Jury:", e);
+                return null;
+            }
+        }));
+        const validSeeds = pngSeeds.filter(s => s !== null) as Buffer[];
+
+        console.log("[AI Service] 🚀 Launching Parallel Generation Batches...");
+
+        // Pipeline: Generate -> Jury
+        const runPipeline = async () => {
+            const images = await generateBatch();
+            return validSeeds.length > 0
+                ? jury.evaluateCandidates(images, validSeeds)
+                : images.map((buf, i) => ({ buffer: buf, score: 10, reasoning: "No Seeds", index: i }));
+        };
+
+        const results = await Promise.allSettled([runPipeline(), runPipeline()]);
+
+        const allScored = results
+            .filter(r => r.status === 'fulfilled')
+            .flatMap(r => (r as PromiseFulfilledResult<any[]>).value);
+
+        if (allScored.length === 0) {
+            // If both failed, throw the error from the first one
+            const firstError = results.find(r => r.status === 'rejected');
+            throw new Error((firstError as PromiseRejectedResult).reason);
         }
 
-        if (generatedImages.length === 0) throw new Error('No images generated');
+        // Sort by score
+        const sorted = allScored.sort((a, b) => b.score - a.score);
+        const survivors = sorted.map(s => s.buffer);
 
         return {
-            images: generatedImages,
+            images: survivors, // Return ranked survivors
             strategy: "OUTLINED",
             visualWeight: (styleAnalysis as any).visualWeight || 10,
             targetFillRatio: 0.85,

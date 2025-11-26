@@ -13,9 +13,12 @@ import { Separator } from "@/components/ui/separator";
 import { useSearch } from "@/lib/search-context";
 import { useProject } from "@/lib/project-context";
 import { ingestGitHubRepo } from "@/lib/ingestion-service";
+
+import { getIngestedIcons, saveIngestedIcons, clearIngestedIcons, getIconSources, saveIconSources } from "@/lib/storage";
 import { Icon } from "@/types/schema";
-import { Sparkles, Key, Loader2, Github, Trash2, AlertTriangle, Wand2 } from "lucide-react";
+import { Sparkles, Key, Loader2, Github, Trash2, AlertTriangle, Wand2, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { analyzeLibrary } from "@/app/actions/analyze-library";
 
 interface SettingsModalProps {
     open: boolean;
@@ -28,6 +31,7 @@ interface Source {
     url: string;
     path: string;
     count: number;
+    styleManifest?: string;
 }
 
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
@@ -46,18 +50,42 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     const [sources, setSources] = useState<Source[]>([]);
     const [useLegacyPrompt, setUseLegacyPrompt] = useState(false);
 
+    // DNA Editor State
+    const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
+    const [editingManifest, setEditingManifest] = useState("");
+    const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+
     // Calculate icon counts for enrichment options
     const allCount = icons.length;
     const missingCount = icons.filter(i => !i.aiDescription).length;
     const favoritesCount = currentProject?.favorites.length || 0;
 
     // Load API key and sources from localStorage
+    // Load API key and sources from localStorage/IndexedDB
     useEffect(() => {
         const storedKey = localStorage.getItem("gemini_api_key");
         if (storedKey) setApiKey(storedKey);
 
-        const storedSources = localStorage.getItem("icon_sources");
-        if (storedSources) setSources(JSON.parse(storedSources));
+        async function loadSources() {
+            let loadedSources = await getIconSources();
+
+            // Migration: Check localStorage if IDB is empty
+            if (loadedSources.length === 0) {
+                const storedSources = localStorage.getItem("icon_sources");
+                if (storedSources) {
+                    try {
+                        loadedSources = JSON.parse(storedSources);
+                        await saveIconSources(loadedSources);
+                        localStorage.removeItem("icon_sources");
+                        console.log("Migrated icon_sources from localStorage to IndexedDB");
+                    } catch (e) {
+                        console.error("Failed to parse localStorage icon_sources", e);
+                    }
+                }
+            }
+            setSources(loadedSources);
+        }
+        loadSources();
 
         const storedLegacy = localStorage.getItem("use_legacy_prompt");
         if (storedLegacy) setUseLegacyPrompt(storedLegacy === "true");
@@ -83,18 +111,27 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         setIngestProgress("Initializing...");
 
         try {
-            const newIcons = await ingestGitHubRepo(
-                repoUrl,
-                pathInRepo,
+            if (!apiKey) {
+                alert("Please enter your Gemini API Key first to generate Style DNA");
+                // We continue, but DNA generation will be skipped/empty
+            }
+
+            const cleanRepoUrl = repoUrl.trim().replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, "");
+            const cleanPath = pathInRepo.trim().replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, "");
+
+            const { icons: newIcons, manifest } = await ingestGitHubRepo(
+                cleanRepoUrl,
+                cleanPath,
+                apiKey,
                 (current, total, status) => {
                     setIngestProgress(`${status} (${current}/${total})`);
                 }
             );
 
             // Save icons
-            const existingIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+            const existingIcons = await getIngestedIcons();
             const merged = [...existingIcons, ...newIcons];
-            localStorage.setItem("ingested_icons", JSON.stringify(merged));
+            await saveIngestedIcons(merged);
             setIcons(merged);
 
             // Extract repo name from URL
@@ -107,12 +144,13 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 name: repoName,
                 url: repoUrl,
                 path: pathInRepo,
-                count: newIcons.length
+                count: newIcons.length,
+                styleManifest: manifest
             };
 
             const updatedSources = [...sources, newSource];
             setSources(updatedSources);
-            localStorage.setItem("icon_sources", JSON.stringify(updatedSources));
+            await saveIconSources(updatedSources);
 
             // Reset form
             setRepoUrl("");
@@ -127,7 +165,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         }
     };
 
-    const handleDeleteSource = (sourceId: string) => {
+    const handleDeleteSource = async (sourceId: string) => {
         const source = sources.find(s => s.id === sourceId);
         if (!source) return;
 
@@ -136,30 +174,101 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         }
 
         // Remove icons from this library
-        const allIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+        const allIcons = await getIngestedIcons();
         const filtered = allIcons.filter((icon: Icon) => icon.library !== source.name);
-        localStorage.setItem("ingested_icons", JSON.stringify(filtered));
+        await saveIngestedIcons(filtered);
         setIcons(filtered);
 
         // Remove source
         const updatedSources = sources.filter(s => s.id !== sourceId);
         setSources(updatedSources);
-        localStorage.setItem("icon_sources", JSON.stringify(updatedSources));
+        await saveIconSources(updatedSources);
 
         alert(`Deleted ${source.name} and removed ${source.count} icons`);
     };
 
-    const handleClearAllData = () => {
+    const handleClearAllData = async () => {
         if (!confirm("⚠️ Clear ALL ingested libraries and icons? This cannot be undone!")) {
             return;
         }
 
-        localStorage.removeItem("ingested_icons");
-        localStorage.removeItem("icon_sources");
+        await clearIngestedIcons();
+        await clearIngestedIcons();
+        await saveIconSources([]);
         setSources([]);
         setIcons([]);
 
         alert("All data cleared successfully");
+    };
+
+    const handleEditDNA = (source: Source) => {
+        setEditingSourceId(source.id);
+        setEditingManifest(source.styleManifest || "No DNA extracted yet.");
+    };
+
+    const handleSaveDNA = async () => {
+        if (!editingSourceId) return;
+
+        const updatedSources = sources.map(s => {
+            if (s.id === editingSourceId) {
+                return { ...s, styleManifest: editingManifest };
+            }
+            return s;
+        });
+
+        setSources(updatedSources);
+        await saveIconSources(updatedSources);
+        setEditingSourceId(null);
+        setEditingManifest("");
+    };
+
+    const handleCancelEditDNA = () => {
+        setEditingSourceId(null);
+        setEditingManifest("");
+    };
+
+    const handleRegenerateDNA = async (source: Source) => {
+        if (!apiKey) {
+            alert("Please enter your Gemini API Key first");
+            return;
+        }
+
+        setRegeneratingId(source.id);
+        try {
+            const allIcons = await getIngestedIcons();
+            const libraryIcons = allIcons.filter((i: Icon) => i.library === source.name);
+
+            if (libraryIcons.length === 0) {
+                throw new Error("No icons found for this library");
+            }
+
+            const manifest = await analyzeLibrary(libraryIcons, apiKey);
+
+            if (!manifest) {
+                throw new Error("Failed to generate manifest");
+            }
+
+            const updatedSources = sources.map(s => {
+                if (s.id === source.id) {
+                    return { ...s, styleManifest: manifest };
+                }
+                return s;
+            });
+
+            setSources(updatedSources);
+            await saveIconSources(updatedSources);
+
+            // If currently editing this one, update the editor too
+            if (editingSourceId === source.id) {
+                setEditingManifest(manifest);
+            }
+
+            alert("Style DNA regenerated successfully!");
+        } catch (error) {
+            alert(`Failed to regenerate DNA: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setRegeneratingId(null);
+        }
     };
 
     const handleEnrichLibrary = async () => {
@@ -230,8 +339,8 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
                 setIcons(updatedIcons);
 
-                // Update localStorage
-                const storedIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+                // Update IndexedDB
+                const storedIcons = await getIngestedIcons();
                 const updatedStored = storedIcons.map((icon: any) => {
                     const enriched = data.find((d: any) => d.name === icon.name && d.library === icon.library);
                     if (enriched) {
@@ -243,7 +352,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                     }
                     return icon;
                 });
-                localStorage.setItem("ingested_icons", JSON.stringify(updatedStored));
+                await saveIngestedIcons(updatedStored);
 
                 setEnrichProgress(((i + 1) / batches.length) * 100);
             }
@@ -259,271 +368,377 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[1200px] w-[90vw] h-[80vh] p-0 overflow-hidden flex flex-col md:flex-row gap-0">
+                <DialogHeader className="sr-only">
                     <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
 
-                <Tabs defaultValue="library" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="library">Library</TabsTrigger>
-                        <TabsTrigger value="ai">AI Enrichment</TabsTrigger>
-                        <TabsTrigger value="generation">Generation</TabsTrigger>
-                        <TabsTrigger value="api">API Key</TabsTrigger>
-                    </TabsList>
+                <Tabs defaultValue="library" orientation="vertical" className="flex-1 flex flex-col md:flex-row h-full">
+                    {/* Sidebar Navigation */}
+                    <div className="w-full md:w-64 border-r bg-muted/30 flex flex-col h-full">
+                        <div className="p-6 border-b">
+                            <h2 className="text-lg font-semibold tracking-tight">Settings</h2>
+                            <p className="text-sm text-muted-foreground">Manage your workspace</p>
+                        </div>
+                        <TabsList className="flex flex-col h-auto bg-transparent p-2 gap-1 justify-start">
+                            <TabsTrigger
+                                value="library"
+                                className="w-full justify-start px-4 py-2 h-auto data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                            >
+                                <Github className="mr-2 h-4 w-4" />
+                                Library
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="ai"
+                                className="w-full justify-start px-4 py-2 h-auto data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                            >
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                AI Enrichment
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="generation"
+                                className="w-full justify-start px-4 py-2 h-auto data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                            >
+                                <Wand2 className="mr-2 h-4 w-4" />
+                                Generation
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="api"
+                                className="w-full justify-start px-4 py-2 h-auto data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                            >
+                                <Key className="mr-2 h-4 w-4" />
+                                API Key
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
 
-                    {/* Library Management */}
-                    <TabsContent value="library" className="space-y-6 mt-4">
-                        {/* Import Section */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Import Icon Library</CardTitle>
-                                <CardDescription>
-                                    Enter a GitHub repository URL and path to ingest SVG icons
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="repo-url">GitHub Repository URL</Label>
-                                            <Input
-                                                id="repo-url"
-                                                placeholder="https://github.com/owner/repo"
-                                                value={repoUrl}
-                                                onChange={(e) => setRepoUrl(e.target.value)}
-                                                disabled={ingesting}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="path">Path in Repository</Label>
-                                            <Input
-                                                id="path"
-                                                placeholder="icons"
-                                                value={pathInRepo}
-                                                onChange={(e) => setPathInRepo(e.target.value)}
-                                                disabled={ingesting}
-                                            />
-                                        </div>
-                                    </div>
+                    {/* Content Area */}
+                    <div className="flex-1 h-full overflow-y-auto bg-background">
+                        <div className="p-6 max-w-3xl mx-auto space-y-6">
 
-                                    {ingesting && (
-                                        <div className="text-sm text-muted-foreground">
-                                            {ingestProgress}
-                                        </div>
-                                    )}
-
-                                    <Button
-                                        onClick={handleIngestLibrary}
-                                        disabled={ingesting}
-                                        className="w-full"
-                                    >
-                                        {ingesting ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Ingesting...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Github className="mr-2 h-4 w-4" />
-                                                Ingest Library
-                                            </>
-                                        )}
-                                    </Button>
-                                    <p className="text-xs text-muted-foreground">
-                                        Example: <code className="bg-muted px-1 rounded">https://github.com/lucide-icons/lucide</code> with path <code className="bg-muted px-1 rounded">icons</code>
-                                    </p>
+                            {/* Library Management */}
+                            <TabsContent value="library" className="space-y-6 m-0">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-semibold tracking-tight">Icon Library</h3>
+                                    <p className="text-sm text-muted-foreground">Manage your ingested icon sets and their style DNA.</p>
                                 </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Installed Libraries Section */}
-                        {sources.length > 0 && (
-                            <>
                                 <Separator />
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-lg font-semibold">Installed Libraries</h3>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={handleClearAllData}
-                                        >
-                                            <AlertTriangle className="mr-2 h-4 w-4" />
-                                            Clear All Data
-                                        </Button>
-                                    </div>
 
-                                    <div className="grid gap-4">
-                                        {sources.map((source) => (
-                                            <Card key={source.id}>
-                                                <CardContent className="flex items-center justify-between p-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                                                            <Github className="h-5 w-5" />
+                                {/* Import Section */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Import from GitHub</CardTitle>
+                                        <CardDescription>
+                                            Ingest SVG icons directly from a public repository.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="repo-url">Repository URL</Label>
+                                                    <Input
+                                                        id="repo-url"
+                                                        placeholder="https://github.com/owner/repo"
+                                                        value={repoUrl}
+                                                        onChange={(e) => setRepoUrl(e.target.value)}
+                                                        disabled={ingesting}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="path">Path to Icons</Label>
+                                                    <Input
+                                                        id="path"
+                                                        placeholder="icons/svg"
+                                                        value={pathInRepo}
+                                                        onChange={(e) => setPathInRepo(e.target.value)}
+                                                        disabled={ingesting}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {ingesting && (
+                                                <div className="text-sm text-muted-foreground">
+                                                    {ingestProgress}
+                                                </div>
+                                            )}
+
+                                            <Button
+                                                onClick={handleIngestLibrary}
+                                                disabled={ingesting}
+                                                className="w-full"
+                                            >
+                                                {ingesting ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Ingesting...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Github className="mr-2 h-4 w-4" />
+                                                        Ingest Library
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Installed Libraries Section */}
+                                {sources.length > 0 && (
+                                    <div className="space-y-4 pt-6">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">Installed Libraries</h3>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={handleClearAllData}
+                                            >
+                                                <AlertTriangle className="mr-2 h-4 w-4" />
+                                                Clear All Data
+                                            </Button>
+                                        </div>
+
+                                        <div className="grid gap-4">
+                                            {sources.map((source) => (
+                                                <Card key={source.id}>
+                                                    <CardContent className="flex flex-col gap-4 p-6">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                                                                    <Github className="h-5 w-5" />
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="font-medium">{source.name}</h3>
+                                                                    <p className="text-sm text-muted-foreground">
+                                                                        {source.url}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        <span className="text-xs bg-secondary px-2 py-0.5 rounded-full text-secondary-foreground">
+                                                                            {source.count} icons
+                                                                        </span>
+                                                                        {source.styleManifest && (
+                                                                            <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                                                <Sparkles className="h-3 w-3" />
+                                                                                DNA Extracted
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleEditDNA(source)}
+                                                                >
+                                                                    Edit DNA
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    title="Regenerate DNA"
+                                                                    onClick={() => handleRegenerateDNA(source)}
+                                                                    disabled={!!regeneratingId}
+                                                                >
+                                                                    {regeneratingId === source.id ? (
+                                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                                    ) : (
+                                                                        <RefreshCw className="h-4 w-4" />
+                                                                    )}
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                                    onClick={() => handleDeleteSource(source.id)}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <h3 className="font-medium">{source.name}</h3>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {source.url} / {source.path}
-                                                            </p>
-                                                            <p className="text-xs text-muted-foreground mt-1">
-                                                                {source.count} icons
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                        onClick={() => handleDeleteSource(source.id)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </TabsContent>
 
-                    {/* AI Enrichment */}
-                    <TabsContent value="ai" className="space-y-4 mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Batch AI Enrichment</CardTitle>
-                                <CardDescription>
-                                    Generate descriptions and tags for your icons
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-4">
-                                    <Label>Which icons to enrich?</Label>
-                                    <RadioGroup value={enrichTarget} onValueChange={(v: string) => setEnrichTarget(v as "all" | "missing" | "favorites")}>
-                                        <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
-                                            <RadioGroupItem value="all" id="all" />
-                                            <Label htmlFor="all" className="flex-1 cursor-pointer">
-                                                <div className="font-medium">All Icons</div>
-                                                <div className="text-xs text-muted-foreground">{allCount} icons total</div>
-                                            </Label>
+                                                        {/* DNA Editor */}
+                                                        {editingSourceId === source.id && (
+                                                            <div className="mt-4 space-y-4 border-t pt-4">
+                                                                <div className="space-y-2">
+                                                                    <Label>Style DNA (Manifest)</Label>
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        This is the "Genetic Code" the AI uses to replicate this library's style.
+                                                                        Edit with caution.
+                                                                    </p>
+                                                                    <textarea
+                                                                        className="w-full h-64 p-4 font-mono text-sm bg-muted/50 rounded-md border resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                                                                        value={editingManifest}
+                                                                        onChange={(e) => setEditingManifest(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex justify-end gap-2">
+                                                                    <Button variant="ghost" size="sm" onClick={handleCancelEditDNA}>
+                                                                        Cancel
+                                                                    </Button>
+                                                                    <Button size="sm" onClick={handleSaveDNA}>
+                                                                        Save DNA Changes
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
                                         </div>
-                                        <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
-                                            <RadioGroupItem value="missing" id="missing" />
-                                            <Label htmlFor="missing" className="flex-1 cursor-pointer">
-                                                <div className="font-medium">Missing Descriptions</div>
-                                                <div className="text-xs text-muted-foreground">{missingCount} icons without AI descriptions</div>
-                                            </Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
-                                            <RadioGroupItem value="favorites" id="favorites" />
-                                            <Label htmlFor="favorites" className="flex-1 cursor-pointer">
-                                                <div className="font-medium">Favorites</div>
-                                                <div className="text-xs text-muted-foreground">{favoritesCount} favorited icons</div>
-                                            </Label>
-                                        </div>
-                                    </RadioGroup>
-                                </div>
-
-                                {enriching && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span>Enriching...</span>
-                                            <span>{Math.round(enrichProgress)}%</span>
-                                        </div>
-                                        <Progress value={enrichProgress} />
                                     </div>
                                 )}
+                            </TabsContent>
 
-                                <Button
-                                    onClick={handleEnrichLibrary}
-                                    disabled={enriching || !apiKey}
-                                    className="w-full"
-                                >
-                                    {enriching ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Enriching...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="mr-2 h-4 w-4" />
-                                            Start Enrichment
-                                        </>
-                                    )}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* API Key */}
-                    <TabsContent value="api" className="space-y-4 mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Gemini API Key</CardTitle>
-                                <CardDescription>
-                                    Required for AI-powered icon enrichment
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="api-key">API Key</Label>
-                                    <Input
-                                        id="api-key"
-                                        type="password"
-                                        placeholder="Enter your Gemini API key"
-                                        value={apiKey}
-                                        onChange={(e) => setApiKey(e.target.value)}
-                                    />
+                            {/* AI Enrichment */}
+                            <TabsContent value="ai" className="space-y-6 m-0">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-semibold tracking-tight">AI Enrichment</h3>
+                                    <p className="text-sm text-muted-foreground">Generate smart tags and descriptions for your icons.</p>
                                 </div>
-                                <Button onClick={handleSaveApiKey} className="w-full">
-                                    <Key className="mr-2 h-4 w-4" />
-                                    Save API Key
-                                </Button>
-                                <p className="text-xs text-muted-foreground">
-                                    Get your API key from{" "}
-                                    <a
-                                        href="https://aistudio.google.com/app/apikey"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline"
-                                    >
-                                        Google AI Studio
-                                    </a>
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                                <Separator />
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Batch Processing</CardTitle>
+                                        <CardDescription>
+                                            Select which icons to process. This requires a Gemini API key.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        <div className="space-y-4">
+                                            <RadioGroup value={enrichTarget} onValueChange={(v: string) => setEnrichTarget(v as "all" | "missing" | "favorites")}>
+                                                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                                                    <RadioGroupItem value="all" id="all" />
+                                                    <Label htmlFor="all" className="flex-1 cursor-pointer">
+                                                        <div className="font-medium">All Icons</div>
+                                                        <div className="text-xs text-muted-foreground">{allCount} icons total</div>
+                                                    </Label>
+                                                </div>
+                                                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                                                    <RadioGroupItem value="missing" id="missing" />
+                                                    <Label htmlFor="missing" className="flex-1 cursor-pointer">
+                                                        <div className="font-medium">Missing Descriptions</div>
+                                                        <div className="text-xs text-muted-foreground">{missingCount} icons without AI descriptions</div>
+                                                    </Label>
+                                                </div>
+                                                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                                                    <RadioGroupItem value="favorites" id="favorites" />
+                                                    <Label htmlFor="favorites" className="flex-1 cursor-pointer">
+                                                        <div className="font-medium">Favorites</div>
+                                                        <div className="text-xs text-muted-foreground">{favoritesCount} favorited icons</div>
+                                                    </Label>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
 
-                    {/* Generation Settings */}
-                    <TabsContent value="generation" className="space-y-4 mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Generation Pipeline</CardTitle>
-                                <CardDescription>
-                                    Configure how the AI generates icons
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="flex items-center justify-between space-x-2">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="legacy-mode">Legacy Prompt Pipeline</Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            Disable the experimental "Meta-Prompting" engine and use the original template-based prompts.
+                                        {enriching && (
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span>Enriching...</span>
+                                                    <span>{Math.round(enrichProgress)}%</span>
+                                                </div>
+                                                <Progress value={enrichProgress} />
+                                            </div>
+                                        )}
+
+                                        <Button
+                                            onClick={handleEnrichLibrary}
+                                            disabled={enriching || !apiKey}
+                                            className="w-full"
+                                        >
+                                            {enriching ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Enriching...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Sparkles className="mr-2 h-4 w-4" />
+                                                    Start Enrichment
+                                                </>
+                                            )}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            {/* Generation Settings */}
+                            <TabsContent value="generation" className="space-y-6 m-0">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-semibold tracking-tight">Generation Pipeline</h3>
+                                    <p className="text-sm text-muted-foreground">Configure the AI generation engine.</p>
+                                </div>
+                                <Separator />
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Pipeline Configuration</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        <div className="flex items-center justify-between space-x-2">
+                                            <div className="space-y-0.5">
+                                                <Label htmlFor="legacy-mode">Legacy Prompt Pipeline</Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Disable the experimental "Meta-Prompting" engine and use the original template-based prompts.
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                id="legacy-mode"
+                                                checked={useLegacyPrompt}
+                                                onCheckedChange={handleToggleLegacyPrompt}
+                                            />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            {/* API Key */}
+                            <TabsContent value="api" className="space-y-6 m-0">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-semibold tracking-tight">API Configuration</h3>
+                                    <p className="text-sm text-muted-foreground">Manage your external service keys.</p>
+                                </div>
+                                <Separator />
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Gemini API Key</CardTitle>
+                                        <CardDescription>
+                                            Required for AI-powered icon enrichment and generation.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="api-key">API Key</Label>
+                                            <Input
+                                                id="api-key"
+                                                type="password"
+                                                placeholder="Enter your Gemini API key"
+                                                value={apiKey}
+                                                onChange={(e) => setApiKey(e.target.value)}
+                                            />
+                                        </div>
+                                        <Button onClick={handleSaveApiKey} className="w-full">
+                                            <Key className="mr-2 h-4 w-4" />
+                                            Save API Key
+                                        </Button>
+                                        <p className="text-xs text-muted-foreground">
+                                            Get your API key from{" "}
+                                            <a
+                                                href="https://aistudio.google.com/app/apikey"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary hover:underline"
+                                            >
+                                                Google AI Studio
+                                            </a>
                                         </p>
-                                    </div>
-                                    <Switch
-                                        id="legacy-mode"
-                                        checked={useLegacyPrompt}
-                                        onCheckedChange={handleToggleLegacyPrompt}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </div>
+                    </div>
                 </Tabs>
-            </DialogContent>
-        </Dialog>
+            </DialogContent >
+        </Dialog >
     );
 }

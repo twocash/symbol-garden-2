@@ -1,11 +1,13 @@
 import { Icon } from "@/types/schema";
 import { fetchRepoContents, fetchRawFile, GitHubFile } from "./github-api";
+import { analyzeLibrary } from "@/app/actions/analyze-library";
 
 export async function ingestGitHubRepo(
     repoUrl: string,
     path: string,
+    apiKey: string,
     onProgress?: (current: number, total: number, status: string) => void
-): Promise<Icon[]> {
+): Promise<{ icons: Icon[], manifest: string }> {
     // 1. Parse Repo URL
     // Handle full URLs like https://github.com/owner/repo/tree/main/path
     let cleanRepoUrl = repoUrl.replace("https://github.com/", "");
@@ -47,7 +49,6 @@ export async function ingestGitHubRepo(
     const BATCH_SIZE = 5;
     for (let i = 0; i < svgFiles.length; i += BATCH_SIZE) {
         const batch = svgFiles.slice(i, i + BATCH_SIZE);
-
         await Promise.all(batch.map(async (file) => {
             try {
                 onProgress?.(completed, svgFiles.length, `Processing ${file.name}...`);
@@ -65,7 +66,22 @@ export async function ingestGitHubRepo(
         }));
     }
 
-    return ingestedIcons;
+    // AFTER the loop, when all icons are ingested:
+    onProgress?.(ingestedIcons.length, ingestedIcons.length, "Generating Style DNA...");
+
+    let manifest = "";
+    try {
+        // Generate the "Geometric Autopsy" via Server Action
+        manifest = await analyzeLibrary(ingestedIcons, apiKey);
+        console.log("Generated Library Manifest:", manifest.slice(0, 100) + "...");
+    } catch (e) {
+        console.warn("Skipping manifest generation due to error:", e);
+    }
+
+    return {
+        icons: ingestedIcons,
+        manifest // Return this so the UI/API can save it to the Project/Library DB
+    };
 }
 
 function parseSvg(svgContent: string, fullPath: string, filename: string, libraryName: string): Icon | null {
@@ -78,7 +94,6 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
     const viewBox = svgElement.getAttribute("viewBox") || "0 0 24 24";
 
     // Library-specific defaults
-    // Some libraries (like Simple Icons) rely on default black fill and don't specify attributes.
     const LIBRARY_DEFAULTS: Record<string, "fill" | "stroke"> = {
         "simple-icons": "fill",
         "material-design-icons": "fill",
@@ -112,7 +127,6 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
         const pathFill = firstPath?.getAttribute("fill");
         const pathStroke = firstPath?.getAttribute("stroke");
 
-        // If explicit fill is set (and not none)
         if (
             (svgFill && svgFill !== "none") ||
             (pathFill && pathFill !== "none") ||
@@ -121,12 +135,9 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
         ) {
             renderStyle = "fill";
         }
-        // If explicit stroke is set
         else if (svgStroke && svgStroke !== "none") {
             renderStyle = "stroke";
         }
-        // If NOTHING is set, default to FILL (SVG spec default is black fill)
-        // Stroke-based icons usually MUST specify stroke to be visible.
         else {
             renderStyle = "fill";
         }
@@ -142,9 +153,6 @@ function parseSvg(svgContent: string, fullPath: string, filename: string, librar
     if (!paths) return null;
 
     const name = filename.replace(".svg", "").replace(/[-_]/g, " ");
-
-    // Use full path for unique ID to prevent collisions in libraries with subdirectories
-    // e.g., Font Awesome has brands/font-awesome.svg and regular/font-awesome.svg
     const uniqueId = fullPath.replace(/\//g, "-").replace(".svg", "");
 
     return {
@@ -171,8 +179,6 @@ function elementToPath(element: Element): string | null {
         case "path": {
             const d = element.getAttribute("d");
             if (!d) return null;
-            // If path starts with relative 'm', convert to absolute 'M'
-            // Using regex to handle potential leading whitespace and ensure robust replacement
             return d.replace(/^\s*m/, "M").trim();
         }
 
@@ -185,7 +191,6 @@ function elementToPath(element: Element): string | null {
             const ry = parseFloat(element.getAttribute("ry") || "0");
 
             if (rx || ry) {
-                // Rounded rect (simplified, handling uniform radius)
                 const r = rx || ry;
                 return `M ${x + r} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r} V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
             }
@@ -218,7 +223,6 @@ function elementToPath(element: Element): string | null {
         case "polyline": {
             const points = element.getAttribute("points");
             if (!points) return null;
-            // Basic parsing: "x,y x,y" -> "M x y L x y"
             const cleaned = points.trim().replace(/,/g, " ");
             const coords = cleaned.split(/\s+/);
             if (coords.length < 2) return null;

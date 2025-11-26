@@ -20,6 +20,7 @@ import { copySvg, copyPng, downloadPng, downloadSvg } from "@/lib/export-utils";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
 import { cn } from "@/lib/utils";
+import { getIngestedIcons, saveIngestedIcons } from "@/lib/storage";
 
 interface IconDetailProps {
     icon: Icon | null;
@@ -111,12 +112,12 @@ export function IconDetail({ icon, open, onOpenChange }: IconDetailProps) {
                 const updatedIcons = icons.map(i => i.id === activeIcon.id ? updatedIcon : i);
                 setIcons(updatedIcons);
 
-                // Update localStorage if it exists there
-                const storedIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+                // Update IndexedDB if it exists there
+                const storedIcons = await getIngestedIcons();
                 const storedIndex = storedIcons.findIndex((i: any) => i.id === activeIcon.id);
                 if (storedIndex !== -1) {
                     storedIcons[storedIndex] = updatedIcon;
-                    localStorage.setItem("ingested_icons", JSON.stringify(storedIcons));
+                    await saveIngestedIcons(storedIcons);
                 }
             }
         } catch (error) {

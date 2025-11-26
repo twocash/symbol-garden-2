@@ -1,9 +1,3 @@
-# DevBridge Context: Symbol Garden 2.0
-
-project: Symbol Garden 2.0
-repo: https://github.com/twocash/symbol-garden-2
-local_path: c:\GitHub\symbol-garden-2
-created: 2025-11-19T16:21:00Z
 - src/lib/ai-icon-service.ts
 - src/app/api/vectorize/route.ts
 - src/components/dialogs/AIIconGeneratorModal.tsx
@@ -11,7 +5,7 @@ created: 2025-11-19T16:21:00Z
 - src/lib/project-context.tsx
 
 **Next Priority:**
-Collections feature
+Integrating Style DNA and geometric generation into the AI Icon Generator
 
 ### 2025-11-25T16:00:00Z Session 12
 **Type:** Human Interactive
@@ -40,22 +34,6 @@ Finalized the "Surgical Strike" (V9) Vectorization Pipeline to produce bold, fix
 **Blockers Resolved:**
 - **"Spindly" Icons:** Solved via Gamma 2.2 + Downsampling.
 - **LocalStorage Crash:** Solved via try-catch safeguard.
-
-**Files Touched:**
-- src/lib/ai-icon-service.ts
-- src/lib/svg-optimizer.ts
-- src/lib/project-context.tsx
-
-**Next Priority:**
-Collections feature
-
----
-
-### 2025-11-25T11:30:00Z Session 11
-**Type:** Human Interactive
-**Duration:** 2.0 hours
-**State Change:** released → released
-**Checkpoints:** 4
 
 **Completed:**
 Fixed critical vectorization bugs where outlined icons were rendered as filled shapes. Implemented full end-to-end strategy passing (Generation -> Frontend -> Vectorization) and fixed SVG parsing to correctly handle `fill-rule`.
@@ -426,3 +404,80 @@ Project Management
 1. src/lib/project-context.tsx: 4 sessions
 2. src/components/layout/Sidebar.tsx: 4 sessions
 3. src/app/api/enrich/route.ts: 3 sessions
+
+# Sprint 04: The Uncanny Valley (Bridging the 30% Gap)
+
+## 1. The Epiphany
+We spent Sprints 1-3 optimizing the *production* of icons (Prompting -> Raster Generation -> Vector Tracing). We achieved ~70% fidelity. The vectors are clean, but they still look like "guests" in the user's library. They lack the "DNA" of the seed icons.
+
+We realized we were solving the wrong problem. We were teaching the AI to **draw** (make a shape of a bowl) when we should have been teaching it to **speak** (use the specific visual grammar of Lineicons).
+
+## 2. The Objective
+Move from **70% Fidelity** (Valid Vector) to **95% Fidelity** (Indistinguishable Match).
+* **Old Mindset:** "Draw a bold basketball."
+* **New Mindset:** "Construct a basketball using a 24px grid, 2px uniform stroke, round caps, and 15% visual density."
+
+## 3. The Strategy: "Grammar & Judgment"
+We are shifting our technical focus from *Raster Manipulation* (Blur/Threshold) to *Constraint Enforcement* and *Adversarial Curation*.
+
+### Strategy A: The Grammar (Constraint Injection)
+Designers don't "vibe code"; they follow rules. We must extract and enforce these commandments.
+* **Upgrade `style-analysis.ts`:** Stop returning fuzzy averages. Extract strict booleans:
+    * `hasRoundedCaps`: true/false
+    * `gridSize`: 24, 32, or 48
+    * `strokeWidth`: Strictly 2px, 3px, or 4px (Snap to nearest).
+* **Upgrade `svg-optimizer.ts`:** Ruthlessly enforce these rules on the final output. If the library is `24px`, every node in the generated SVG must snap to `1/24` coordinates.
+
+### Strategy B: The Jury (Adversarial Review)
+The Generator (Imagen) has no self-awareness. It produces a "good image" but doesn't know if it matches the "Lineicon" style.
+* **New Pipeline Step:** Introduce a **"Style Tribunal"** before the user sees results.
+* **Mechanism:**
+    1.  Generate 8 candidates (instead of 4).
+    2.  Pass candidates + Seed Icons to **Gemini 1.5 Pro Vision**.
+    3.  **Prompt:** "You are a Design Director. Which of these 8 candidates belongs in the same icon set as these 3 reference icons? Discard any that deviate in stroke weight or complexity."
+    4.  Return only the "Survivors" to the user.
+
+## 4. Implementation Plan
+1.  **Refactor `style-analysis.ts`:** Add logic to detect `gridSize` and `strokeCap` style.
+2.  **Implement `StyleJuryService`:** A dedicated service that takes a list of image buffers and ranks them by similarity to seeds.
+3.  **Update `ai-icon-service.ts`:** Integrate the Jury loop into the generation process.
+
+---
+
+### 2025-11-25T22:30:00Z Session 13
+**Type:** Human Interactive
+**Duration:** 2.0 hours
+**State Change:** released → released
+**Checkpoints:** 4
+
+**Completed:**
+Implemented "Grammar & Judgment" strategy (Sprint 04). Enforced strict style constraints (Grid/Stroke/Caps) and introduced `StyleJuryService` for adversarial review using Gemini 1.5 Pro Vision.
+
+#### Checkpoint: 21:00
+- Completed: Refactored `style-analysis.ts` and `svg-optimizer.ts`
+- Files: src/lib/style-analysis.ts, src/lib/svg-optimizer.ts
+- Decision: Enforced strict snapping (24/32/48px grid, 2/3/4px stroke) and `floatPrecision: 1` for alignment.
+
+#### Checkpoint: 21:45
+- Completed: Implemented `StyleJuryService`
+- Files: src/lib/style-jury-service.ts
+- Decision: Use Gemini 1.5 Pro Vision to rank candidates; always return Top 2 (Hung Jury failsafe).
+
+#### Checkpoint: 22:15
+- Completed: Integrated Jury into `ai-icon-service.ts`
+- Files: src/lib/ai-icon-service.ts
+- Decision: Pipelined Parallelism (2 batches of 4) to minimize latency.
+
+**Key Decisions:**
+- **Strict Constraints:** No more "fuzzy averages"; icons must snap to the grid.
+- **Adversarial Review:** AI judges AI to filter out hallucinations.
+- **Parallel Pipeline:** Overlapping generation and evaluation to keep speed high.
+
+**Files Touched:**
+- src/lib/style-analysis.ts
+- src/lib/svg-optimizer.ts
+- src/lib/style-jury-service.ts
+- src/lib/ai-icon-service.ts
+
+**Next Priority:**
+Collections feature

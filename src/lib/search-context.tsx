@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Icon } from "@/types/schema";
+import { getIngestedIcons } from "@/lib/storage";
 
 interface SearchContextType {
     query: string;
@@ -31,9 +32,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
                 const res = await fetch("/data/icons.json");
                 const staticIcons: Icon[] = await res.json();
 
-                // Load dynamic icons from localStorage
-                const storedIcons = localStorage.getItem("ingested_icons");
-                const dynamicIcons: Icon[] = storedIcons ? JSON.parse(storedIcons) : [];
+                // Load dynamic icons from IndexedDB
+                const dynamicIcons = await getIngestedIcons();
 
                 const allIcons = [...staticIcons, ...dynamicIcons];
                 setIcons(allIcons);

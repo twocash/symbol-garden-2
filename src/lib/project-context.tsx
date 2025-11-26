@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Project, Icon } from "@/types/schema";
 import { nanoid } from "nanoid";
+import { getProjects, saveProjectsToIDB } from "@/lib/storage";
 
 interface ProjectContextType {
     projects: Project[];
@@ -29,52 +30,72 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
     // Load projects from localStorage on mount
+    // Load projects from IndexedDB on mount (with migration from localStorage)
     useEffect(() => {
-        const storedProjects = localStorage.getItem("projects");
-        const storedCurrentId = localStorage.getItem("currentProjectId");
+        async function load() {
+            // 1. Try loading from IndexedDB
+            let loadedProjects = await getProjects();
 
-        if (storedProjects) {
-            const parsedProjects = JSON.parse(storedProjects);
-            // Filter out soft-deleted projects
-            const activeProjects = parsedProjects.filter((p: Project) => !p.deletedAt);
+            // 2. If empty, check localStorage (Migration)
+            if (loadedProjects.length === 0) {
+                const storedProjects = localStorage.getItem("projects");
+                if (storedProjects) {
+                    try {
+                        loadedProjects = JSON.parse(storedProjects);
+                        // Save to IDB immediately
+                        await saveProjectsToIDB(loadedProjects);
+                        // Clear localStorage to free up space
+                        localStorage.removeItem("projects");
+                        console.log("Migrated projects from localStorage to IndexedDB");
+                    } catch (e) {
+                        console.error("Failed to parse localStorage projects", e);
+                    }
+                }
+            }
+
+            // 3. If still empty, create default
+            if (loadedProjects.length === 0) {
+                const defaultProject: Project = {
+                    id: "default",
+                    name: "Default Project",
+                    slug: "default-project",
+                    primaryLibrary: "all",
+                    fallbackLibraries: [],
+                    icons: {},
+                    customIcons: [],
+                    favorites: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                loadedProjects = [defaultProject];
+                await saveProjectsToIDB(loadedProjects);
+            }
+
+            // 4. Set State
+            const activeProjects = loadedProjects.filter((p: Project) => !p.deletedAt);
             setProjects(activeProjects);
 
+            // 5. Restore current project ID
+            const storedCurrentId = localStorage.getItem("currentProjectId");
             if (storedCurrentId && activeProjects.find((p: Project) => p.id === storedCurrentId)) {
                 setCurrentProjectId(storedCurrentId);
             } else if (activeProjects.length > 0) {
                 setCurrentProjectId(activeProjects[0].id);
             }
-        } else {
-            // Create default project if none exist
-            const defaultProject: Project = {
-                id: "default",
-                name: "Default Project",
-                slug: "default-project",
-                primaryLibrary: "all",
-                fallbackLibraries: [],
-                icons: {},
-                customIcons: [],
-                favorites: [],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            setProjects([defaultProject]);
-            setCurrentProjectId("default");
-            localStorage.setItem("projects", JSON.stringify([defaultProject]));
-            localStorage.setItem("currentProjectId", "default");
         }
+        load();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const currentProject = projects.find(p => p.id === currentProjectId) || null;
 
-    const saveProjects = (newProjects: Project[]) => {
+    const saveProjects = async (newProjects: Project[]) => {
         setProjects(newProjects);
         try {
-            localStorage.setItem("projects", JSON.stringify(newProjects));
+            await saveProjectsToIDB(newProjects);
         } catch (error) {
-            console.error("Failed to save projects to localStorage:", error);
-            toast.error("Storage full! Your changes are not saved locally.");
+            console.error("Failed to save projects to IndexedDB:", error);
+            toast.error("Failed to save project changes.");
         }
     };
 
@@ -94,7 +115,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
         setProjects(prev => {
             const updated = [...prev, newProject];
-            localStorage.setItem("projects", JSON.stringify(updated));
+            saveProjectsToIDB(updated); // Fire and forget
             return updated;
         });
 
@@ -141,7 +162,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
         setProjects(prev => {
             const updated = [...prev, newProject];
-            localStorage.setItem("projects", JSON.stringify(updated));
+            saveProjectsToIDB(updated); // Fire and forget
             return updated;
         });
 

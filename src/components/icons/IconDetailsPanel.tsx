@@ -25,6 +25,7 @@ import { Icon } from "@/types/schema";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
 import { useUI } from "@/lib/ui-context";
+import { getIngestedIcons, saveIngestedIcons } from "@/lib/storage";
 import {
     Dialog,
     DialogContent,
@@ -119,12 +120,12 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
                 const updatedIcons = icons.map(i => i.id === icon.id ? updatedIcon : i);
                 setIcons(updatedIcons);
 
-                // Update in localStorage (persistence)
-                const storedIcons = JSON.parse(localStorage.getItem("ingested_icons") || "[]");
+                // Update in IndexedDB (persistence)
+                const storedIcons = await getIngestedIcons();
                 const storedIndex = storedIcons.findIndex((i: any) => i.id === icon.id);
                 if (storedIndex !== -1) {
                     storedIcons[storedIndex] = updatedIcon;
-                    localStorage.setItem("ingested_icons", JSON.stringify(storedIcons));
+                    await saveIngestedIcons(storedIcons);
                 }
                 toast.success("Description generated");
             }

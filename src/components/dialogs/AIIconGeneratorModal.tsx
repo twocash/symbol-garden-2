@@ -54,10 +54,16 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     }, [isOpen]);
 
     // Helper to construct SVG string
-    const getSvgString = (icon: typeof favorites[0]) => `
-<svg viewBox="${icon.viewBox}" xmlns="http://www.w3.org/2000/svg">
-    <path d="${icon.path}" fill="currentColor" />
+    const getSvgString = (icon: typeof favorites[0]) => {
+        const isStroke = icon.renderStyle === 'stroke';
+        const attrs = isStroke
+            ? 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+            : 'fill="currentColor"';
+
+        return `<svg viewBox="${icon.viewBox}" xmlns="http://www.w3.org/2000/svg">
+    <path d="${icon.path}" ${attrs} />
 </svg>`;
+    };
 
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
@@ -105,8 +111,15 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                const errorMsg = error.details || error.error || "Generation failed";
+                const errorData = await response.json();
+
+                // Handle Quota Exceeded (429)
+                if (response.status === 429 || errorData.error?.code === 429 || JSON.stringify(errorData).includes("Quota exceeded")) {
+                    throw new Error("API Quota Exceeded. Please wait 60 seconds and try again.");
+                }
+
+                // Extract meaningful message (handle nested error objects)
+                const errorMsg = errorData.details || errorData.error?.message || errorData.message || "Generation failed";
                 throw new Error(errorMsg);
             }
 

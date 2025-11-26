@@ -45,6 +45,8 @@ export const LibrarySchema = z.object({
   name: z.string(),
   url: z.string().optional(),
   license: z.string().optional(),
+  // NEW: The "Geometric Autopsy" text block
+  styleManifest: z.string().optional().describe("AI-generated technical analysis of the library's design system"),
 });
 
 export type Library = z.infer<typeof LibrarySchema>;

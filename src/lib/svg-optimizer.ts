@@ -1,10 +1,14 @@
 import { optimize } from 'svgo';
 
-export async function optimizeSvg(svgString: string, targetGridSize: number = 24): Promise<string> {
+export async function optimizeSvg(
+    svgString: string,
+    targetGridSize: number = 24,
+    floatPrecision: number = 1
+): Promise<string> {
     try {
         const result = optimize(svgString, {
             multipass: true,
-            floatPrecision: 2,
+            floatPrecision: floatPrecision, // Use the passed precision (default 1)
             plugins: [
                 {
                     name: 'preset-default',
@@ -17,8 +21,8 @@ export async function optimizeSvg(svgString: string, targetGridSize: number = 24
                 {
                     name: 'convertPathData',
                     params: {
-                        floatPrecision: 1, // Rounds coordinates to 1 decimal place (Grid Snap effect)
-                        transformPrecision: 1,
+                        floatPrecision: floatPrecision, // Rounds coordinates to 1 decimal place (Grid Snap effect)
+                        transformPrecision: floatPrecision,
                         makeArcs: undefined,
                         noSpaceAfterFlags: undefined,
                     }

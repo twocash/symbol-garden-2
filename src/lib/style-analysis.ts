@@ -1,22 +1,114 @@
 import { Icon } from '../types/schema';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export async function generateLibraryManifest(icons: Icon[], apiKey: string): Promise<string> {
+    console.log("generateLibraryManifest called with", icons.length, "icons");
+
+    if (icons.length === 0) {
+        console.warn("No icons provided to generateLibraryManifest");
+        return "";
+    }
+
+    // Allow fallback to environment variable if apiKey argument is missing
+    if (!apiKey) {
+        apiKey = process.env.GOOGLE_API_KEY || "";
+    }
+
+    if (!apiKey) {
+        console.warn("No API key provided for manifest generation");
+        return "";
+    }
+
+    // 1. Select a diverse sample (e.g., 20 icons) to avoid token overload
+    // Ideally, pick icons with different shapes (circle, rect, diagonal)
+    const sampleSize = 20;
+    const step = Math.max(1, Math.floor(icons.length / sampleSize));
+    const samples = [];
+    for (let i = 0; i < icons.length; i += step) {
+        samples.push(icons[i]);
+        if (samples.length >= sampleSize) break;
+    }
+    console.log("Selected", samples.length, "samples for analysis");
+
+    // 2. Construct the Analysis Prompt
+    // We provide the SVG code directly so the model can see the math (viewBox, stroke-width)
+    const svgSamples = samples.map(i =>
+        `Name: ${i.name}\nSVG: ${i.path ? `<path d="${i.path}" />` : '...'}`
+    ).join("\n\n");
+
+    const prompt = `
+    Role: Senior Design System Architect.
+    Task: Perform a "Geometric Autopsy" on this icon library.
+    
+    Input: A sample of SVG paths from the library.
+    Output: A highly technical, concise design system specification (The "DNA").
+    
+    Analyze these specific dimensions:
+    1. **Stroke Architecture:** Uniformity, scaling ratio, tapering.
+    2. **Grid System:** Bounding box padding, implied grid (e.g., 24px), anchor point snapping.
+    3. **Corner Radius:** Sharp vs. Rounded. If rounded, estimate the pixel radius relative to the grid.
+    4. **Terminal Treatment:** Butt caps vs. Round caps. Join types (Miter vs. Round).
+    5. **Geometric Primitives:** Does it favor perfect circles or squaricles? 45-degree angles or organic curves?
+    6. **The Governing Equation:** A one-sentence formula summarizing the style (e.g., "Bauhaus with a pixel grid").
+    
+    Target Audience: An advanced AI generator that needs to replicate this style perfectly.
+    
+    SAMPLES TO ANALYZE:
+    ${svgSamples}
+    `;
+
+    // 3. Call Gemini via Google Generative AI SDK
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    // List of models to try in order of preference (Updated Nov 2025)
+    const modelsToTry = [
+        "gemini-2.5-pro",       // Primary: Best reasoning for "Autopsy"
+        "gemini-3-pro-preview", // Fallback: Most powerful agentic model
+        "gemini-2.5-flash"      // Backup: Fast and capable
+    ];
+
+    for (const modelName of modelsToTry) {
+        try {
+            console.log(`Attempting Geometric Autopsy with model: ${modelName}`);
+            const model = genAI.getGenerativeModel({ model: modelName });
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const manifest = response.text();
+
+            if (manifest) {
+                console.log(`Gemini response received from ${modelName}. Length:`, manifest.length);
+                return manifest;
+            } else {
+                console.warn(`Gemini ${modelName} returned empty text`);
+            }
+        } catch (error: any) {
+            console.warn(`Failed to generate with ${modelName}:`, error.message || error);
+            // Continue to next model
+        }
+    }
+
+    console.error("All Gemini models failed to generate manifest");
+    return "";
+}
 
 /**
  * StyleSummary represents the computed visual characteristics of a set of icons.
  * Used to generate style-matched AI icons that fit the existing library aesthetic.
  */
 export interface StyleSummary {
-    avgStrokeWidth: number;
+    avgStrokeWidth: 2 | 3 | 4; // Strict snapping
     strokeStyle: 'outline' | 'filled' | 'mixed';
     strokeCap: 'round' | 'square' | 'butt';
     strokeJoin: 'round' | 'miter' | 'bevel';
     avgCornerRadius: number;
     fillUsage: 'none' | 'solid' | 'partial';
-    dominantShapes: string;  // e.g., "circles and rounded rectangles"
+    dominantShapes: string;
     detailLevel: 'low' | 'medium' | 'high';
-    visualWeight?: number; // 0-100 (Density percentage)
-    targetFillRatio?: number; // 0-1 (Content/Canvas ratio)
-    targetGrid?: number; // e.g., 24, 16, 512
-    confidenceScore: number; // 0-1, how reliable the analysis is
+    visualWeight?: number;
+    targetFillRatio?: number;
+    targetGrid?: 24 | 32 | 48; // Strict snapping
+    confidenceScore: number;
 }
 
 /**
@@ -246,8 +338,8 @@ export async function analyzeIconStyle(icons: Icon[]): Promise<StyleSummary> {
     // Build SVG strings from icons
     const svgs = icons.map(icon => {
         return `<svg viewBox="${icon.viewBox}" xmlns="http://www.w3.org/2000/svg">
-      <path d="${icon.path}" fill="${icon.renderStyle === 'fill' ? 'currentColor' : 'none'}" stroke="${icon.renderStyle === 'stroke' ? 'currentColor' : 'none'}" />
-    </svg>`;
+            <path d="${icon.path}" fill="${icon.renderStyle === 'fill' ? 'currentColor' : 'none'}" stroke="${icon.renderStyle === 'stroke' ? 'currentColor' : 'none'}" />
+        </svg>`;
     });
 
     // Determine stroke style from icon metadata if available, otherwise fallback to SVG analysis
@@ -271,9 +363,11 @@ export async function analyzeSvgStyle(svgs: string[], overrideStrokeStyle?: 'out
         throw new Error('Cannot analyze style of empty SVG set');
     }
 
-    // Aggregate stroke widths
+    // Aggregate stroke widths and snap to strict integer values
     const allWidths = svgs.flatMap(parseStrokeWidth);
-    const avgStrokeWidth = allWidths.length > 0 ? median(allWidths) : 2.0; // Default to 2px
+    const rawAvgWidth = allWidths.length > 0 ? median(allWidths) : 2.0;
+    // Snap to nearest integer, clamped between 2 and 4
+    const avgStrokeWidth = Math.max(2, Math.min(4, Math.round(rawAvgWidth))) as 2 | 3 | 4;
 
     // Aggregate corner radii
     const allRadii = svgs.flatMap(parseCornerRadius);
@@ -320,9 +414,14 @@ export async function analyzeSvgStyle(svgs: string[], overrideStrokeStyle?: 'out
         totalIcons: svgs.length,
     });
 
-    // Detect target grid (mode of all grids)
+    // Detect target grid (mode of all grids) and snap to standard sizes
     const grids = svgs.map(detectGridSize);
-    const targetGrid = mode(grids) || 24;
+    const rawGrid = mode(grids) || 24;
+    // Snap to nearest standard grid size
+    let targetGrid: 24 | 32 | 48 = 24;
+    if (rawGrid >= 40) targetGrid = 48;
+    else if (rawGrid >= 28) targetGrid = 32;
+    else targetGrid = 24;
 
     return {
         avgStrokeWidth,
