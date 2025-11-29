@@ -16,7 +16,7 @@ import { ingestGitHubRepo } from "@/lib/ingestion-service";
 
 import { getIngestedIcons, saveIngestedIcons, clearIngestedIcons, getIconSources, saveIconSources } from "@/lib/storage";
 import { Icon } from "@/types/schema";
-import { Sparkles, Key, Loader2, Github, Trash2, AlertTriangle, Wand2, RefreshCw } from "lucide-react";
+import { Sparkles, Key, Loader2, Github, Trash2, AlertTriangle, Wand2, RefreshCw, Globe, Search } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { analyzeLibrary } from "@/app/actions/analyze-library";
 
@@ -54,6 +54,18 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
     const [editingManifest, setEditingManifest] = useState("");
     const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+
+    // Iconify Import State
+    const [iconifySearch, setIconifySearch] = useState("");
+    const [iconifyResults, setIconifyResults] = useState<Array<{
+        prefix: string;
+        name: string;
+        total: number;
+        license?: string;
+    }>>([]);
+    const [searchingIconify, setSearchingIconify] = useState(false);
+    const [importingIconify, setImportingIconify] = useState<string | null>(null);
+    const [iconifyImportProgress, setIconifyImportProgress] = useState("");
 
     // Calculate icon counts for enrichment options
     const allCount = icons.length;
@@ -271,6 +283,132 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         }
     };
 
+    // Iconify handlers
+    const handleSearchIconify = async () => {
+        if (!iconifySearch.trim()) return;
+
+        setSearchingIconify(true);
+        try {
+            const response = await fetch(`/api/iconify/collections?search=${encodeURIComponent(iconifySearch)}`);
+            if (!response.ok) throw new Error("Search failed");
+            const data = await response.json();
+            setIconifyResults(data.collections || []);
+        } catch (error) {
+            console.error("Iconify search failed:", error);
+            setIconifyResults([]);
+        } finally {
+            setSearchingIconify(false);
+        }
+    };
+
+    const handleLoadPopularCollections = async () => {
+        setSearchingIconify(true);
+        try {
+            const response = await fetch("/api/iconify/collections?popular=true");
+            if (!response.ok) throw new Error("Failed to load collections");
+            const data = await response.json();
+            setIconifyResults(data.collections || []);
+        } catch (error) {
+            console.error("Failed to load popular collections:", error);
+        } finally {
+            setSearchingIconify(false);
+        }
+    };
+
+    const handleImportIconifyCollection = async (prefix: string) => {
+        console.log("[Iconify Import] Starting import for:", prefix);
+        setImportingIconify(prefix);
+        setIconifyImportProgress("Initializing...");
+
+        try {
+            const response = await fetch("/api/iconify/import", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prefix,
+                    apiKey: apiKey || undefined,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Import failed");
+            }
+
+            // Handle streaming response
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error("No response stream");
+
+            const decoder = new TextDecoder();
+            let importedIcons: Icon[] = [];
+            let manifest = "";
+            let collectionName = prefix;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split("\n").filter(Boolean);
+
+                for (const line of lines) {
+                    try {
+                        const event = JSON.parse(line);
+                        if (event.status === "fetching") {
+                            setIconifyImportProgress(`Fetching icons... (${event.progress}/${event.total})`);
+                        } else if (event.status === "converting") {
+                            setIconifyImportProgress(`Converting to Symbol Garden format...`);
+                        } else if (event.status === "analyzing") {
+                            setIconifyImportProgress(`Generating Style DNA...`);
+                        } else if (event.status === "complete") {
+                            importedIcons = event.icons || [];
+                            manifest = event.manifest || "";
+                            collectionName = event.name || prefix;
+                        }
+                    } catch {
+                        // Ignore parse errors for incomplete chunks
+                    }
+                }
+            }
+
+            if (importedIcons.length === 0) {
+                throw new Error("No icons were imported");
+            }
+
+            // Save icons
+            const existingIcons = await getIngestedIcons();
+            const merged = [...existingIcons, ...importedIcons];
+            await saveIngestedIcons(merged);
+            setIcons(merged);
+
+            // Save source metadata
+            const newSource: Source = {
+                id: `iconify-${prefix}-${Date.now()}`,
+                name: collectionName,
+                url: `https://iconify.design/icon-sets/${prefix}/`,
+                path: `Iconify: ${prefix}`,
+                count: importedIcons.length,
+                styleManifest: manifest,
+            };
+
+            const updatedSources = [...sources, newSource];
+            setSources(updatedSources);
+            await saveIconSources(updatedSources);
+
+            // Clear from results to indicate it's imported
+            setIconifyResults(prev => prev.filter(c => c.prefix !== prefix));
+
+            alert(`Successfully imported ${importedIcons.length} icons from ${collectionName}!`);
+        } catch (error) {
+            console.error("[Iconify Import] Error:", error);
+            alert(`Import failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            console.log("[Iconify Import] Finished");
+            setImportingIconify(null);
+            setIconifyImportProgress("");
+        }
+    };
+
     const handleEnrichLibrary = async () => {
         if (!apiKey) {
             alert("Please enter your Gemini API Key first");
@@ -326,12 +464,19 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
                 // Update icons with enriched data
                 const updatedIcons = icons.map(icon => {
-                    const enriched = data.find((d: any) => d.name === icon.name && d.library === icon.library);
+                    const enriched = data.find((d: any) => d.id === icon.id);
                     if (enriched) {
                         return {
                             ...icon,
-                            tags: [...new Set([...icon.tags, ...enriched.tags])],
-                            aiDescription: enriched.description
+                            tags: [...new Set([...icon.tags, ...(enriched.tags || [])])],
+                            aiDescription: enriched.description,
+                            // NEW: AI metadata for smart sample selection
+                            aiMetadata: enriched.semanticCategory ? {
+                                semanticCategory: enriched.semanticCategory,
+                                complexity: enriched.complexity || 3,
+                                geometricTraits: enriched.geometricTraits || [],
+                                confidence: 0.8,
+                            } : undefined,
                         };
                     }
                     return icon;
@@ -342,12 +487,19 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 // Update IndexedDB
                 const storedIcons = await getIngestedIcons();
                 const updatedStored = storedIcons.map((icon: any) => {
-                    const enriched = data.find((d: any) => d.name === icon.name && d.library === icon.library);
+                    const enriched = data.find((d: any) => d.id === icon.id);
                     if (enriched) {
                         return {
                             ...icon,
-                            tags: [...new Set([...icon.tags, ...enriched.tags])],
-                            aiDescription: enriched.description
+                            tags: [...new Set([...icon.tags, ...(enriched.tags || [])])],
+                            aiDescription: enriched.description,
+                            // NEW: AI metadata for smart sample selection
+                            aiMetadata: enriched.semanticCategory ? {
+                                semanticCategory: enriched.semanticCategory,
+                                complexity: enriched.complexity || 3,
+                                geometricTraits: enriched.geometricTraits || [],
+                                confidence: 0.8,
+                            } : undefined,
                         };
                     }
                     return icon;
@@ -484,6 +636,91 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                     </CardContent>
                                 </Card>
 
+                                {/* Iconify Import Section */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <Globe className="h-5 w-5" />
+                                            Import from Iconify
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Browse and import from 275,000+ open-source icons across 200+ libraries.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    placeholder="Search collections (e.g., lucide, tabler, feather...)"
+                                                    value={iconifySearch}
+                                                    onChange={(e) => setIconifySearch(e.target.value)}
+                                                    onKeyDown={(e) => e.key === "Enter" && handleSearchIconify()}
+                                                    disabled={searchingIconify || !!importingIconify}
+                                                />
+                                                <Button
+                                                    onClick={handleSearchIconify}
+                                                    disabled={searchingIconify || !!importingIconify}
+                                                    variant="secondary"
+                                                >
+                                                    {searchingIconify ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        <Search className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </div>
+
+                                            {iconifyResults.length === 0 && !searchingIconify && (
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full"
+                                                    onClick={handleLoadPopularCollections}
+                                                >
+                                                    <Globe className="mr-2 h-4 w-4" />
+                                                    Browse Popular Stroke-Based Libraries
+                                                </Button>
+                                            )}
+
+                                            {importingIconify && (
+                                                <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    {iconifyImportProgress}
+                                                </div>
+                                            )}
+
+                                            {iconifyResults.length > 0 && (
+                                                <div className="grid gap-2 max-h-64 overflow-y-auto">
+                                                    {iconifyResults.map((collection) => (
+                                                        <div
+                                                            key={collection.prefix}
+                                                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                                                        >
+                                                            <div>
+                                                                <div className="font-medium">{collection.name}</div>
+                                                                <div className="text-xs text-muted-foreground">
+                                                                    {collection.total.toLocaleString()} icons
+                                                                    {collection.license && ` • ${collection.license}`}
+                                                                </div>
+                                                            </div>
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => handleImportIconifyCollection(collection.prefix)}
+                                                                disabled={!!importingIconify}
+                                                            >
+                                                                {importingIconify === collection.prefix ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : (
+                                                                    "Import"
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
                                 {/* Installed Libraries Section */}
                                 {sources.length > 0 && (
                                     <div className="space-y-4 pt-6">
@@ -506,7 +743,11 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-4">
                                                                 <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                                                                    <Github className="h-5 w-5" />
+                                                                    {source.path.startsWith("Iconify:") ? (
+                                                                        <Globe className="h-5 w-5" />
+                                                                    ) : (
+                                                                        <Github className="h-5 w-5" />
+                                                                    )}
                                                                 </div>
                                                                 <div>
                                                                     <h3 className="font-medium">{source.name}</h3>
