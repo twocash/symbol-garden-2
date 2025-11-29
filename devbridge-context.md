@@ -411,7 +411,7 @@ Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source i
 | **P0** | Style Enforcement | Critical | 2h | ✅ Complete |
 | **P1a** | Iconify Service Layer | High | 3h | ✅ Complete |
 | **P1b** | One-Click Library Import | High | 6h | ✅ Complete |
-| **P1c** | Reference Oracle for Generation | High | 4h | 🔴 Not Started |
+| **P1c** | Reference Oracle for Generation | High | 4h | ✅ Complete |
 | **P2** | Borrow & Adapt | Medium | 4h | 🔴 Not Started |
 | **P3** | Discovery Features | Low | 6h | 🔴 Not Started |
 
@@ -467,9 +467,43 @@ searchAndGetSvgs(query)               // Convenience: search + fetch SVGs
 4. Icons saved to IndexedDB, library appears in sidebar
 5. Iconify imports show Globe icon vs GitHub icon for differentiation
 
-### P1c: Reference Oracle for Generation
+### P1c: Reference Oracle for Generation ✅ COMPLETE
 
 **Concept:** When generating "bike", search Iconify across multiple libraries to establish structural consensus (where wheels go, frame shape, etc.), then generate in user's library style.
+
+**Implementation:**
+
+1. **`getStructuralReference(concept, options)` in iconify-service.ts:**
+   - Searches Iconify for the concept across 10 stroke-based collections
+   - Limits to 1 icon per collection for diversity
+   - Uses Gemini to analyze SVGs and extract structural consensus
+   - Returns elements, spatial patterns, geometric traits, and example SVGs
+
+2. **`formatStructuralReference(ref)` in svg-prompt-builder.ts:**
+   - Formats consensus for prompt injection
+   - Lists common visual elements
+   - Describes spatial arrangement patterns
+   - Includes 2 reference SVGs (for structure, not style)
+
+3. **Integration in hybrid-generator.ts:**
+   - `useReferenceOracle` config option (default: true)
+   - Runs before prompt building to get cross-library consensus
+   - Gracefully fails if Iconify unavailable
+   - Logs consensus elements for debugging
+
+**Example Output (bike):**
+```
+Common Elements:
+  - two circles representing wheels
+  - a line connecting the wheels, representing the frame
+  - a seat or implied seat position
+  - handlebars at the front
+
+Spatial Pattern: Wheels at bottom, frame rises diagonally to seat, handlebars above front wheel
+Geometric Traits: circular elements, angular lines, geometric representation
+```
+
+**Commit:** `6c2ce32`
 
 ### Key Iconify Collections (Stroke-Based)
 
