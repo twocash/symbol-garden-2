@@ -15,6 +15,7 @@ import { formatPatternLibrary, getSuggestedPatterns } from './pattern-library';
 import { Decomposition, formatDecompositionForPrompt } from './decomposition-service';
 import { formatSimilarIconsForPrompt, formatSimilarIconsWithContext, IconStyleSpec } from './similar-icon-finder';
 import { LibraryAnalysis } from './library-analyzer';
+import { StructuralReference } from './iconify-service';
 
 /**
  * Style specifications extracted from Style DNA / Geometric Autopsy
@@ -37,12 +38,14 @@ export interface SvgPromptOptions {
   includePatternLibrary?: boolean;
   includeFewShot?: boolean;
   includeDecomposition?: boolean;
+  includeStructuralReference?: boolean;  // P1c: Include cross-library consensus
 
   // Data sources
   similarIcons?: Icon[];
   decomposition?: Decomposition | null;
   libraryAnalysis?: LibraryAnalysis;
   styleSpec?: StyleSpec;  // Style DNA specifications
+  structuralReference?: StructuralReference | null;  // P1c: Cross-library structural consensus
 
   // Fine-tuning
   maxFewShotExamples?: number;
@@ -60,6 +63,7 @@ export interface BuiltSvgPrompt {
     patternLibrary: boolean;
     fewShotCount: number;
     hasDecomposition: boolean;
+    hasStructuralReference: boolean;  // P1c: Whether cross-library reference was included
   };
 }
 
@@ -187,6 +191,63 @@ function formatStyleRules(analysis: LibraryAnalysis): string {
 }
 
 /**
+ * Format structural reference for prompt (P1c: Reference Oracle)
+ *
+ * This provides cross-library consensus on how the concept is typically represented.
+ */
+function formatStructuralReference(ref: StructuralReference): string {
+  const sections: string[] = [
+    '## STRUCTURAL REFERENCE (Cross-Library Analysis)',
+    '',
+    `The concept "${ref.concept}" was analyzed across ${ref.iconCount} icons from: ${ref.collections.join(', ')}.`,
+    '',
+  ];
+
+  // Add consensus information if available
+  if (ref.consensus.elements.length > 0) {
+    sections.push('### Common Visual Elements');
+    sections.push('These elements appear consistently across implementations:');
+    for (const element of ref.consensus.elements) {
+      sections.push(`- ${element}`);
+    }
+    sections.push('');
+  }
+
+  if (ref.consensus.spatialPattern) {
+    sections.push('### Spatial Arrangement');
+    sections.push(ref.consensus.spatialPattern);
+    sections.push('');
+  }
+
+  if (ref.consensus.commonTraits.length > 0) {
+    sections.push('### Geometric Traits');
+    sections.push(`Common traits: ${ref.consensus.commonTraits.join(', ')}`);
+    sections.push('');
+  }
+
+  // Add 1-2 example SVGs for visual reference (not all to save tokens)
+  if (ref.exampleSvgs.length > 0) {
+    sections.push('### Reference Examples');
+    sections.push('Here are examples from other libraries showing typical structure:');
+    sections.push('');
+
+    // Limit to 2 examples to save tokens
+    const examplesToShow = ref.exampleSvgs.slice(0, 2);
+    for (const example of examplesToShow) {
+      sections.push(`**${example.iconId}:**`);
+      sections.push('```svg');
+      sections.push(example.svg);
+      sections.push('```');
+      sections.push('');
+    }
+
+    sections.push('NOTE: These are for STRUCTURAL reference only. Generate in the TARGET library style, not these examples\' style.');
+  }
+
+  return sections.join('\n');
+}
+
+/**
  * Build the system prompt (context and rules)
  */
 function buildSystemPrompt(options: SvgPromptOptions): string {
@@ -236,6 +297,12 @@ function buildSystemPrompt(options: SvgPromptOptions): string {
     if (styleRules) {
       sections.push('', styleRules);
     }
+  }
+
+  // P1c: Structural reference from cross-library analysis (Reference Oracle)
+  // This provides consensus on how the concept is typically represented across multiple icon libraries
+  if (options.includeStructuralReference !== false && options.structuralReference) {
+    sections.push('', formatStructuralReference(options.structuralReference));
   }
 
   // Few-shot examples (use rich context if icons have aiMetadata)
@@ -305,6 +372,7 @@ export function buildSvgPrompt(options: SvgPromptOptions): BuiltSvgPrompt {
       patternLibrary: options.includePatternLibrary !== false,
       fewShotCount: options.similarIcons?.length || 0,
       hasDecomposition: !!options.decomposition,
+      hasStructuralReference: !!options.structuralReference,
     },
   };
 }

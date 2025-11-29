@@ -18,6 +18,7 @@ import { findSimilarIcons, findExemplarIcons, findExemplarIconsWithTraits, getCo
 import { buildSvgPrompt, combineSvgPrompt, BuiltSvgPrompt, StyleSpec, parseStyleDNA } from './svg-prompt-builder';
 import { analyzeLibrary, LibraryAnalysis, quickAnalyzeLibrary } from './library-analyzer';
 import { validateSvg, ValidationResult, formatValidationResult, normalizeSvg } from './svg-validator';
+import { getStructuralReference, StructuralReference } from './iconify-service';
 
 /**
  * Configuration for icon generation
@@ -71,6 +72,9 @@ export interface GenerationConfig {
 
   /** Allow creative interpretation instead of exact path following (for variants) */
   allowCreativeInterpretation?: boolean;
+
+  /** P1c: Use Reference Oracle to get cross-library structural consensus (default: true) */
+  useReferenceOracle?: boolean;
 }
 
 /**
@@ -103,6 +107,9 @@ export interface GenerationResult {
 
   /** Whether the SVG was auto-fixed */
   wasFixed?: boolean;
+
+  /** P1c: Structural reference from cross-library analysis (if used) */
+  structuralReference?: StructuralReference | null;
 }
 
 // Cache for library analyses
@@ -193,6 +200,7 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     styleManifest,
     variantIndex = 0,
     allowCreativeInterpretation = false,
+    useReferenceOracle = true,  // P1c: Enable by default
   } = config;
 
   const resolvedApiKey = apiKey || process.env.GOOGLE_API_KEY;
@@ -266,6 +274,27 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     console.log(`[HybridGenerator] Parsed Style DNA: linecap=${styleSpec.strokeLinecap || 'default'}, linejoin=${styleSpec.strokeLinejoin || 'default'}`);
   }
 
+  // Step 4b: P1c - Get structural reference from Iconify (cross-library consensus)
+  let structuralReference: StructuralReference | null = null;
+  if (useReferenceOracle) {
+    try {
+      structuralReference = await getStructuralReference(concept, {
+        maxIcons: 6,
+        maxPerCollection: 1,
+        apiKey: resolvedApiKey,
+      });
+      if (structuralReference) {
+        console.log(`[HybridGenerator] Reference Oracle: Found ${structuralReference.iconCount} icons across ${structuralReference.collections.length} libraries`);
+        if (structuralReference.consensus.elements.length > 0) {
+          console.log(`[HybridGenerator] Consensus elements: ${structuralReference.consensus.elements.slice(0, 3).join(', ')}`);
+        }
+      }
+    } catch (error) {
+      console.warn(`[HybridGenerator] Reference Oracle failed (continuing without):`, error);
+      // Continue without structural reference - it's optional
+    }
+  }
+
   // Step 5: Build prompt
   const prompt = buildSvgPrompt({
     concept,
@@ -274,9 +303,11 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     decomposition,
     libraryAnalysis,
     styleSpec,
+    structuralReference,  // P1c: Cross-library consensus
     includePatternLibrary,
     includeFewShot: true,
     includeDecomposition: true,
+    includeStructuralReference: true,  // P1c: Include if available
     maxFewShotExamples: fewShotCount,
     onlyRelevantPatterns: true,
     allowCreativeInterpretation,
@@ -378,6 +409,7 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     prompt,
     validation,
     wasFixed,
+    structuralReference,  // P1c: Include cross-library consensus if used
   };
 }
 
