@@ -409,8 +409,8 @@ Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source i
 | Phase | Name | Priority | Effort | Status |
 |-------|------|----------|--------|--------|
 | **P0** | Style Enforcement | Critical | 2h | ✅ Complete |
-| **P1a** | Iconify Service Layer | High | 3h | 🔴 Not Started |
-| **P1b** | One-Click Library Import | High | 6h | 🔴 Not Started |
+| **P1a** | Iconify Service Layer | High | 3h | ✅ Complete |
+| **P1b** | One-Click Library Import | High | 6h | ✅ Complete |
 | **P1c** | Reference Oracle for Generation | High | 4h | 🔴 Not Started |
 | **P2** | Borrow & Adapt | Medium | 4h | 🔴 Not Started |
 | **P3** | Discovery Features | Low | 6h | 🔴 Not Started |
@@ -428,32 +428,44 @@ Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source i
 **Files Modified:** `similar-icon-finder.ts`, `svg-validator.ts`, `svg-prompt-builder.ts`, `hybrid-generator.ts`
 **Commit:** `99a001a`
 
-### P1a: Iconify Service Layer
+### P1a: Iconify Service Layer ✅ COMPLETE
 
-**New File:** `src/lib/iconify-service.ts`
+**File:** `src/lib/iconify-service.ts`
 
+**Implemented Functions:**
 ```typescript
-// Core functions
-async function searchIcons(query: string): Promise<SearchResult>;
-async function getIconSvg(prefix: string, name: string): Promise<string>;
-async function getCollectionIcons(prefix: string): Promise<IconifyIcon[]>;
-async function getStrokeBasedCollections(): Promise<IconifyCollection[]>;
+searchIcons(query, options)           // Search across 275k+ icons
+searchStrokeBasedIcons(query)         // Filter to stroke-based collections
+getIconSvg(prefix, name)              // Fetch individual icon SVG
+getIconSvgById(iconId)                // Fetch by "prefix:name" format
+getCollection(prefix)                 // Collection metadata
+getCollections({ strokeBasedOnly })   // List all collections
+getCollectionIconNames(prefix)        // All icon names in collection
+searchAndGetSvgs(query)               // Convenience: search + fetch SVGs
 ```
 
-**Features:**
-- In-memory cache with TTL
+**Features Implemented:**
+- In-memory cache with TTL (5min search, 24h SVGs, 7d metadata)
 - Fallback hosts (api.iconify.design, api.simplesvg.com, api.unisvg.com)
-- Path extraction from SVG
+- 10-second timeout per host with AbortController
+- Stroke-based collection filter (lucide, tabler, feather, phosphor, etc.)
 
-### P1b: One-Click Library Import
+**Commit:** `5cb890a`
 
-**UI:** Settings → Libraries → "Add from Iconify" → search/browse → click to import
+### P1b: One-Click Library Import ✅ COMPLETE
 
-**Flow:**
-1. User browses Iconify collections
-2. Clicks "Import"
-3. Stream progress: fetch → convert → enrich
-4. Library appears in sidebar
+**UI:** Settings → Library → "Import from Iconify" card
+
+**API Routes:**
+- `GET /api/iconify/collections` - Browse/search collections
+- `POST /api/iconify/import` - Stream import with progress (NDJSON)
+
+**Flow Implemented:**
+1. User searches or browses popular collections
+2. Clicks "Import" on a collection
+3. Streaming progress: fetching → converting → analyzing (Style DNA)
+4. Icons saved to IndexedDB, library appears in sidebar
+5. Iconify imports show Globe icon vs GitHub icon for differentiation
 
 ### P1c: Reference Oracle for Generation
 
