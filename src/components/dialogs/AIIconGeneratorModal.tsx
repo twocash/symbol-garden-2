@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download, Settings2 } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+
+// P2: Iconify match interface
+interface IconifyMatch {
+    iconId: string;  // e.g., "lucide:bike"
+    svg: string;
+    collection: string;
+}
 
 interface AIIconGeneratorModalProps {
     isOpen: boolean;
@@ -55,6 +62,12 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         name: string;
         styleManifest?: string;
     }>>([]);
+
+    // P2: Iconify search state ("Borrow & Adapt")
+    const [iconifyMatches, setIconifyMatches] = useState<IconifyMatch[]>([]);
+    const [isSearchingIconify, setIsSearchingIconify] = useState(false);
+    const [selectedIconifyMatch, setSelectedIconifyMatch] = useState<IconifyMatch | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
 
     // Determine available libraries from ingested icons
     const availableLibraries = libraries.filter(lib => lib !== "custom");
@@ -101,6 +114,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setSelectedSvgIndex(null);
             setMetadata(null);
             setLibraryOverride(null); // Reset override on open
+            setIconifyMatches([]); // P2: Reset Iconify matches
+            setSelectedIconifyMatch(null);
 
             // Load icon sources to access styleManifest
             getIconSources().then(sources => {
@@ -108,6 +123,89 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             });
         }
     }, [isOpen]);
+
+    // P2: Search Iconify when concept changes (debounced)
+    useEffect(() => {
+        if (!prompt.trim() || prompt.length < 2) {
+            setIconifyMatches([]);
+            return;
+        }
+
+        const timeoutId = setTimeout(async () => {
+            setIsSearchingIconify(true);
+            try {
+                // Use the search API endpoint
+                const response = await fetch(`/api/iconify/search?query=${encodeURIComponent(prompt.trim())}&limit=6`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setIconifyMatches(data.results || []);
+                }
+            } catch (error) {
+                console.error("[P2] Iconify search failed:", error);
+            } finally {
+                setIsSearchingIconify(false);
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [prompt]);
+
+    // P2: Import and adapt an icon from Iconify
+    const handleImportAndAdapt = useCallback(async (match: IconifyMatch) => {
+        if (!effectiveLibrary || !currentProject) {
+            toast.error("No library available for style adaptation");
+            return;
+        }
+
+        setIsImporting(true);
+        try {
+            // Get the styleManifest for the target library
+            const librarySource = iconSources.find(s => s.name === effectiveLibrary);
+            const styleManifest = librarySource?.styleManifest;
+
+            // Call adaptation API
+            const response = await fetch("/api/iconify/adapt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    iconId: match.iconId,
+                    svg: match.svg,
+                    targetLibrary: effectiveLibrary,
+                    styleManifest,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Adaptation failed");
+            }
+
+            const { adaptedSvg, path, viewBox } = await response.json();
+
+            // Extract concept name from iconId (e.g., "lucide:bike" -> "bike")
+            const conceptName = match.iconId.split(":")[1] || prompt || "imported-icon";
+
+            // Save to workspace
+            const newIcon = {
+                id: crypto.randomUUID(),
+                name: conceptName,
+                library: "custom",
+                viewBox: viewBox || "0 0 24 24",
+                path: path,
+                tags: ["imported", "adapted", match.collection],
+                categories: ["Imported"],
+                renderStyle: "stroke" as const,
+            };
+
+            addIconToProject(newIcon, true); // Auto-favorite
+            toast.success(`"${conceptName}" imported and adapted!`);
+            onClose();
+        } catch (error) {
+            console.error("[P2] Import failed:", error);
+            toast.error("Failed to import icon");
+        } finally {
+            setIsImporting(false);
+        }
+    }, [effectiveLibrary, currentProject, iconSources, prompt, addIconToProject, onClose]);
 
     const handleGenerate = async () => {
         if (!prompt.trim()) {
@@ -419,6 +517,70 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
                     {/* Right Column: Results */}
                     <div className="flex-1 flex flex-col min-h-0">
+                        {/* P2: Found in other libraries */}
+                        {(iconifyMatches.length > 0 || isSearchingIconify) && (
+                            <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Globe className="w-4 h-4 text-muted-foreground" />
+                                    <Label className="text-sm">Found in other libraries</Label>
+                                    {isSearchingIconify && (
+                                        <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                                    )}
+                                </div>
+                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                    {iconifyMatches.map((match) => (
+                                        <button
+                                            key={match.iconId}
+                                            className={cn(
+                                                "relative flex-shrink-0 w-16 h-16 rounded-lg border-2 bg-background p-2 transition-all hover:border-primary/50 focus:outline-none group",
+                                                selectedIconifyMatch?.iconId === match.iconId
+                                                    ? "border-primary ring-2 ring-primary/20"
+                                                    : "border-muted"
+                                            )}
+                                            onClick={() => setSelectedIconifyMatch(
+                                                selectedIconifyMatch?.iconId === match.iconId ? null : match
+                                            )}
+                                            title={`${match.collection}: ${match.iconId.split(':')[1]}`}
+                                        >
+                                            <div
+                                                className="w-full h-full text-foreground"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: match.svg
+                                                        .replace(/<svg/, '<svg class="w-full h-full"')
+                                                        .replace(/stroke="[^"]*"/, 'stroke="currentColor"')
+                                                }}
+                                            />
+                                            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground bg-background px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                {match.collection}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {selectedIconifyMatch && (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full mt-2"
+                                        onClick={() => handleImportAndAdapt(selectedIconifyMatch)}
+                                        disabled={isImporting}
+                                    >
+                                        {isImporting ? (
+                                            <>
+                                                <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                                                Importing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Import className="w-3 h-3 mr-2" />
+                                                Import &amp; Adapt from {selectedIconifyMatch.collection}
+                                            </>
+                                        )}
+                                    </Button>
+                                )}
+                                <Separator className="mt-3" />
+                            </div>
+                        )}
+
                         <div className="flex items-center justify-between mb-2">
                             <Label>Generated Icons</Label>
                             {metadata && (
