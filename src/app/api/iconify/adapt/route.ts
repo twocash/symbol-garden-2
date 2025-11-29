@@ -9,25 +9,128 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseStyleDNA } from "@/lib/svg-prompt-builder";
 
 /**
- * Extract path data from an SVG string
+ * Convert a rect element to path commands
  */
-function extractPaths(svg: string): string {
-  const pathMatches = [...svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
-  if (pathMatches.length === 0) {
-    // Try other elements
-    const circleMatches = [...svg.matchAll(/<circle[^>]*\/>/g)];
-    const lineMatches = [...svg.matchAll(/<line[^>]*\/>/g)];
-    const rectMatches = [...svg.matchAll(/<rect[^>]*\/>/g)];
+function rectToPath(rect: string): string {
+  const x = parseFloat(rect.match(/x="([^"]+)"/)?.[1] || '0');
+  const y = parseFloat(rect.match(/y="([^"]+)"/)?.[1] || '0');
+  const width = parseFloat(rect.match(/width="([^"]+)"/)?.[1] || '0');
+  const height = parseFloat(rect.match(/height="([^"]+)"/)?.[1] || '0');
+  const rx = parseFloat(rect.match(/rx="([^"]+)"/)?.[1] || '0');
+  const ry = parseFloat(rect.match(/ry="([^"]+)"/)?.[1] || rx.toString());
 
-    // If we have other elements, we can't easily extract as a path
-    // Return the original SVG content
-    if (circleMatches.length > 0 || lineMatches.length > 0 || rectMatches.length > 0) {
-      // For now, just extract any path we can find
-      return pathMatches.map(m => m[1]).join(' ') || '';
+  if (rx > 0 || ry > 0) {
+    // Rounded rect - use arcs
+    const r = Math.min(rx, ry, width / 2, height / 2);
+    return `M${x + r},${y} L${x + width - r},${y} A${r},${r} 0 0 1 ${x + width},${y + r} L${x + width},${y + height - r} A${r},${r} 0 0 1 ${x + width - r},${y + height} L${x + r},${y + height} A${r},${r} 0 0 1 ${x},${y + height - r} L${x},${y + r} A${r},${r} 0 0 1 ${x + r},${y} Z`;
+  } else {
+    // Simple rect
+    return `M${x},${y} L${x + width},${y} L${x + width},${y + height} L${x},${y + height} Z`;
+  }
+}
+
+/**
+ * Convert a circle element to path commands
+ */
+function circleToPath(circle: string): string {
+  const cx = parseFloat(circle.match(/cx="([^"]+)"/)?.[1] || '0');
+  const cy = parseFloat(circle.match(/cy="([^"]+)"/)?.[1] || '0');
+  const r = parseFloat(circle.match(/r="([^"]+)"/)?.[1] || '0');
+
+  // Circle as two arcs
+  return `M${cx - r},${cy} A${r},${r} 0 1 0 ${cx + r},${cy} A${r},${r} 0 1 0 ${cx - r},${cy}`;
+}
+
+/**
+ * Convert a line element to path commands
+ */
+function lineToPath(line: string): string {
+  const x1 = line.match(/x1="([^"]+)"/)?.[1] || '0';
+  const y1 = line.match(/y1="([^"]+)"/)?.[1] || '0';
+  const x2 = line.match(/x2="([^"]+)"/)?.[1] || '0';
+  const y2 = line.match(/y2="([^"]+)"/)?.[1] || '0';
+
+  return `M${x1},${y1} L${x2},${y2}`;
+}
+
+/**
+ * Convert a polyline element to path commands
+ */
+function polylineToPath(polyline: string): string {
+  const points = polyline.match(/points="([^"]+)"/)?.[1] || '';
+  const pairs = points.trim().split(/[\s,]+/);
+
+  if (pairs.length < 2) return '';
+
+  const commands: string[] = [];
+  for (let i = 0; i < pairs.length; i += 2) {
+    const x = pairs[i];
+    const y = pairs[i + 1];
+    if (i === 0) {
+      commands.push(`M${x},${y}`);
+    } else {
+      commands.push(`L${x},${y}`);
     }
   }
 
-  return pathMatches.map(m => m[1]).join(' ');
+  return commands.join(' ');
+}
+
+/**
+ * Convert a polygon element to path commands (like polyline but closed)
+ */
+function polygonToPath(polygon: string): string {
+  return polylineToPath(polygon) + ' Z';
+}
+
+/**
+ * Extract and convert all SVG elements to path data
+ */
+function extractAllPaths(svg: string): string {
+  const paths: string[] = [];
+
+  // Extract existing path elements
+  const pathMatches = [...svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
+  for (const match of pathMatches) {
+    paths.push(match[1]);
+  }
+
+  // Convert rect elements
+  const rectMatches = [...svg.matchAll(/<rect[^>]*\/?>(?:<\/rect>)?/g)];
+  for (const match of rectMatches) {
+    const converted = rectToPath(match[0]);
+    if (converted) paths.push(converted);
+  }
+
+  // Convert circle elements
+  const circleMatches = [...svg.matchAll(/<circle[^>]*\/?>(?:<\/circle>)?/g)];
+  for (const match of circleMatches) {
+    const converted = circleToPath(match[0]);
+    if (converted) paths.push(converted);
+  }
+
+  // Convert line elements
+  const lineMatches = [...svg.matchAll(/<line[^>]*\/?>(?:<\/line>)?/g)];
+  for (const match of lineMatches) {
+    const converted = lineToPath(match[0]);
+    if (converted) paths.push(converted);
+  }
+
+  // Convert polyline elements
+  const polylineMatches = [...svg.matchAll(/<polyline[^>]*\/?>(?:<\/polyline>)?/g)];
+  for (const match of polylineMatches) {
+    const converted = polylineToPath(match[0]);
+    if (converted) paths.push(converted);
+  }
+
+  // Convert polygon elements
+  const polygonMatches = [...svg.matchAll(/<polygon[^>]*\/?>(?:<\/polygon>)?/g)];
+  for (const match of polygonMatches) {
+    const converted = polygonToPath(match[0]);
+    if (converted) paths.push(converted);
+  }
+
+  return paths.join(' ');
 }
 
 /**
@@ -132,16 +235,15 @@ export async function POST(request: NextRequest) {
     // Apply style adaptation
     const adaptedSvg = adaptSvgStyle(svg, targetStyle);
 
-    // Extract path data for storage
-    const path = extractPaths(adaptedSvg);
+    // Extract and convert all SVG elements to path data
+    const path = extractAllPaths(adaptedSvg);
     const viewBox = extractViewBox(adaptedSvg);
 
-    // If we couldn't extract a path, we need to keep the full SVG structure
-    // For now, still return the path (may be empty for complex SVGs)
+    console.log(`[Adapt API] Extracted path (${path.length} chars) from SVG`);
 
     return NextResponse.json({
       adaptedSvg,
-      path: path || extractPaths(svg), // Fallback to original paths
+      path: path || extractAllPaths(svg), // Fallback to original
       viewBox,
       targetStyle,
     });
