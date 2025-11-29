@@ -623,7 +623,7 @@ INPUT: "secure user"
 | **F2** | Ghost Preview | 2-3h | ✅ Complete | Show candidate between library icons |
 | **F3** | Component Indexer | 4-5h | ✅ Complete | Semantic tagging of icon parts |
 | **F4** | Kitbash Engine | 6-8h | ✅ Complete | Assembly from existing components |
-| **F5** | Skeleton-First UI | 4-5h | 🔴 Not Started | Composition approval before styling |
+| **F5** | Skeleton-First UI | 4-5h | ✅ Complete | Composition approval before styling |
 
 ### F1: Style Enforcer (Quick Win)
 
@@ -746,23 +746,61 @@ arrow-right (simple) → arrow-right [indicator] Tags: directional, forward
 4. If coverage > 70%: GRAFT (mechanical assembly)
 5. If coverage < 70%: HYBRID (AI fills gaps)
 
-### F5: Skeleton-First UI
+### F5: Skeleton-First UI ✅ COMPLETE
 
 **Goal:** Approve structure before committing to style.
 
+**Implementation:**
+
+1. **Mode Selection in AI Generator Modal:**
+   - New tabs: "Generate" (AI from scratch) vs "Kitbash" (component assembly)
+   - Mode affects the entire workflow - different buttons, different results
+   - Quick switch between modes while preserving concept input
+
+2. **Kitbash Planning UI:**
+   - "Plan Assembly" button calls `/api/kitbash?mode=plan`
+   - Displays strategy badge (GRAFT, HYBRID, ADAPT, GENERATE)
+   - Shows coverage percentage
+   - Lists found parts (✓ with confidence %) vs missing parts (⚠ AI will generate)
+
+3. **Layout Selection:**
+   - 3 layout options displayed as clickable cards
+   - Each shows layout name and description
+   - Selected layout highlighted with ring
+   - User chooses composition before executing
+
+4. **Execute & Preview:**
+   - "Assemble Icon" button executes with selected layout
+   - Assembled SVG shown in preview panel
+   - Save to Workspace works for kitbash results
+
+**UI Flow:**
 ```
 ┌─────────────────────────────────────────────────┐
-│  How should "secure user" look?                 │
+│  Creation Mode: [Generate] [Kitbash]            │
 │                                                 │
+│  Icon Concept: [secure user________]            │
+│                                                 │
+│  [Plan Assembly]                                │
+├─────────────────────────────────────────────────┤
+│  Assembly Plan              HYBRID 50%          │
+│                                                 │
+│  Found Parts      │  Missing Parts              │
+│  ✓ body (53%)     │  ⚠ head (AI)               │
+│                                                 │
+│  Select Layout:                                 │
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
-│  │ Shield  │  │ Badge   │  │ Overlay │        │
-│  │ Behind  │  │ Corner  │  │ Center  │        │
+│  │standard │  │ badge   │  │ dynamic │        │
+│  │ overlap │  │ overlay │  │  guard  │        │
 │  └─────────┘  └─────────┘  └─────────┘        │
-│      ○            ○            ●               │
+│      ●            ○            ○               │
 │                                                 │
-│  [Generate with Selected Layout]                │
+│  [Assemble Icon]                                │
 └─────────────────────────────────────────────────┘
 ```
+
+**Files Modified:**
+- `src/components/dialogs/AIIconGeneratorModal.tsx` - Full Kitbash UI integration
 
 ### Success Metrics
 

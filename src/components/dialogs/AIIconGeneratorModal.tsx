@@ -10,7 +10,7 @@ import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
 import { getRelatedSearchTerms } from "@/lib/iconify-service";
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle, Puzzle, Wand2, ChevronRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // P2: Iconify match interface
 interface IconifyMatch {
@@ -50,6 +51,28 @@ interface ComplianceInfo {
         autoFixed: boolean;
     }>;
     changesApplied: number;
+}
+
+// F5: Kitbash plan types
+interface KitbashLayout {
+    name: string;
+    description: string;
+}
+
+interface KitbashMatch {
+    partName: string;
+    sourceIcon: string;
+    confidence: number;
+}
+
+interface KitbashPlanResult {
+    concept: string;
+    requiredParts: string[];
+    foundParts: KitbashMatch[];
+    missingParts: string[];
+    coverage: number;
+    strategy: 'graft' | 'hybrid' | 'generate' | 'adapt';
+    suggestedLayouts: KitbashLayout[];
 }
 
 interface AIIconGeneratorModalProps {
@@ -109,6 +132,14 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         right: null,
     });
 
+    // F5: Kitbash mode state
+    const [generationMode, setGenerationMode] = useState<'generate' | 'kitbash'>('generate');
+    const [kitbashPlan, setKitbashPlan] = useState<KitbashPlanResult | null>(null);
+    const [isPlanning, setIsPlanning] = useState(false);
+    const [selectedLayoutIndex, setSelectedLayoutIndex] = useState(0);
+    const [kitbashSvg, setKitbashSvg] = useState<string | null>(null);
+    const [isExecutingKitbash, setIsExecutingKitbash] = useState(false);
+
     // Determine available libraries from ingested icons
     const availableLibraries = libraries.filter(lib => lib !== "custom");
 
@@ -160,6 +191,10 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setSelectedLibraryMatch(null);
             setCompliance(null); // F2: Reset compliance
             setGhostNeighbors({ left: null, right: null }); // F2: Reset ghost neighbors
+            // F5: Reset kitbash state
+            setKitbashPlan(null);
+            setSelectedLayoutIndex(0);
+            setKitbashSvg(null);
 
             // Load icon sources to access styleManifest
             getIconSources().then(sources => {
@@ -306,6 +341,165 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setIsImporting(false);
         }
     }, [effectiveLibrary, currentProject, iconSources, prompt, addIconToProject, onClose]);
+
+    // F5: Plan kitbash assembly
+    const handlePlanKitbash = useCallback(async () => {
+        if (!prompt.trim()) {
+            toast.error("Please enter an icon concept");
+            return;
+        }
+
+        if (!effectiveLibrary) {
+            toast.error("No icon library available");
+            return;
+        }
+
+        // Get icons for the effective library
+        const libraryIcons = globalIcons.filter(icon =>
+            icon.library === effectiveLibrary && icon.path
+        );
+
+        if (libraryIcons.length < 5) {
+            toast.error(`Not enough icons in "${effectiveLibrary}" library for kitbash.`);
+            return;
+        }
+
+        setIsPlanning(true);
+        setKitbashPlan(null);
+        setKitbashSvg(null);
+        setSelectedLayoutIndex(0);
+
+        try {
+            // Get styleManifest for the library
+            const librarySource = iconSources.find(s => s.name === effectiveLibrary);
+            const styleManifest = librarySource?.styleManifest;
+
+            const response = await fetch("/api/kitbash", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mode: "plan",
+                    concept: prompt.trim(),
+                    icons: libraryIcons.slice(0, 50), // Send icons with components
+                    styleManifest,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.details || error.error || "Planning failed");
+            }
+
+            const data = await response.json();
+            setKitbashPlan(data.plan);
+
+            if (data.plan.strategy === 'generate') {
+                toast.info("No matching components found. Consider using Generate mode instead.");
+            } else {
+                toast.success(`Found ${data.plan.foundParts.length}/${data.plan.requiredParts.length} components (${Math.round(data.plan.coverage * 100)}% coverage)`);
+            }
+        } catch (error) {
+            console.error("[F5] Kitbash planning failed:", error);
+            toast.error(error instanceof Error ? error.message : "Planning failed");
+        } finally {
+            setIsPlanning(false);
+        }
+    }, [prompt, effectiveLibrary, globalIcons, iconSources]);
+
+    // F5: Execute kitbash with selected layout
+    const handleExecuteKitbash = useCallback(async () => {
+        if (!kitbashPlan) {
+            toast.error("No plan available");
+            return;
+        }
+
+        if (!effectiveLibrary) {
+            toast.error("No library available");
+            return;
+        }
+
+        const libraryIcons = globalIcons.filter(icon =>
+            icon.library === effectiveLibrary && icon.path
+        );
+
+        setIsExecutingKitbash(true);
+        setKitbashSvg(null);
+
+        try {
+            const librarySource = iconSources.find(s => s.name === effectiveLibrary);
+            const styleManifest = librarySource?.styleManifest;
+
+            const response = await fetch("/api/kitbash", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mode: "execute",
+                    concept: prompt.trim(),
+                    icons: libraryIcons.slice(0, 50),
+                    plan: kitbashPlan,
+                    layoutIndex: selectedLayoutIndex,
+                    styleManifest,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.details || error.error || "Execution failed");
+            }
+
+            const data = await response.json();
+            setKitbashSvg(data.svg);
+
+            if (data.usedGeneration) {
+                toast.success(`Assembled icon with ${data.generatedParts?.length || 0} AI-generated parts`);
+            } else {
+                toast.success("Icon assembled from library components!");
+            }
+        } catch (error) {
+            console.error("[F5] Kitbash execution failed:", error);
+            toast.error(error instanceof Error ? error.message : "Assembly failed");
+        } finally {
+            setIsExecutingKitbash(false);
+        }
+    }, [kitbashPlan, effectiveLibrary, globalIcons, iconSources, prompt, selectedLayoutIndex]);
+
+    // F5: Save kitbash result
+    const handleSaveKitbash = useCallback(async () => {
+        if (!kitbashSvg || !currentProject) return;
+
+        setIsSaving(true);
+        try {
+            // Extract viewBox and path from SVG
+            const viewBoxMatch = kitbashSvg.match(/viewBox="([^"]+)"/);
+            const pathMatches = [...kitbashSvg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
+
+            if (pathMatches.length === 0) {
+                throw new Error("Could not extract path from kitbash SVG");
+            }
+
+            const combinedPath = pathMatches.map(match => match[1]).join(' ');
+
+            const newIcon = {
+                id: crypto.randomUUID(),
+                name: prompt || "Kitbashed Icon",
+                library: "custom",
+                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
+                path: combinedPath,
+                tags: ["ai-generated", "kitbash", "sprout"],
+                categories: ["Generated"],
+                renderStyle: "stroke" as const,
+            };
+
+            addIconToProject(newIcon, true);
+            toast.success(`"${prompt}" saved to workspace!`);
+            onClose();
+        } catch (error) {
+            console.error('[F5] Save error:', error);
+            toast.error(error instanceof Error ? error.message : "Failed to save icon");
+        } finally {
+            setIsSaving(false);
+        }
+    }, [kitbashSvg, currentProject, prompt, addIconToProject, onClose]);
 
     const handleGenerate = async () => {
         if (!prompt.trim()) {
@@ -568,87 +762,134 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             )}
                         </div>
 
+                        {/* F5: Mode Selection */}
                         <div className="space-y-2">
-                            <Label>Variants</Label>
-                            <Select value={variantCount.toString()} onValueChange={(v) => setVariantCount(parseInt(v))}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="1">1 variant</SelectItem>
-                                    <SelectItem value="2">2 variants</SelectItem>
-                                    <SelectItem value="3">3 variants</SelectItem>
-                                    <SelectItem value="4">4 variants</SelectItem>
-                                    <SelectItem value="5">5 variants</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Label>Creation Mode</Label>
+                            <Tabs value={generationMode} onValueChange={(v) => setGenerationMode(v as 'generate' | 'kitbash')} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="generate" className="text-xs">
+                                        <Wand2 className="w-3 h-3 mr-1.5" />
+                                        Generate
+                                    </TabsTrigger>
+                                    <TabsTrigger value="kitbash" className="text-xs">
+                                        <Puzzle className="w-3 h-3 mr-1.5" />
+                                        Kitbash
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                            <p className="text-[10px] text-muted-foreground">
+                                {generationMode === 'generate'
+                                    ? "AI generates new icon from scratch"
+                                    : "Assemble from existing library components"}
+                            </p>
                         </div>
 
-                        {/* Advanced Options Toggle */}
-                        <div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-xs text-muted-foreground"
-                                onClick={() => setShowAdvanced(!showAdvanced)}
-                            >
-                                <Settings2 className="w-3 h-3 mr-2" />
-                                {showAdvanced ? "Hide" : "Show"} Advanced Options
-                            </Button>
-                            {showAdvanced && (
-                                <div className="space-y-3 pt-2 px-1">
-                                    <div className="space-y-1">
-                                        <Label className="text-xs flex justify-between">
-                                            <span>Few-shot Examples</span>
-                                            <span className="text-muted-foreground">{fewShotCount}</span>
-                                        </Label>
-                                        <input
-                                            type="range"
-                                            min="1"
-                                            max="8"
-                                            step="1"
-                                            value={fewShotCount}
-                                            onChange={(e) => setFewShotCount(Number(e.target.value))}
-                                            className="w-full h-2"
-                                        />
+                        {/* Generate mode options */}
+                        {generationMode === 'generate' && (
+                            <div className="space-y-2">
+                                <Label>Variants</Label>
+                                <Select value={variantCount.toString()} onValueChange={(v) => setVariantCount(parseInt(v))}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1">1 variant</SelectItem>
+                                        <SelectItem value="2">2 variants</SelectItem>
+                                        <SelectItem value="3">3 variants</SelectItem>
+                                        <SelectItem value="4">4 variants</SelectItem>
+                                        <SelectItem value="5">5 variants</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {/* Advanced Options Toggle (Generate mode only) */}
+                        {generationMode === 'generate' && (
+                            <div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start text-xs text-muted-foreground"
+                                    onClick={() => setShowAdvanced(!showAdvanced)}
+                                >
+                                    <Settings2 className="w-3 h-3 mr-2" />
+                                    {showAdvanced ? "Hide" : "Show"} Advanced Options
+                                </Button>
+                                {showAdvanced && (
+                                    <div className="space-y-3 pt-2 px-1">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs flex justify-between">
+                                                <span>Few-shot Examples</span>
+                                                <span className="text-muted-foreground">{fewShotCount}</span>
+                                            </Label>
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="8"
+                                                step="1"
+                                                value={fewShotCount}
+                                                onChange={(e) => setFewShotCount(Number(e.target.value))}
+                                                className="w-full h-2"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-xs flex justify-between">
+                                                <span>Temperature</span>
+                                                <span className="text-muted-foreground">{temperature.toFixed(1)}</span>
+                                            </Label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="1"
+                                                step="0.1"
+                                                value={temperature}
+                                                onChange={(e) => setTemperature(Number(e.target.value))}
+                                                className="w-full h-2"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-xs flex justify-between">
-                                            <span>Temperature</span>
-                                            <span className="text-muted-foreground">{temperature.toFixed(1)}</span>
-                                        </Label>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="1"
-                                            step="0.1"
-                                            value={temperature}
-                                            onChange={(e) => setTemperature(Number(e.target.value))}
-                                            className="w-full h-2"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
 
                         <div className="mt-auto">
-                            <Button
-                                className="w-full"
-                                onClick={handleGenerate}
-                                disabled={!prompt.trim() || isGenerating || globalIcons.length < 10}
-                            >
-                                {isGenerating ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Generating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-4 h-4 mr-2" />
-                                        Generate Icon
-                                    </>
-                                )}
-                            </Button>
+                            {generationMode === 'generate' ? (
+                                <Button
+                                    className="w-full"
+                                    onClick={handleGenerate}
+                                    disabled={!prompt.trim() || isGenerating || globalIcons.length < 10}
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Generating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4 mr-2" />
+                                            Generate Icon
+                                        </>
+                                    )}
+                                </Button>
+                            ) : (
+                                <Button
+                                    className="w-full"
+                                    onClick={handlePlanKitbash}
+                                    disabled={!prompt.trim() || isPlanning || globalIcons.length < 5}
+                                >
+                                    {isPlanning ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Planning...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Puzzle className="w-4 h-4 mr-2" />
+                                            Plan Assembly
+                                        </>
+                                    )}
+                                </Button>
+                            )}
                             {globalIcons.length < 10 && (
                                 <p className="text-xs text-destructive mt-2 text-center">
                                     Ingest an icon library first to enable generation
@@ -776,6 +1017,142 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                     </Button>
                                 )}
                                 <Separator className="mt-3" />
+                            </div>
+                        )}
+
+                        {/* F5: Kitbash Plan Results */}
+                        {generationMode === 'kitbash' && kitbashPlan && (
+                            <div className="mb-4 p-3 rounded-lg border bg-muted/30">
+                                {/* Strategy & Coverage Header */}
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <Puzzle className="w-4 h-4 text-primary" />
+                                        <span className="text-sm font-medium">Assembly Plan</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className={cn(
+                                            "text-xs px-2 py-0.5 rounded-full font-medium uppercase",
+                                            kitbashPlan.strategy === 'graft' && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                                            kitbashPlan.strategy === 'hybrid' && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+                                            kitbashPlan.strategy === 'adapt' && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+                                            kitbashPlan.strategy === 'generate' && "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+                                        )}>
+                                            {kitbashPlan.strategy}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {Math.round(kitbashPlan.coverage * 100)}% coverage
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Found & Missing Parts */}
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <Label className="text-[10px] text-muted-foreground mb-1 block">Found Parts</Label>
+                                        <div className="space-y-1">
+                                            {kitbashPlan.foundParts.length > 0 ? (
+                                                kitbashPlan.foundParts.map((part, i) => (
+                                                    <div key={i} className="flex items-center gap-1 text-xs">
+                                                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                                        <span className="truncate">{part.partName}</span>
+                                                        <span className="text-[9px] text-muted-foreground">
+                                                            ({Math.round(part.confidence * 100)}%)
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">None</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-[10px] text-muted-foreground mb-1 block">Missing Parts</Label>
+                                        <div className="space-y-1">
+                                            {kitbashPlan.missingParts.length > 0 ? (
+                                                kitbashPlan.missingParts.map((part, i) => (
+                                                    <div key={i} className="flex items-center gap-1 text-xs">
+                                                        <AlertCircle className="w-3 h-3 text-yellow-500" />
+                                                        <span className="truncate">{part}</span>
+                                                        <span className="text-[9px] text-muted-foreground">(AI)</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <span className="text-xs text-green-600">All parts found!</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Layout Selection */}
+                                {kitbashPlan.suggestedLayouts.length > 0 && (
+                                    <div className="mb-3">
+                                        <Label className="text-[10px] text-muted-foreground mb-2 block">Select Layout</Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {kitbashPlan.suggestedLayouts.map((layout, index) => (
+                                                <button
+                                                    key={layout.name}
+                                                    onClick={() => setSelectedLayoutIndex(index)}
+                                                    className={cn(
+                                                        "p-2 rounded-md border text-left transition-all",
+                                                        selectedLayoutIndex === index
+                                                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                                                            : "border-muted hover:border-muted-foreground/30"
+                                                    )}
+                                                >
+                                                    <div className="text-[10px] font-medium truncate">
+                                                        {layout.name.replace(/_/g, ' ')}
+                                                    </div>
+                                                    <div className="text-[9px] text-muted-foreground line-clamp-2 mt-0.5">
+                                                        {layout.description}
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Execute Button */}
+                                <Button
+                                    className="w-full"
+                                    onClick={handleExecuteKitbash}
+                                    disabled={isExecutingKitbash || kitbashPlan.strategy === 'generate'}
+                                >
+                                    {isExecutingKitbash ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Assembling...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChevronRight className="w-4 h-4 mr-2" />
+                                            Assemble Icon
+                                        </>
+                                    )}
+                                </Button>
+
+                                {kitbashPlan.strategy === 'generate' && (
+                                    <p className="text-[10px] text-muted-foreground text-center mt-2">
+                                        No components found. Switch to Generate mode for this concept.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* F5: Kitbash Result Preview */}
+                        {generationMode === 'kitbash' && kitbashSvg && (
+                            <div className="mb-4 p-3 rounded-lg border bg-muted/30">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                    <span className="text-sm font-medium">Assembled Icon</span>
+                                </div>
+                                <div className="flex justify-center">
+                                    <div className="w-24 h-24 p-3 rounded-lg border-2 border-primary bg-background">
+                                        <div
+                                            className="w-full h-full text-foreground"
+                                            dangerouslySetInnerHTML={{ __html: renderSvgPreview(kitbashSvg) }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -927,22 +1304,41 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             <Button variant="outline" onClick={onClose}>
                                 Cancel
                             </Button>
-                            <Button
-                                onClick={handleSave}
-                                disabled={selectedSvgIndex === null || isSaving}
-                            >
-                                {isSaving ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Download className="w-4 h-4 mr-2" />
-                                        Save to Workspace
-                                    </>
-                                )}
-                            </Button>
+                            {generationMode === 'generate' ? (
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={selectedSvgIndex === null || isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download className="w-4 h-4 mr-2" />
+                                            Save to Workspace
+                                        </>
+                                    )}
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={handleSaveKitbash}
+                                    disabled={!kitbashSvg || isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download className="w-4 h-4 mr-2" />
+                                            Save to Workspace
+                                        </>
+                                    )}
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
