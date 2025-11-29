@@ -577,15 +577,152 @@ Geometric Traits: circular elements, angular lines, geometric representation
 
 ---
 
+## 8b. Forgery Engine Roadmap (Next Phase)
+
+> **PRD:** See `PRD-forgery-engine.md` for detailed implementation plan
+
+### Vision
+
+Transform from "AI sketch artist" to "Vector Forgery Engine". The goal is **indistinguishable forgery** - icons that are mathematically identical in style because they're assembled from the library's actual parts.
+
+### Core Insight
+
+> "Why generate paths from scratch when we can assemble from proven parts?"
+
+LLMs are bad at precise geometry but good at concepts. Instead of asking the AI to draw, ask it to identify components and mechanically assemble them.
+
+### Architecture
+
+```
+INPUT: "secure user"
+       │
+       ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   SEMANTIC   │───▶│   KITBASH    │───▶│   DECISION   │
+│   INDEXER    │    │   MATCHER    │    │   GATE       │
+│              │    │              │    │              │
+│ What parts   │    │ Do we have   │    │ Coverage>70%?│
+│ exist?       │    │ these parts? │    │ GRAFT/HYBRID │
+└──────────────┘    └──────────────┘    └──────────────┘
+       │                                        │
+       ▼                                        ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   STYLE      │◀───│   GHOST      │◀───│   SKELETON   │
+│   ENFORCER   │    │   PREVIEW    │    │   COMPOSER   │
+│              │    │              │    │              │
+│ Deterministic│    │ Context View │    │ Layout       │
+│ SVG mutation │    │ w/ neighbors │    │ options      │
+└──────────────┘    └──────────────┘    └──────────────┘
+```
+
+### Implementation Phases
+
+| Phase | Name | Effort | Status | Description |
+|-------|------|--------|--------|-------------|
+| **F1** | Style Enforcer | 3-4h | ✅ Complete | Deterministic SVG mutation for compliance |
+| **F2** | Ghost Preview | 2-3h | 🔴 Not Started | Show candidate between library icons |
+| **F3** | Component Indexer | 4-5h | 🔴 Not Started | Semantic tagging of icon parts |
+| **F4** | Kitbash Engine | 6-8h | 🔴 Not Started | Assembly from existing components |
+| **F5** | Skeleton-First UI | 4-5h | 🔴 Not Started | Composition approval before styling |
+
+### F1: Style Enforcer (Quick Win)
+
+**Goal:** Turn passive style analysis into active enforcement.
+
+```typescript
+// After generation, enforce compliance
+const rules = rulesFromStyleDNA(styleSpec);
+const compliance = enforceStyle(svg, rules);
+// compliance.autoFixed has mathematically correct stroke-width, linecap, etc.
+```
+
+**Key Functions:**
+- `enforceStyle(svg, rules)` → Returns auto-fixed SVG
+- `rulesFromStyleDNA(styleSpec)` → Converts Style DNA to enforcement rules
+- Violations are logged with before/after values
+
+### F2: Ghost Preview
+
+**Goal:** Visual context for instant quality assessment.
+
+```
+┌─────────────────────────────────────────────────┐
+│     Home        CANDIDATE      Settings         │
+│   ┌─────┐       ┌─────┐       ┌─────┐          │
+│   │  🏠 │       │ 🛡👤│       │  ⚙️ │          │
+│   └─────┘       └─────┘       └─────┘          │
+│                                                 │
+│   Compliance: 94/100                            │
+│   ✅ Stroke Width  ✅ Linecap  ⚠️ Optical Weight│
+└─────────────────────────────────────────────────┘
+```
+
+### F3: Component Indexer
+
+**Goal:** Know **what** is in the library, not just **how** it's styled.
+
+```typescript
+interface IconComponent {
+  name: string;           // "arrow-head", "user-body"
+  category: string;       // "body", "modifier", "indicator"
+  pathData: string;       // Actual 'd' attribute
+  boundingBox: BoundingBox;
+}
+
+// Index built during enrichment
+// Enables: "find icons with arrow-head component"
+```
+
+### F4: Kitbash Engine
+
+**Goal:** Assemble icons from proven parts instead of generating from scratch.
+
+**Process:**
+1. Decompose concept: "secure user" → ["user", "shield"]
+2. Search component index for matches
+3. Calculate coverage (% of parts found)
+4. If coverage > 70%: GRAFT (mechanical assembly)
+5. If coverage < 70%: HYBRID (AI fills gaps)
+
+### F5: Skeleton-First UI
+
+**Goal:** Approve structure before committing to style.
+
+```
+┌─────────────────────────────────────────────────┐
+│  How should "secure user" look?                 │
+│                                                 │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
+│  │ Shield  │  │ Badge   │  │ Overlay │        │
+│  │ Behind  │  │ Corner  │  │ Center  │        │
+│  └─────────┘  └─────────┘  └─────────┘        │
+│      ○            ○            ●               │
+│                                                 │
+│  [Generate with Selected Layout]                │
+└─────────────────────────────────────────────────┘
+```
+
+### Success Metrics
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| Style compliance | ~70% | 100% (enforced) |
+| First-attempt acceptance | ~40% | 80% |
+| Composition accuracy | ~60% | 90% |
+| Kitbash generation time | N/A | <2s |
+
+---
+
 ## 9. Quick Reference
 
 ### Hot Files (Most Modified)
 ```
 src/lib/hybrid-generator.ts      # Native SVG generation
+src/lib/style-enforcer.ts        # Forgery Engine F1 - style compliance
 src/lib/similar-icon-finder.ts   # Trait-aware selection
 src/lib/decomposition-service.ts # Icon structure
 src/lib/svg-prompt-builder.ts    # Prompt construction
-src/lib/iconify-service.ts       # Iconify API integration (NEW)
+src/lib/iconify-service.ts       # Iconify API integration
 src/components/dialogs/AIIconGeneratorModal.tsx
 ```
 

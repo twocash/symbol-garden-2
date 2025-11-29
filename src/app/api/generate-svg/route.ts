@@ -145,6 +145,19 @@ export async function POST(req: NextRequest) {
           tokensUsed: result.tokensUsed,
           attempts: result.attempts,
         },
+        // F1: Style compliance information
+        compliance: result.compliance ? {
+          passed: result.compliance.passed,
+          score: result.compliance.score,
+          violations: result.compliance.violations.map(v => ({
+            rule: v.rule,
+            expected: v.expected,
+            actual: v.actual,
+            severity: v.severity,
+            autoFixed: v.autoFixable,
+          })),
+          changesApplied: result.compliance.changes.length,
+        } : undefined,
       });
     } else {
       const results = await generateIconVariants(config, variantCount);
@@ -158,6 +171,13 @@ export async function POST(req: NextRequest) {
           tokensUsed: results.reduce((sum, r) => sum + r.tokensUsed, 0),
           variantCount: results.length,
         },
+        // F1: Style compliance for all variants
+        compliance: results.map(r => r.compliance ? {
+          passed: r.compliance.passed,
+          score: r.compliance.score,
+          violationCount: r.compliance.violations.length,
+          changesApplied: r.compliance.changes.length,
+        } : undefined),
       });
     }
   } catch (error) {

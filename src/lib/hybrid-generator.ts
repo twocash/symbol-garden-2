@@ -19,6 +19,7 @@ import { buildSvgPrompt, combineSvgPrompt, BuiltSvgPrompt, StyleSpec, parseStyle
 import { analyzeLibrary, LibraryAnalysis, quickAnalyzeLibrary } from './library-analyzer';
 import { validateSvg, ValidationResult, formatValidationResult, normalizeSvg } from './svg-validator';
 import { getStructuralReference, StructuralReference } from './iconify-service';
+import { enforceStyle, rulesFromStyleDNA, ComplianceResult, formatComplianceResult, EnforcementRules, FEATHER_RULES } from './style-enforcer';
 
 /**
  * Configuration for icon generation
@@ -110,6 +111,9 @@ export interface GenerationResult {
 
   /** P1c: Structural reference from cross-library analysis (if used) */
   structuralReference?: StructuralReference | null;
+
+  /** F1: Style compliance result from the Forgery Engine */
+  compliance?: ComplianceResult;
 }
 
 // Cache for library analyses
@@ -395,9 +399,36 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     }
   }
 
-  // Normalize SVG to ensure stroke-only rendering (add fill="none" to all elements)
-  // Also enforce styleSpec attributes (stroke-linecap, stroke-linejoin) if available
-  svg = normalizeSvg(svg, styleSpec);
+  // F1: Style Enforcer - Deterministic style compliance
+  // This is the core of the Forgery Engine - guarantee style match
+  let compliance: ComplianceResult | undefined;
+
+  // Build enforcement rules from style spec or use defaults
+  const rules: EnforcementRules = styleSpec
+    ? rulesFromStyleDNA(styleSpec)
+    : FEATHER_RULES; // Default to Feather-style rules
+
+  // Run the enforcer
+  compliance = enforceStyle(svg, rules);
+
+  // Log compliance result
+  console.log(`[StyleEnforcer] ${compliance.passed ? 'PASS' : 'FAIL'} (Score: ${compliance.score}/100)`);
+  if (compliance.changes.length > 0) {
+    console.log(`[StyleEnforcer] Auto-fixed: ${compliance.changes.map(c => c.attribute).join(', ')}`);
+  }
+  if (compliance.violations.length > 0) {
+    const errors = compliance.violations.filter(v => v.severity === 'error');
+    const warnings = compliance.violations.filter(v => v.severity === 'warning');
+    if (errors.length > 0) {
+      console.log(`[StyleEnforcer] Errors fixed: ${errors.map(e => e.rule).join(', ')}`);
+    }
+    if (warnings.length > 0) {
+      console.log(`[StyleEnforcer] Warnings: ${warnings.map(w => `${w.rule}(${w.actual})`).join(', ')}`);
+    }
+  }
+
+  // Always use the auto-fixed version
+  svg = compliance.autoFixed;
 
   return {
     svg,
@@ -410,6 +441,7 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     validation,
     wasFixed,
     structuralReference,  // P1c: Include cross-library consensus if used
+    compliance,  // F1: Include style compliance result
   };
 }
 
