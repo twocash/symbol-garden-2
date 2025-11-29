@@ -621,7 +621,7 @@ INPUT: "secure user"
 |-------|------|--------|--------|-------------|
 | **F1** | Style Enforcer | 3-4h | ✅ Complete | Deterministic SVG mutation for compliance |
 | **F2** | Ghost Preview | 2-3h | ✅ Complete | Show candidate between library icons |
-| **F3** | Component Indexer | 4-5h | 🔴 Not Started | Semantic tagging of icon parts |
+| **F3** | Component Indexer | 4-5h | ✅ Complete | Semantic tagging of icon parts |
 | **F4** | Kitbash Engine | 6-8h | 🔴 Not Started | Assembly from existing components |
 | **F5** | Skeleton-First UI | 4-5h | 🔴 Not Started | Composition approval before styling |
 
@@ -657,20 +657,47 @@ const compliance = enforceStyle(svg, rules);
 └─────────────────────────────────────────────────┘
 ```
 
-### F3: Component Indexer
+### F3: Component Indexer ✅ COMPLETE
 
 **Goal:** Know **what** is in the library, not just **how** it's styled.
 
-```typescript
-interface IconComponent {
-  name: string;           // "arrow-head", "user-body"
-  category: string;       // "body", "modifier", "indicator"
-  pathData: string;       // Actual 'd' attribute
-  boundingBox: BoundingBox;
-}
+**Implementation:**
 
-// Index built during enrichment
-// Enables: "find icons with arrow-head component"
+1. **New File: `src/lib/component-indexer.ts`**
+   - `IconComponent` interface with category, pathData, boundingBox, semanticTags
+   - `indexIconComponents(icon, apiKey)` - LLM-based semantic analysis
+   - `buildComponentIndex(icons)` - Build searchable index by name/tag/category
+   - `searchComponents(index, query)` - Find matching components
+   - Bounding box calculation from path commands
+
+2. **Updated Schema: `src/types/schema.ts`**
+   - Added `ComponentCategorySchema` (body, head, modifier, container, indicator, detail, connector)
+   - Added `BoundingBoxSchema` and `IconComponentSchema`
+   - Extended `IconSchema` with `components` and `componentSignature` fields
+
+3. **New API: `/api/index-components`**
+   - POST endpoint accepts icons array
+   - Returns component analysis with stats
+   - Enables batch component indexing
+
+**Component Categories:**
+```typescript
+type ComponentCategory =
+  | 'body'        // Main shape (user torso, document rectangle)
+  | 'head'        // Top element (user head, arrow point)
+  | 'modifier'    // Badge, indicator, status symbol
+  | 'container'   // Enclosing shape (circle, shield, square)
+  | 'indicator'   // Check, x, plus, minus, arrow
+  | 'detail'      // Internal lines, decorative elements
+  | 'connector';  // Lines joining other elements
+```
+
+**Test Output:**
+```
+user (simple) → user-figure [body] Tags: person, human, profile
+check (simple) → check-mark [indicator] Tags: validation, success
+shield (simple) → shield-body [container] Tags: protection, security
+arrow-right (simple) → arrow-right [indicator] Tags: directional, forward
 ```
 
 ### F4: Kitbash Engine
@@ -719,6 +746,7 @@ interface IconComponent {
 ```
 src/lib/hybrid-generator.ts      # Native SVG generation
 src/lib/style-enforcer.ts        # Sprout Engine F1 - style compliance
+src/lib/component-indexer.ts     # Sprout Engine F3 - semantic component tagging
 src/lib/similar-icon-finder.ts   # Trait-aware selection
 src/lib/decomposition-service.ts # Icon structure
 src/lib/svg-prompt-builder.ts    # Prompt construction
@@ -793,6 +821,27 @@ type GeometricTrait =
   | 'symmetry'      // Bilateral/radial
   | 'open-path'     // Unclosed strokes
   | 'compound';     // Multiple disconnected shapes
+
+// F3: Component types for Kitbash Engine
+interface IconComponent {
+  name: string;             // "arrow-head", "user-body"
+  category: ComponentCategory;
+  pathData: string;         // 'd' attribute or element attributes
+  elementType: 'path' | 'circle' | 'rect' | 'line' | 'polyline' | 'ellipse';
+  boundingBox: BoundingBox;
+  semanticTags: string[];   // ["directional", "upward"]
+  sourceIcon: string;       // Icon ID this came from
+  weight: number;           // Visual weight 0-1
+}
+
+type ComponentCategory =
+  | 'body'        // Main shape
+  | 'head'        // Top element
+  | 'modifier'    // Badge, status
+  | 'container'   // Enclosing shape
+  | 'indicator'   // Check, arrow
+  | 'detail'      // Internal lines
+  | 'connector';  // Joining lines
 ```
 
 ---

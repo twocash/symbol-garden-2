@@ -16,6 +16,42 @@ export const GeometricTraitSchema = z.enum([
 ]);
 export type GeometricTrait = z.infer<typeof GeometricTraitSchema>;
 
+// Component categories for Sprout Engine (F3)
+export const ComponentCategorySchema = z.enum([
+  'body',        // Main shape (user torso, document rectangle)
+  'head',        // Top element (user head, arrow point)
+  'modifier',    // Badge, indicator, status symbol
+  'container',   // Enclosing shape (circle, shield, square)
+  'indicator',   // Check, x, plus, minus, arrow
+  'detail',      // Internal lines, decorative elements
+  'connector',   // Lines joining other elements
+]);
+export type ComponentCategory = z.infer<typeof ComponentCategorySchema>;
+
+// Bounding box for component positioning
+export const BoundingBoxSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  width: z.number(),
+  height: z.number(),
+  centerX: z.number(),
+  centerY: z.number(),
+});
+export type BoundingBox = z.infer<typeof BoundingBoxSchema>;
+
+// A discrete visual component within an icon (Sprout Engine F3)
+export const IconComponentSchema = z.object({
+  name: z.string(),
+  category: ComponentCategorySchema,
+  pathData: z.string(),
+  elementType: z.enum(['path', 'circle', 'rect', 'line', 'polyline', 'ellipse']),
+  boundingBox: BoundingBoxSchema,
+  semanticTags: z.array(z.string()),
+  sourceIcon: z.string(),
+  weight: z.number().min(0).max(1),
+});
+export type IconComponent = z.infer<typeof IconComponentSchema>;
+
 // AI-extracted metadata for smart sample selection
 export const AiMetadataSchema = z.object({
   // Semantic Category (mutually exclusive)
@@ -45,6 +81,9 @@ export const IconSchema = z.object({
   aiDescription: z.string().optional(),
   // NEW: AI-extracted metadata for smart sample selection
   aiMetadata: AiMetadataSchema.optional(),
+  // Sprout Engine F3: Semantic component breakdown
+  components: z.array(IconComponentSchema).optional(),
+  componentSignature: z.string().optional(), // Quick signature for matching (e.g., "user-body+user-head")
 });
 
 export type Icon = z.infer<typeof IconSchema>;
