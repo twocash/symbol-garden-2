@@ -813,12 +813,55 @@ Component index should be cached:
 
 ---
 
+## Future Enhancement: Reference-Guided Generation
+
+### Concept
+
+When a user searches Iconify and finds an icon they like (e.g., a Lucide rocket), they could select it as a **structural reference** rather than importing it directly. The system would then generate a new icon with:
+
+- **Structure/Composition** from the selected Iconify icon
+- **Style** (stroke-width, linecap, corners) from the user's target library
+
+### UI Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Found in other libraries:                                               │
+│                                                                          │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐                    │
+│  │  🚀     │  │  🚀     │  │  🚀     │  │  🚀     │                    │
+│  │ Lucide  │  │ Tabler  │  │ Phosphor│  │ Hero    │                    │
+│  └─────────┘  └─────────┘  └─────────┘  └─────────┘                    │
+│       ●                                                                  │
+│                                                                          │
+│  [Import & Adapt]  [Use as Reference →]                                 │
+│                                                                          │
+│  ℹ️ "Use as Reference" generates a new icon inspired by this             │
+│     composition, styled to match your FontAwesome library                │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Implementation
+
+1. Pass selected Iconify SVG as `structuralReference` to generation prompt
+2. Prompt instructs LLM: "Create an icon with similar spatial arrangement to this reference, but using ONLY the style attributes from the target library"
+3. Style Enforcer guarantees compliance post-generation
+
+### Value
+
+- **Better composition** - User can pick proven layouts from 275k+ icons
+- **Guaranteed style** - Output matches target library exactly
+- **Best of both worlds** - Iconify's variety + local library's consistency
+
+---
+
 ## Open Questions
 
 1. **Component naming conventions:** How to ensure consistent naming across LLM calls?
 2. **Complex icons:** How to handle icons with 10+ paths?
 3. **Hybrid generation:** What's the best prompt for "fill in the gaps"?
 4. **Path simplification:** When optical weight is too high, how to simplify?
+5. **Reference-guided prompting:** What's the optimal way to describe a reference icon's composition to the LLM without it copying style?
 
 ---
 
