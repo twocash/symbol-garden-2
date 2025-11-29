@@ -1,5 +1,34 @@
 import { z } from "zod";
 
+// Semantic categories for smart sample selection
+export const SemanticCategorySchema = z.enum(['object', 'action', 'ui', 'abstract']);
+export type SemanticCategory = z.infer<typeof SemanticCategorySchema>;
+
+// Geometric traits for identifying edge cases
+export const GeometricTraitSchema = z.enum([
+  'containment',    // elements inside other elements (battery, folder)
+  'intersection',   // crossing/overlapping strokes (scissors, link)
+  'nested',         // recursive structure (folder in folder)
+  'fine-detail',    // small precise elements (eye pupil, checkbox)
+  'symmetry',       // bilateral or radial symmetry
+  'open-path',      // unclosed strokes (check, arrow)
+  'compound',       // multiple disconnected shapes
+]);
+export type GeometricTrait = z.infer<typeof GeometricTraitSchema>;
+
+// AI-extracted metadata for smart sample selection
+export const AiMetadataSchema = z.object({
+  // Semantic Category (mutually exclusive)
+  semanticCategory: SemanticCategorySchema,
+  // Geometric Complexity (1-5 scale)
+  complexity: z.number().min(1).max(5),
+  // Geometric Characteristics (can have multiple)
+  geometricTraits: z.array(GeometricTraitSchema),
+  // Confidence that this classification is correct (0-1)
+  confidence: z.number().min(0).max(1).default(0.8),
+});
+export type AiMetadata = z.infer<typeof AiMetadataSchema>;
+
 export const IconSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -14,6 +43,8 @@ export const IconSchema = z.object({
   categories: z.array(z.string()).optional(),
   synonyms: z.array(z.string()).optional(),
   aiDescription: z.string().optional(),
+  // NEW: AI-extracted metadata for smart sample selection
+  aiMetadata: AiMetadataSchema.optional(),
 });
 
 export type Icon = z.infer<typeof IconSchema>;
