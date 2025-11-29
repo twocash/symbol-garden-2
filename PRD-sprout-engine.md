@@ -1,4 +1,4 @@
-# PRD: Forgery Engine - Vector Assembly for Indistinguishable Icons
+# PRD: Sprout Engine - Vector Assembly for Native-Quality Icons
 
 **Version:** 1.0
 **Date:** 2025-11-29
@@ -11,13 +11,13 @@
 
 Symbol Garden's AI generation treats the LLM as a "sketch artist" - asking it to draw icons from scratch. This leads to inconsistent results because LLMs are fundamentally bad at precise geometry but good at concepts.
 
-The **Forgery Engine** flips this paradigm: treat the AI as a **Vector Engineer** that assembles icons from existing library parts. A perfect forgery isn't drawn from memory; it's assembled from spare parts of the existing library.
+The **Sprout Engine** flips this paradigm: treat the AI as a **Vector Engineer** that assembles icons from existing library parts. A perfect sprout isn't drawn from memory; it's grown from the genetic material of the existing library.
 
 ### Core Insight
 
 > "Why generate paths from scratch when we can assemble from proven parts?"
 
-The goal is **indistinguishable forgery** - generated icons that are mathematically identical in style because they're literally built from the library's DNA.
+The goal is **indistinguishable native quality** - generated icons that are mathematically identical in style because they're literally built from the library's DNA.
 
 ---
 
@@ -33,9 +33,9 @@ The goal is **indistinguishable forgery** - generated icons that are mathematica
 | Wasted API calls | Generate → Reject → Regenerate cycle | Slow, expensive, frustrating |
 | No quality guarantee | Probabilistic output, hope for the best | Production unusable results |
 
-### The Forgery Standard
+### The Native Standard
 
-An icon passes the "forgery test" if a designer cannot distinguish it from native library icons when shown in context. This requires:
+An icon passes the "native test" if a designer cannot distinguish it from native library icons when shown in context. This requires:
 
 1. **Identical stroke attributes** - Not "similar", mathematically same
 2. **Consistent corner treatment** - Same radius curves
@@ -44,13 +44,13 @@ An icon passes the "forgery test" if a designer cannot distinguish it from nativ
 
 ---
 
-## Solution: The Forgery Engine
+## Solution: The Sprout Engine
 
 ### Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         FORGERY ENGINE                                   │
+│                         SPROUT ENGINE                                    │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  INPUT: "secure user"                                                    │
@@ -864,4 +864,4 @@ Component index should be cached:
 
 ---
 
-*This document defines the roadmap for transforming Symbol Garden from "AI sketch artist" to "Vector Forgery Engine".*
+*This document defines the roadmap for transforming Symbol Garden from "AI sketch artist" to "Vector Sprout Engine".*

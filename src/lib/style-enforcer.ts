@@ -1,12 +1,12 @@
 /**
  * Style Enforcer - Deterministic SVG mutation for guaranteed style compliance
  *
- * Part of the Forgery Engine (F1)
+ * Part of the Sprout Engine (F1)
  *
  * Philosophy: Don't hope the generated SVG matches the library style - FORCE it.
  * This module turns passive style analysis into active enforcement.
  *
- * A "forgery" passes if a designer cannot distinguish it from native library icons.
+ * A "sprout" passes if a designer cannot distinguish it from native library icons.
  * We achieve this by mathematically guaranteeing style attribute compliance.
  */
 

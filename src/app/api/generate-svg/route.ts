@@ -1,7 +1,7 @@
 /**
  * API Route: Generate SVG Icon
  *
- * Creates "master forgeries" - new icons that perfectly match an ingested library's style.
+ * Sprouts native-quality icons that perfectly match an ingested library's style.
  *
  * POST /api/generate-svg
  * Body: {

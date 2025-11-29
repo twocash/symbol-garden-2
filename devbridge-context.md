@@ -577,13 +577,13 @@ Geometric Traits: circular elements, angular lines, geometric representation
 
 ---
 
-## 8b. Forgery Engine Roadmap (Next Phase)
+## 8b. Sprout Engine Roadmap (Next Phase)
 
-> **PRD:** See `PRD-forgery-engine.md` for detailed implementation plan
+> **PRD:** See `PRD-sprout-engine.md` for detailed implementation plan
 
 ### Vision
 
-Transform from "AI sketch artist" to "Vector Forgery Engine". The goal is **indistinguishable forgery** - icons that are mathematically identical in style because they're assembled from the library's actual parts.
+Transform from "AI sketch artist" to "Vector Sprout Engine". The goal is **native-quality icons** - generated icons that are mathematically identical in style because they're grown from the library's actual DNA.
 
 ### Core Insight
 
@@ -718,7 +718,7 @@ interface IconComponent {
 ### Hot Files (Most Modified)
 ```
 src/lib/hybrid-generator.ts      # Native SVG generation
-src/lib/style-enforcer.ts        # Forgery Engine F1 - style compliance
+src/lib/style-enforcer.ts        # Sprout Engine F1 - style compliance
 src/lib/similar-icon-finder.ts   # Trait-aware selection
 src/lib/decomposition-service.ts # Icon structure
 src/lib/svg-prompt-builder.ts    # Prompt construction

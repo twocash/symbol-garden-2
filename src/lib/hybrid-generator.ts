@@ -1,5 +1,5 @@
 /**
- * Hybrid SVG Generator - Creates "master forgeries" of missing icons
+ * Hybrid SVG Generator - Sprouts native-quality icons from library DNA
  *
  * Core workflow:
  * 1. User has ingested an icon library (e.g., Feather, Lucide, Heroicons)
@@ -112,7 +112,7 @@ export interface GenerationResult {
   /** P1c: Structural reference from cross-library analysis (if used) */
   structuralReference?: StructuralReference | null;
 
-  /** F1: Style compliance result from the Forgery Engine */
+  /** F1: Style compliance result from the Sprout Engine */
   compliance?: ComplianceResult;
 }
 
@@ -185,7 +185,7 @@ function isValidSvg(svg: string): boolean {
 /**
  * Generate an icon that matches the style of an ingested library
  *
- * This is the main entry point for "master forgery" generation.
+ * This is the main entry point for sprouting native-quality icons.
  */
 export async function generateIcon(config: GenerationConfig): Promise<GenerationResult> {
   const {
@@ -400,7 +400,7 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
   }
 
   // F1: Style Enforcer - Deterministic style compliance
-  // This is the core of the Forgery Engine - guarantee style match
+  // This is the core of the Sprout Engine - guarantee style match
   let compliance: ComplianceResult | undefined;
 
   // Build enforcement rules from style spec or use defaults

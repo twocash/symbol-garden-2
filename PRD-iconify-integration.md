@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Symbol Garden's AI icon generation produces icons with style fidelity issues (wrong stroke attributes, poor spatial composition). This PRD outlines a multi-phase approach to achieve "forgery-level" icon generation through:
+Symbol Garden's AI icon generation produces icons with style fidelity issues (wrong stroke attributes, poor spatial composition). This PRD outlines a multi-phase approach to achieve native-quality icon generation through:
 
 1. **Style Enforcement** - Fix immediate fidelity bugs
 2. **Iconify Integration** - Leverage 275k+ open-source icons as a reference oracle

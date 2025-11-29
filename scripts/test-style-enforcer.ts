@@ -1,6 +1,6 @@
 /**
- * Test script for the Style Enforcer (F1: Forgery Engine)
- * 
+ * Test script for the Style Enforcer (F1: Sprout Engine)
+ *
  * Run with: npx tsx scripts/test-style-enforcer.ts
  */
 
