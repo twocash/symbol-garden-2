@@ -99,6 +99,86 @@ const CACHE_TTL = {
   collectionsList: 24 * 60 * 60 * 1000,   // 24 hours
 };
 
+// P3c: Synonym map for related icon suggestions
+// Maps common terms to related/synonymous search terms
+const ICON_SYNONYMS: Record<string, string[]> = {
+  // Transportation
+  'bike': ['bicycle', 'cycling', 'cycle'],
+  'bicycle': ['bike', 'cycling', 'cycle'],
+  'car': ['vehicle', 'automobile', 'auto'],
+  'plane': ['airplane', 'aircraft', 'flight'],
+  'airplane': ['plane', 'aircraft', 'flight'],
+  'ship': ['boat', 'vessel', 'ferry'],
+  'boat': ['ship', 'vessel', 'yacht'],
+
+  // Communication
+  'mail': ['email', 'envelope', 'message', 'letter'],
+  'email': ['mail', 'envelope', 'message'],
+  'message': ['chat', 'comment', 'text', 'sms'],
+  'chat': ['message', 'comment', 'conversation'],
+  'phone': ['call', 'telephone', 'mobile'],
+
+  // UI/Actions
+  'search': ['find', 'magnifier', 'magnifying-glass'],
+  'settings': ['gear', 'cog', 'config', 'preferences'],
+  'gear': ['settings', 'cog', 'config'],
+  'close': ['x', 'cancel', 'remove', 'delete'],
+  'delete': ['trash', 'remove', 'bin'],
+  'trash': ['delete', 'remove', 'bin', 'garbage'],
+  'edit': ['pencil', 'pen', 'write', 'modify'],
+  'add': ['plus', 'new', 'create'],
+  'plus': ['add', 'new', 'create'],
+
+  // Media
+  'image': ['photo', 'picture', 'gallery'],
+  'photo': ['image', 'picture', 'camera'],
+  'video': ['movie', 'film', 'play'],
+  'music': ['audio', 'sound', 'speaker'],
+  'audio': ['music', 'sound', 'speaker', 'volume'],
+
+  // Files/Documents
+  'file': ['document', 'doc', 'paper'],
+  'document': ['file', 'doc', 'paper'],
+  'folder': ['directory', 'archive'],
+
+  // People/Social
+  'user': ['person', 'profile', 'account', 'avatar'],
+  'person': ['user', 'human', 'people'],
+  'people': ['users', 'group', 'team'],
+  'users': ['people', 'group', 'team'],
+  'heart': ['love', 'like', 'favorite'],
+  'love': ['heart', 'like', 'favorite'],
+
+  // Security
+  'lock': ['secure', 'security', 'locked', 'padlock'],
+  'unlock': ['unlocked', 'open'],
+  'key': ['password', 'credential', 'access'],
+  'shield': ['security', 'protect', 'safe'],
+
+  // Nature/Objects
+  'sun': ['light', 'day', 'brightness'],
+  'moon': ['night', 'dark'],
+  'star': ['favorite', 'rating', 'bookmark'],
+  'home': ['house', 'building'],
+  'house': ['home', 'building'],
+
+  // Tech
+  'wifi': ['wireless', 'network', 'internet', 'signal'],
+  'bluetooth': ['wireless', 'connect'],
+  'battery': ['power', 'charge', 'energy'],
+  'power': ['battery', 'energy', 'plug'],
+  'download': ['save', 'arrow-down'],
+  'upload': ['share', 'arrow-up'],
+  'cloud': ['storage', 'sync', 'backup'],
+  'code': ['programming', 'developer', 'terminal'],
+
+  // Commerce
+  'cart': ['shopping', 'basket', 'buy'],
+  'shopping': ['cart', 'basket', 'store', 'shop'],
+  'credit-card': ['payment', 'card', 'pay'],
+  'money': ['dollar', 'currency', 'cash', 'payment'],
+};
+
 // ============================================================================
 // Cache Implementation
 // ============================================================================
@@ -752,4 +832,42 @@ Focus on STRUCTURAL patterns, not style (ignore stroke-width, colors, etc.). Wha
     console.error('[ReferenceOracle] LLM analysis failed:', error);
     return { elements: [], spatialPattern: '', commonTraits: [] };
   }
+}
+
+// ============================================================================
+// P3c: Related Search Terms
+// ============================================================================
+
+/**
+ * Get related search terms for a given query
+ *
+ * Uses a synonym map to suggest alternative search terms that might
+ * find similar icons (e.g., "bike" → "bicycle", "cycling")
+ *
+ * @param query - The user's search term
+ * @returns Array of related terms (not including the original)
+ *
+ * @example
+ * getRelatedSearchTerms("bike")
+ * // Returns: ["bicycle", "cycling", "cycle"]
+ */
+export function getRelatedSearchTerms(query: string): string[] {
+  const normalized = query.toLowerCase().trim();
+
+  // Direct lookup in synonym map
+  const directSynonyms = ICON_SYNONYMS[normalized] || [];
+
+  // Also check if the query is contained in any synonym lists
+  const reverseSynonyms: string[] = [];
+  for (const [term, synonyms] of Object.entries(ICON_SYNONYMS)) {
+    if (synonyms.includes(normalized) && term !== normalized) {
+      reverseSynonyms.push(term);
+    }
+  }
+
+  // Combine and deduplicate
+  const allRelated = [...new Set([...directSynonyms, ...reverseSynonyms])];
+
+  // Filter out the original query
+  return allRelated.filter(term => term !== normalized);
 }

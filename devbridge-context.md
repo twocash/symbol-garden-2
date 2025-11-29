@@ -413,7 +413,7 @@ Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source i
 | **P1b** | One-Click Library Import | High | 6h | ✅ Complete |
 | **P1c** | Reference Oracle for Generation | High | 4h | ✅ Complete |
 | **P2** | Borrow & Adapt | Medium | 4h | ✅ Complete |
-| **P3** | Discovery Features | Low | 6h | 🔴 Not Started |
+| **P3** | Discovery Features | Low | 6h | ✅ Complete (P3b, P3c) |
 
 ### P0: Style Enforcement (Critical) ✅ COMPLETE
 
@@ -533,6 +533,29 @@ Geometric Traits: circular elements, angular lines, geometric representation
 
 **Commit:** `ca0bcf7`
 
+### P3: Discovery Features ✅ COMPLETE (P3b, P3c)
+
+**Goal:** Help users discover icons before generating.
+
+**P3b: Icon Exists Pre-Check ✅**
+- Search user's library when concept is entered
+- "Already in your library" section (green) shows existing matches
+- One-click to use existing icon (adds to favorites)
+- Prioritized above Iconify matches in UI flow
+
+**P3c: Related Icons Suggestions ✅**
+- Synonym map for ~75 common icon concepts
+- "Try:" suggestions appear below concept input
+- Click to search related term (e.g., "bike" → "bicycle", "cycling", "cycle")
+
+**P3a: Find Similar Libraries ⏸️ Deferred**
+- Compare library styles (viewBox, stroke style, complexity)
+- Lower priority - can be added as enhancement
+
+**Files:**
+- `src/components/dialogs/AIIconGeneratorModal.tsx` - P3b/P3c UI
+- `src/lib/iconify-service.ts` - Synonym map + `getRelatedSearchTerms()`
+
 ### Key Iconify Collections (Stroke-Based)
 
 | Collection | Icons | Notes |
@@ -581,6 +604,24 @@ npx tsx scripts/spike-smart-selection.ts  # Test trait selection
 | Poor exemplar selection | Use `findExemplarIconsWithTraits()` | similar-icon-finder.ts |
 | Style Jury disabled | Set `GOOGLE_CLOUD_PROJECT_ID` | .env.local |
 | Wrong stroke-linecap | P0: Parameterize formatters | similar-icon-finder.ts |
+| Missing elements in import | Convert rect/circle/line/polyline to path | adapt/route.ts |
+
+### Backlog: Robust SVG Handling
+
+**Priority:** Medium | **Area:** Core Architecture
+
+The app currently stores icons as single `path` strings, which creates issues when importing/generating icons that use multiple SVG elements (rect, circle, line, polyline, polygon, ellipse, etc.).
+
+**Current workarounds:**
+- P2 adapt API converts elements to path commands on import
+- Generated SVGs may use multiple paths (combined with space separator)
+
+**Future improvements to consider:**
+1. Extend Icon schema to support `elements: SVGElement[]` for compound icons
+2. Create a centralized SVG normalization service
+3. Handle transforms, groups (`<g>`), and nested structures
+4. Support `<use>` references and symbol definitions
+5. Better preservation of original SVG structure for round-tripping
 
 ---
 

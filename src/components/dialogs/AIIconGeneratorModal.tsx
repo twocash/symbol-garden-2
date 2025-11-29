@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
+import { getRelatedSearchTerms } from "@/lib/iconify-service";
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,15 @@ interface IconifyMatch {
     iconId: string;  // e.g., "lucide:bike"
     svg: string;
     collection: string;
+}
+
+// P3b: Library icon match interface
+interface LibraryMatch {
+    id: string;
+    name: string;
+    library: string;
+    path: string;
+    viewBox: string;
 }
 
 interface AIIconGeneratorModalProps {
@@ -68,6 +78,13 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     const [isSearchingIconify, setIsSearchingIconify] = useState(false);
     const [selectedIconifyMatch, setSelectedIconifyMatch] = useState<IconifyMatch | null>(null);
     const [isImporting, setIsImporting] = useState(false);
+
+    // P3b: Library pre-check state
+    const [libraryMatches, setLibraryMatches] = useState<LibraryMatch[]>([]);
+    const [selectedLibraryMatch, setSelectedLibraryMatch] = useState<LibraryMatch | null>(null);
+
+    // P3c: Related search terms
+    const relatedTerms = prompt.trim().length >= 2 ? getRelatedSearchTerms(prompt.trim()) : [];
 
     // Determine available libraries from ingested icons
     const availableLibraries = libraries.filter(lib => lib !== "custom");
@@ -116,6 +133,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setLibraryOverride(null); // Reset override on open
             setIconifyMatches([]); // P2: Reset Iconify matches
             setSelectedIconifyMatch(null);
+            setLibraryMatches([]); // P3b: Reset library matches
+            setSelectedLibraryMatch(null);
 
             // Load icon sources to access styleManifest
             getIconSources().then(sources => {
@@ -123,6 +142,35 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             });
         }
     }, [isOpen]);
+
+    // P3b: Search user's library when concept changes
+    useEffect(() => {
+        if (!prompt.trim() || prompt.length < 2) {
+            setLibraryMatches([]);
+            return;
+        }
+
+        const searchTerm = prompt.trim().toLowerCase();
+
+        // Search globalIcons for matching names or tags
+        const matches = globalIcons
+            .filter(icon => {
+                const nameMatch = icon.name.toLowerCase().includes(searchTerm);
+                const tagMatch = icon.tags?.some(tag => tag.toLowerCase().includes(searchTerm));
+                return (nameMatch || tagMatch) && icon.path;
+            })
+            .slice(0, 6) // Limit to 6 matches
+            .map(icon => ({
+                id: icon.id,
+                name: icon.name,
+                library: icon.library || "custom",
+                path: icon.path || "",
+                viewBox: icon.viewBox || "0 0 24 24",
+            }));
+
+        setLibraryMatches(matches);
+        setSelectedLibraryMatch(null); // Reset selection when prompt changes
+    }, [prompt, globalIcons]);
 
     // P2: Search Iconify when concept changes (debounced)
     useEffect(() => {
@@ -149,6 +197,33 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
         return () => clearTimeout(timeoutId);
     }, [prompt]);
+
+    // P3b: Use an existing icon from user's library
+    const handleUseLibraryIcon = useCallback((match: LibraryMatch) => {
+        if (!currentProject) {
+            toast.error("No workspace available");
+            return;
+        }
+
+        // Find the full icon data
+        const fullIcon = globalIcons.find(i => i.id === match.id);
+        if (!fullIcon) {
+            toast.error("Icon not found");
+            return;
+        }
+
+        // Check if already in favorites
+        if (currentProject.favorites.includes(match.id)) {
+            toast.info(`"${match.name}" is already in your favorites`);
+            onClose();
+            return;
+        }
+
+        // Add to favorites
+        addIconToProject(fullIcon, true);
+        toast.success(`"${match.name}" added to favorites!`);
+        onClose();
+    }, [currentProject, globalIcons, addIconToProject, onClose]);
 
     // P2: Import and adapt an icon from Iconify
     const handleImportAndAdapt = useCallback(async (match: IconifyMatch) => {
@@ -374,6 +449,22 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             <p className="text-xs text-muted-foreground">
                                 Describe the icon you want to create
                             </p>
+                            {/* P3c: Related search terms */}
+                            {relatedTerms.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    <span className="text-[10px] text-muted-foreground">Try:</span>
+                                    {relatedTerms.slice(0, 4).map((term) => (
+                                        <button
+                                            key={term}
+                                            type="button"
+                                            onClick={() => setPrompt(term)}
+                                            className="text-[10px] px-1.5 py-0.5 rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                                        >
+                                            {term}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -517,6 +608,60 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
                     {/* Right Column: Results */}
                     <div className="flex-1 flex flex-col min-h-0">
+                        {/* P3b: Already in your library */}
+                        {libraryMatches.length > 0 && (
+                            <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Library className="w-4 h-4 text-green-600" />
+                                    <Label className="text-sm text-green-700">Already in your library</Label>
+                                </div>
+                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                    {libraryMatches.map((match) => (
+                                        <button
+                                            key={match.id}
+                                            className={cn(
+                                                "relative flex-shrink-0 w-16 h-16 rounded-lg border-2 bg-background p-2 transition-all hover:border-green-500/50 focus:outline-none group",
+                                                selectedLibraryMatch?.id === match.id
+                                                    ? "border-green-500 ring-2 ring-green-500/20"
+                                                    : "border-muted"
+                                            )}
+                                            onClick={() => setSelectedLibraryMatch(
+                                                selectedLibraryMatch?.id === match.id ? null : match
+                                            )}
+                                            title={`${match.library}: ${match.name}`}
+                                        >
+                                            <svg
+                                                viewBox={match.viewBox}
+                                                className="w-full h-full text-foreground"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d={match.path} />
+                                            </svg>
+                                            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground bg-background px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                {match.name}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {selectedLibraryMatch && (
+                                    <Button
+                                        size="sm"
+                                        variant="default"
+                                        className="w-full mt-2 bg-green-600 hover:bg-green-700"
+                                        onClick={() => handleUseLibraryIcon(selectedLibraryMatch)}
+                                    >
+                                        <Check className="w-3 h-3 mr-2" />
+                                        Use &quot;{selectedLibraryMatch.name}&quot; from {selectedLibraryMatch.library}
+                                    </Button>
+                                )}
+                                <Separator className="mt-3" />
+                            </div>
+                        )}
+
                         {/* P2: Found in other libraries */}
                         {(iconifyMatches.length > 0 || isSearchingIconify) && (
                             <div className="mb-4">
