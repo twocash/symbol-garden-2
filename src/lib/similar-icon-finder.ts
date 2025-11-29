@@ -400,15 +400,38 @@ export function findIconsByPattern(
 /**
  * Format similar icons for prompt inclusion
  */
-export function formatSimilarIconsForPrompt(icons: Icon[]): string {
+/**
+ * Style spec for formatting SVG examples
+ * Matches StyleSpec from svg-prompt-builder.ts
+ */
+export interface IconStyleSpec {
+  strokeLinecap?: 'butt' | 'round' | 'square';
+  strokeLinejoin?: 'miter' | 'round' | 'bevel';
+  strokeWidth?: number;
+  viewBoxSize?: number;
+}
+
+/**
+ * Format a single icon as SVG with correct style attributes
+ */
+function formatIconSvg(icon: Icon, styleSpec?: IconStyleSpec): string {
+  const linecap = styleSpec?.strokeLinecap || 'round';
+  const linejoin = styleSpec?.strokeLinejoin || 'round';
+  const strokeWidth = styleSpec?.strokeWidth || 2;
+  const viewBox = styleSpec?.viewBoxSize || 24;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${viewBox}" height="${viewBox}" viewBox="0 0 ${viewBox} ${viewBox}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="${linecap}" stroke-linejoin="${linejoin}">
+  <path d="${icon.path}" fill="none"/>
+</svg>`;
+}
+
+export function formatSimilarIconsForPrompt(icons: Icon[], styleSpec?: IconStyleSpec): string {
   if (icons.length === 0) {
     return '';
   }
 
   const formatted = icons.map(icon => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="${icon.path}"/>
-</svg>`;
+    const svg = formatIconSvg(icon, styleSpec);
     return `### ${icon.name}\n\`\`\`svg\n${svg}\n\`\`\``;
   });
 
@@ -662,12 +685,13 @@ export function findExemplarIconsWithTraits(
  *
  * Includes semantic category, complexity, and traits to help LLM understand WHY
  * this example is relevant and what patterns it demonstrates.
+ *
+ * @param icon - The icon to format
+ * @param styleSpec - Style specification for correct stroke attributes
  */
-export function formatIconWithContext(icon: Icon): string {
+export function formatIconWithContext(icon: Icon, styleSpec?: IconStyleSpec): string {
   const meta = icon.aiMetadata;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="${icon.path}" fill="none"/>
-</svg>`;
+  const svg = formatIconSvg(icon, styleSpec);
 
   // Build context annotation
   const annotations: string[] = [];
@@ -695,13 +719,16 @@ export function formatIconWithContext(icon: Icon): string {
 /**
  * Format similar icons with rich context for prompt inclusion
  * This version includes semantic metadata to help the LLM understand patterns
+ *
+ * @param icons - Icons to format
+ * @param styleSpec - Style specification for correct stroke attributes
  */
-export function formatSimilarIconsWithContext(icons: Icon[]): string {
+export function formatSimilarIconsWithContext(icons: Icon[], styleSpec?: IconStyleSpec): string {
   if (icons.length === 0) {
     return '';
   }
 
-  const formatted = icons.map(icon => formatIconWithContext(icon));
+  const formatted = icons.map(icon => formatIconWithContext(icon, styleSpec));
 
   return `## REFERENCE EXAMPLES FROM LIBRARY\n\nStudy these examples to understand the icon style and patterns:\n\n${formatted.join('\n\n')}`;
 }

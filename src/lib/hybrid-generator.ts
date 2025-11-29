@@ -365,7 +365,8 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
   }
 
   // Normalize SVG to ensure stroke-only rendering (add fill="none" to all elements)
-  svg = normalizeSvg(svg);
+  // Also enforce styleSpec attributes (stroke-linecap, stroke-linejoin) if available
+  svg = normalizeSvg(svg, styleSpec);
 
   return {
     svg,

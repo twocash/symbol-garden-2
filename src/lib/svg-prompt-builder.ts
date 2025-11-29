@@ -13,7 +13,7 @@
 import { Icon } from '../types/schema';
 import { formatPatternLibrary, getSuggestedPatterns } from './pattern-library';
 import { Decomposition, formatDecompositionForPrompt } from './decomposition-service';
-import { formatSimilarIconsForPrompt, formatSimilarIconsWithContext } from './similar-icon-finder';
+import { formatSimilarIconsForPrompt, formatSimilarIconsWithContext, IconStyleSpec } from './similar-icon-finder';
 import { LibraryAnalysis } from './library-analyzer';
 
 /**
@@ -239,16 +239,25 @@ function buildSystemPrompt(options: SvgPromptOptions): string {
   }
 
   // Few-shot examples (use rich context if icons have aiMetadata)
+  // Pass styleSpec to formatters so examples have correct stroke attributes
   if (options.includeFewShot !== false && options.similarIcons && options.similarIcons.length > 0) {
     const maxExamples = options.maxFewShotExamples || 4;
     const examples = options.similarIcons.slice(0, maxExamples);
 
+    // Convert StyleSpec to IconStyleSpec format for formatters
+    const iconStyleSpec = options.styleSpec ? {
+      strokeLinecap: options.styleSpec.strokeLinecap,
+      strokeLinejoin: options.styleSpec.strokeLinejoin,
+      strokeWidth: options.styleSpec.strokeWidth,
+      viewBoxSize: options.styleSpec.viewBoxSize,
+    } : undefined;
+
     // Use rich context formatting if any examples have aiMetadata
     const hasEnrichment = examples.some(i => i.aiMetadata);
     if (hasEnrichment) {
-      sections.push('', formatSimilarIconsWithContext(examples));
+      sections.push('', formatSimilarIconsWithContext(examples, iconStyleSpec));
     } else {
-      sections.push('', formatSimilarIconsForPrompt(examples));
+      sections.push('', formatSimilarIconsForPrompt(examples, iconStyleSpec));
     }
   }
 

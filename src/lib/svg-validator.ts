@@ -475,17 +475,76 @@ export function ensureStrokeOnly(svg: string): string {
 }
 
 /**
+ * Style specification for SVG normalization
+ */
+export interface StyleSpec {
+  strokeLinecap?: 'butt' | 'round' | 'square';
+  strokeLinejoin?: 'miter' | 'round' | 'bevel';
+  strokeWidth?: number;
+  viewBoxSize?: number;
+}
+
+/**
+ * Enforce style specification on SVG root element
+ * This ensures the generated SVG has the correct stroke attributes
+ *
+ * @param svg - The SVG string to modify
+ * @param styleSpec - The style specification to enforce
+ */
+export function enforceStyleSpec(svg: string, styleSpec: StyleSpec): string {
+  let result = svg;
+
+  // Helper to set or replace an attribute on the root <svg> element
+  const setRootAttribute = (attr: string, value: string | number) => {
+    const attrPattern = new RegExp(`(<svg[^>]*?)\\s*${attr}\\s*=\\s*["'][^"']*["']`, 'i');
+    if (attrPattern.test(result)) {
+      // Replace existing attribute
+      result = result.replace(attrPattern, `$1 ${attr}="${value}"`);
+    } else {
+      // Add new attribute
+      result = result.replace(/<svg/, `<svg ${attr}="${value}"`);
+    }
+  };
+
+  // Enforce stroke-linecap
+  if (styleSpec.strokeLinecap) {
+    setRootAttribute('stroke-linecap', styleSpec.strokeLinecap);
+  }
+
+  // Enforce stroke-linejoin
+  if (styleSpec.strokeLinejoin) {
+    setRootAttribute('stroke-linejoin', styleSpec.strokeLinejoin);
+  }
+
+  // Enforce stroke-width
+  if (styleSpec.strokeWidth) {
+    setRootAttribute('stroke-width', styleSpec.strokeWidth);
+  }
+
+  return result;
+}
+
+/**
  * Normalize SVG to Feather-style format
  * - Ensures stroke-only rendering
  * - Cleans up formatting
+ * - Optionally enforces style specification
+ *
+ * @param svg - The SVG string to normalize
+ * @param styleSpec - Optional style specification to enforce
  */
-export function normalizeSvg(svg: string): string {
+export function normalizeSvg(svg: string, styleSpec?: StyleSpec): string {
   // Ensure all elements have fill="none"
   let result = ensureStrokeOnly(svg);
 
   // Ensure root SVG has fill="none" if not present
   if (!/<svg[^>]*fill\s*=/.test(result)) {
     result = result.replace(/<svg/, '<svg fill="none"');
+  }
+
+  // Enforce style spec if provided
+  if (styleSpec) {
+    result = enforceStyleSpec(result, styleSpec);
   }
 
   return result;
