@@ -620,7 +620,7 @@ INPUT: "secure user"
 | Phase | Name | Effort | Status | Description |
 |-------|------|--------|--------|-------------|
 | **F1** | Style Enforcer | 3-4h | ✅ Complete | Deterministic SVG mutation for compliance |
-| **F2** | Ghost Preview | 2-3h | 🔴 Not Started | Show candidate between library icons |
+| **F2** | Ghost Preview | 2-3h | ✅ Complete | Show candidate between library icons |
 | **F3** | Component Indexer | 4-5h | 🔴 Not Started | Semantic tagging of icon parts |
 | **F4** | Kitbash Engine | 6-8h | 🔴 Not Started | Assembly from existing components |
 | **F5** | Skeleton-First UI | 4-5h | 🔴 Not Started | Composition approval before styling |

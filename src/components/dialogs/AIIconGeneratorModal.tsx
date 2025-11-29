@@ -10,7 +10,7 @@ import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
 import { getRelatedSearchTerms } from "@/lib/iconify-service";
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,20 @@ interface LibraryMatch {
     library: string;
     path: string;
     viewBox: string;
+}
+
+// F2: Compliance result from Sprout Engine
+interface ComplianceInfo {
+    passed: boolean;
+    score: number;
+    violations: Array<{
+        rule: string;
+        expected: string;
+        actual: string;
+        severity: 'error' | 'warning';
+        autoFixed: boolean;
+    }>;
+    changesApplied: number;
 }
 
 interface AIIconGeneratorModalProps {
@@ -86,6 +100,15 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     // P3c: Related search terms
     const relatedTerms = prompt.trim().length >= 2 ? getRelatedSearchTerms(prompt.trim()) : [];
 
+    // F2: Compliance data from generation
+    const [compliance, setCompliance] = useState<ComplianceInfo | null>(null);
+
+    // F2: Ghost preview neighbors (random library icons for context)
+    const [ghostNeighbors, setGhostNeighbors] = useState<{ left: LibraryMatch | null; right: LibraryMatch | null }>({
+        left: null,
+        right: null,
+    });
+
     // Determine available libraries from ingested icons
     const availableLibraries = libraries.filter(lib => lib !== "custom");
 
@@ -135,6 +158,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setSelectedIconifyMatch(null);
             setLibraryMatches([]); // P3b: Reset library matches
             setSelectedLibraryMatch(null);
+            setCompliance(null); // F2: Reset compliance
+            setGhostNeighbors({ left: null, right: null }); // F2: Reset ghost neighbors
 
             // Load icon sources to access styleManifest
             getIconSources().then(sources => {
@@ -307,6 +332,29 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         setGeneratedSvgs([]);
         setSelectedSvgIndex(null);
         setMetadata(null);
+        setCompliance(null); // F2: Reset compliance
+
+        // F2: Select random ghost neighbors from the effective library
+        const libIcons = globalIcons.filter(i => i.library === effectiveLibrary && i.path);
+        if (libIcons.length >= 2) {
+            const shuffled = [...libIcons].sort(() => Math.random() - 0.5);
+            setGhostNeighbors({
+                left: {
+                    id: shuffled[0].id,
+                    name: shuffled[0].name,
+                    library: shuffled[0].library || 'custom',
+                    path: shuffled[0].path || '',
+                    viewBox: shuffled[0].viewBox || '0 0 24 24',
+                },
+                right: {
+                    id: shuffled[1].id,
+                    name: shuffled[1].name,
+                    library: shuffled[1].library || 'custom',
+                    path: shuffled[1].path || '',
+                    viewBox: shuffled[1].viewBox || '0 0 24 24',
+                },
+            });
+        }
 
         try {
             // Find the styleManifest for this library from icon sources
@@ -349,6 +397,11 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             const svgs = data.svgs || (data.svg ? [data.svg] : []);
             setGeneratedSvgs(svgs);
             setMetadata(data.metadata);
+
+            // F2: Capture compliance data
+            if (data.compliance) {
+                setCompliance(data.compliance);
+            }
 
             if (svgs.length > 0) {
                 toast.success(`Generated ${svgs.length} icon variant${svgs.length > 1 ? 's' : ''}!`);
@@ -723,6 +776,108 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                     </Button>
                                 )}
                                 <Separator className="mt-3" />
+                            </div>
+                        )}
+
+                        {/* F2: Ghost Preview - Show selected icon in context */}
+                        {selectedSvgIndex !== null && ghostNeighbors.left && ghostNeighbors.right && (
+                            <div className="mb-4 p-3 rounded-lg border bg-muted/30">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-xs font-medium text-muted-foreground">Context Preview</span>
+                                    {compliance && (
+                                        <span className={cn(
+                                            "text-xs px-2 py-0.5 rounded-full",
+                                            compliance.passed
+                                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                        )}>
+                                            Score: {compliance.score}/100
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Three icons in a row: neighbor - candidate - neighbor */}
+                                <div className="flex items-center justify-center gap-4">
+                                    {/* Left neighbor */}
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-14 h-14 p-2 rounded-lg border bg-background">
+                                            <svg
+                                                viewBox={ghostNeighbors.left.viewBox}
+                                                className="w-full h-full text-muted-foreground"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d={ghostNeighbors.left.path} />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[9px] text-muted-foreground mt-1 truncate max-w-[60px]">
+                                            {ghostNeighbors.left.name}
+                                        </span>
+                                    </div>
+
+                                    {/* Candidate (generated) */}
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-16 h-16 p-2 rounded-lg border-2 border-primary bg-background ring-2 ring-primary/20">
+                                            <div
+                                                className="w-full h-full text-foreground"
+                                                dangerouslySetInnerHTML={{ __html: renderSvgPreview(generatedSvgs[selectedSvgIndex]) }}
+                                            />
+                                        </div>
+                                        <span className="text-[9px] font-medium text-primary mt-1">
+                                            {prompt || 'Generated'}
+                                        </span>
+                                    </div>
+
+                                    {/* Right neighbor */}
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-14 h-14 p-2 rounded-lg border bg-background">
+                                            <svg
+                                                viewBox={ghostNeighbors.right.viewBox}
+                                                className="w-full h-full text-muted-foreground"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d={ghostNeighbors.right.path} />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[9px] text-muted-foreground mt-1 truncate max-w-[60px]">
+                                            {ghostNeighbors.right.name}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Compliance details */}
+                                {compliance && compliance.violations.length > 0 && (
+                                    <div className="mt-3 pt-2 border-t space-y-1">
+                                        {compliance.violations.slice(0, 3).map((v, i) => (
+                                            <div key={i} className="flex items-center gap-2 text-[10px]">
+                                                {v.severity === 'error' ? (
+                                                    v.autoFixed ? (
+                                                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                                    ) : (
+                                                        <AlertCircle className="w-3 h-3 text-red-500" />
+                                                    )
+                                                ) : (
+                                                    <AlertTriangle className="w-3 h-3 text-yellow-500" />
+                                                )}
+                                                <span className="text-muted-foreground">
+                                                    {v.rule}: {v.autoFixed ? 'fixed' : `${v.actual} → ${v.expected}`}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        {compliance.changesApplied > 0 && (
+                                            <div className="text-[10px] text-green-600 dark:text-green-400">
+                                                ✓ {compliance.changesApplied} style {compliance.changesApplied === 1 ? 'fix' : 'fixes'} auto-applied
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
 
