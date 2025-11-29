@@ -412,7 +412,7 @@ Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source i
 | **P1a** | Iconify Service Layer | High | 3h | ✅ Complete |
 | **P1b** | One-Click Library Import | High | 6h | ✅ Complete |
 | **P1c** | Reference Oracle for Generation | High | 4h | ✅ Complete |
-| **P2** | Borrow & Adapt | Medium | 4h | 🔴 Not Started |
+| **P2** | Borrow & Adapt | Medium | 4h | ✅ Complete |
 | **P3** | Discovery Features | Low | 6h | 🔴 Not Started |
 
 ### P0: Style Enforcement (Critical) ✅ COMPLETE
@@ -504,6 +504,34 @@ Geometric Traits: circular elements, angular lines, geometric representation
 ```
 
 **Commit:** `6c2ce32`
+
+### P2: Borrow & Adapt ✅ COMPLETE
+
+**Goal:** Import individual icons from Iconify and adapt to user's library style.
+
+**UI:** In AI Icon Generator modal, when user types a concept:
+
+1. **Debounced search** - After 500ms, searches Iconify for matching icons
+2. **"Found in other libraries"** section shows icons from various collections
+3. **Select icon** - Click to select, shows collection name on hover
+4. **"Import & Adapt"** button - One-click import with style adaptation
+
+**API Routes:**
+- `GET /api/iconify/search?query=bike&limit=6` - Search and return SVGs
+- `POST /api/iconify/adapt` - Apply style adaptation from Style DNA
+
+**Adaptation Pipeline:**
+1. Fetch icon SVG from Iconify (already in search results)
+2. Parse Style DNA from target library (if available)
+3. Apply stroke-width, stroke-linecap, stroke-linejoin
+4. Extract path data and save as custom icon
+
+**Files:**
+- `src/components/dialogs/AIIconGeneratorModal.tsx` - UI additions
+- `src/app/api/iconify/search/route.ts` - Search API
+- `src/app/api/iconify/adapt/route.ts` - Adaptation API
+
+**Commit:** `ca0bcf7`
 
 ### Key Iconify Collections (Stroke-Based)
 
