@@ -1,8 +1,9 @@
 # Symbol Garden 2.0 - Architecture & Context Document
 
 > **Last Updated:** 2025-11-29
-> **Version:** 0.3.1
+> **Version:** 0.4.0-roadmap
 > **Branch:** feature/svg-native-generation
+> **PRD:** See `PRD-iconify-integration.md` for detailed implementation plan
 
 ---
 
@@ -366,7 +367,118 @@ CONCEPT_HINTS = {
 
 ---
 
-## 8. Quick Reference
+## 8. Roadmap: Iconify Integration & Fidelity
+
+### Executive Summary
+
+Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source icons) as a reference oracle and import source, plus fixes generation fidelity issues.
+
+### Architecture Evolution
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    SYMBOL GARDEN                        │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐ │
+│  │   USER'S    │    │  ICONIFY    │    │    LLM      │ │
+│  │  LIBRARIES  │    │   ORACLE    │    │  GENERATOR  │ │
+│  │             │    │             │    │             │ │
+│  │ • Feather   │    │ • Search    │    │ • Novel     │ │
+│  │ • Custom    │    │ • Import    │    │   concepts  │ │
+│  │             │    │ • Reference │    │ • Style     │ │
+│  │             │    │ • Adapt     │    │   transfer  │ │
+│  └─────────────┘    └─────────────┘    └─────────────┘ │
+│         │                  │                  │        │
+│         └──────────────────┴──────────────────┘        │
+│                           │                            │
+│                    ┌──────┴──────┐                     │
+│                    │  ICON NEED  │                     │
+│                    └─────────────┘                     │
+│                           │                            │
+│              ┌────────────┼────────────┐               │
+│              ▼            ▼            ▼               │
+│         [In Library]  [In Iconify]  [Generate]         │
+│            Use it    Import/Adapt   Create new         │
+│                                                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Phase Overview
+
+| Phase | Name | Priority | Effort | Status |
+|-------|------|----------|--------|--------|
+| **P0** | Style Enforcement | Critical | 2h | 🔴 Not Started |
+| **P1a** | Iconify Service Layer | High | 3h | 🔴 Not Started |
+| **P1b** | One-Click Library Import | High | 6h | 🔴 Not Started |
+| **P1c** | Reference Oracle for Generation | High | 4h | 🔴 Not Started |
+| **P2** | Borrow & Adapt | Medium | 4h | 🔴 Not Started |
+| **P3** | Discovery Features | Low | 6h | 🔴 Not Started |
+
+### P0: Style Enforcement (Critical)
+
+**Problem:** Generated icons have wrong `stroke-linecap`/`stroke-linejoin` because few-shot examples are hardcoded to "round" regardless of library style.
+
+**Solution:**
+1. Parameterize `formatIconWithContext()` to accept `StyleSpec`
+2. Update `normalizeSvg()` to enforce correct stroke attributes
+3. Add style validation to `validateSvg()`
+
+**Files:** `similar-icon-finder.ts`, `svg-validator.ts`, `svg-prompt-builder.ts`
+
+### P1a: Iconify Service Layer
+
+**New File:** `src/lib/iconify-service.ts`
+
+```typescript
+// Core functions
+async function searchIcons(query: string): Promise<SearchResult>;
+async function getIconSvg(prefix: string, name: string): Promise<string>;
+async function getCollectionIcons(prefix: string): Promise<IconifyIcon[]>;
+async function getStrokeBasedCollections(): Promise<IconifyCollection[]>;
+```
+
+**Features:**
+- In-memory cache with TTL
+- Fallback hosts (api.iconify.design, api.simplesvg.com, api.unisvg.com)
+- Path extraction from SVG
+
+### P1b: One-Click Library Import
+
+**UI:** Settings → Libraries → "Add from Iconify" → search/browse → click to import
+
+**Flow:**
+1. User browses Iconify collections
+2. Clicks "Import"
+3. Stream progress: fetch → convert → enrich
+4. Library appears in sidebar
+
+### P1c: Reference Oracle for Generation
+
+**Concept:** When generating "bike", search Iconify across multiple libraries to establish structural consensus (where wheels go, frame shape, etc.), then generate in user's library style.
+
+### Key Iconify Collections (Stroke-Based)
+
+| Collection | Icons | Notes |
+|------------|-------|-------|
+| `lucide` | 1,653 | Feather fork, actively maintained |
+| `tabler` | 5,963 | Large, consistent set |
+| `phosphor` | 9,072 | Multiple weights |
+| `heroicons` | 876 | Tailwind ecosystem |
+
+### Success Metrics
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| Stroke attribute accuracy | ~50% | 100% |
+| Spatial composition quality | ~60% | 85% |
+| Libraries available | ~1 | 200+ |
+
+**Full details:** See `PRD-iconify-integration.md`
+
+---
+
+## 9. Quick Reference
 
 ### Hot Files (Most Modified)
 ```
@@ -374,6 +486,7 @@ src/lib/hybrid-generator.ts      # Native SVG generation
 src/lib/similar-icon-finder.ts   # Trait-aware selection
 src/lib/decomposition-service.ts # Icon structure
 src/lib/svg-prompt-builder.ts    # Prompt construction
+src/lib/iconify-service.ts       # Iconify API integration (NEW)
 src/components/dialogs/AIIconGeneratorModal.tsx
 ```
 
@@ -391,10 +504,11 @@ npx tsx scripts/spike-smart-selection.ts  # Test trait selection
 | Filled shape violations | `normalizeSvg()` adds `fill="none"` | svg-validator.ts |
 | Poor exemplar selection | Use `findExemplarIconsWithTraits()` | similar-icon-finder.ts |
 | Style Jury disabled | Set `GOOGLE_CLOUD_PROJECT_ID` | .env.local |
+| Wrong stroke-linecap | P0: Parameterize formatters | similar-icon-finder.ts |
 
 ---
 
-## 9. Type Reference
+## 10. Type Reference
 
 ### Core Types (from schema.ts)
 ```typescript
