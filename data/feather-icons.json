@@ -1,0 +1,7494 @@
+[
+  {
+    "id": "feather-icons-alert-triangle",
+    "name": "alert triangle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M 12 9 L 12 13 M 12 17 L 12.01 17",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "alert",
+      "triangle",
+      "warning",
+      "danger",
+      "caution",
+      "exclamation",
+      "notify"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a warning or caution status, often used to indicate potential issues or critical information in a user interface.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-alert-octagon",
+    "name": "alert octagon",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7.86 2 L 16.14 2 L 22 7.86 L 22 16.14 L 16.14 22 L 7.86 22 L 2 16.14 L 2 7.86 L 7.86 2 Z M 12 8 L 12 12 M 12 16 L 12.01 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "alert",
+      "octagon",
+      "warning",
+      "danger",
+      "caution",
+      "exclamation",
+      "notify"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a warning or critical alert status, often indicating a stop or important notice within a system.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-activity",
+    "name": "activity",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 22 12 L 18 12 L 15 21 L 9 3 L 6 12 L 2 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "activity",
+      "pulse",
+      "heartbeat",
+      "monitor",
+      "health",
+      "data"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a fluctuating line, often used to symbolize system activity, health monitoring, or vital signs.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-airplay",
+    "name": "airplay",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1 M 12 15 L 17 21 L 7 21 L 12 15 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "airplay",
+      "stream",
+      "cast",
+      "display",
+      "screen",
+      "project"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the action of wirelessly streaming content to another display or device, like a television or projector.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-alert-circle",
+    "name": "alert circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 12 8 L 12 12 M 12 16 L 12.01 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "alert",
+      "circle",
+      "warning",
+      "info",
+      "exclamation",
+      "notice",
+      "problem"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates an alert or informational message, often signaling a general warning or important detail.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-anchor",
+    "name": "anchor",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 9 5 A 3 3 0 1 0 15 5 A 3 3 0 1 0 9 5 Z M 12 22 L 12 8 M5 12H2a10 10 0 0 0 20 0h-3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "anchor",
+      "marine",
+      "ship",
+      "boat",
+      "mooring",
+      "secure"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a nautical anchor, often used to symbolize stability, navigation, or a fixed point.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-align-justify",
+    "name": "align justify",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 21 10 L 3 10 M 21 6 L 3 6 M 21 14 L 3 14 M 21 18 L 3 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "align",
+      "justify",
+      "text",
+      "paragraph",
+      "format",
+      "layout",
+      "editor"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the text alignment option where lines are justified to both the left and right margins, common in text editors.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "compound",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-align-center",
+    "name": "align center",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 18 10 L 6 10 M 21 6 L 3 6 M 21 14 L 3 14 M 18 18 L 6 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "align",
+      "center",
+      "text",
+      "paragraph",
+      "format",
+      "layout",
+      "editor"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the text alignment option where lines are centered on the page or within a text block, typical in word processing.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "compound",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-align-left",
+    "name": "align left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 17 10 L 3 10 M 21 6 L 3 6 M 21 14 L 3 14 M 17 18 L 3 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "align",
+      "left",
+      "text",
+      "paragraph",
+      "format",
+      "layout",
+      "editor"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the text alignment option where lines are aligned to the left margin, a standard setting in most text documents.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-align-right",
+    "name": "align right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 21 10 L 7 10 M 21 6 L 3 6 M 21 14 L 3 14 M 21 18 L 7 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "align",
+      "right",
+      "text",
+      "paragraph",
+      "format",
+      "layout",
+      "editor"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the text alignment option where lines are aligned to the right margin, commonly used for specific document layouts.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-archive",
+    "name": "archive",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 21 8 L 21 21 L 3 21 L 3 8 M 1 3 H 23 V 8 H 1 Z M 10 12 L 14 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "archive",
+      "box",
+      "storage",
+      "file",
+      "records",
+      "data"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a physical container or digital repository for storing documents and information.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-aperture",
+    "name": "aperture",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 14.31 8 L 20.05 17.94 M 9.69 8 L 21.17 8 M 7.38 12 L 13.12 2.06 M 9.69 16 L 3.95 6.06 M 14.31 16 L 2.83 16 M 16.62 12 L 10.88 21.94",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "aperture",
+      "lens",
+      "camera",
+      "focus",
+      "photography",
+      "optics"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the adjustable diaphragm of a camera lens, often used to symbolize photography or precision.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 4,
+      "geometricTraits": [
+        "containment",
+        "intersection",
+        "symmetry",
+        "fine-detail",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-down-right",
+    "name": "arrow down right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7 7 L 17 17 M 17 7 L 17 17 L 7 17",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "down",
+      "right",
+      "navigate",
+      "diagonal",
+      "move",
+      "point",
+      "direction"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a directional movement or selection towards the bottom-right.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-down-circle",
+    "name": "arrow down circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 8 12 L 12 16 L 16 12 M 12 8 L 12 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "down",
+      "circle",
+      "scroll",
+      "expand",
+      "enter",
+      "collapse",
+      "proceed"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a downward action or navigation within a contained interface element.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-down-left",
+    "name": "arrow down left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 17 7 L 7 17 M 17 17 L 7 17 L 7 7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "down",
+      "left",
+      "navigate",
+      "diagonal",
+      "return",
+      "back",
+      "move"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a directional movement or selection towards the bottom-left.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-down",
+    "name": "arrow down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 5 L 12 19 M 19 12 L 12 19 L 5 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "down",
+      "scroll",
+      "collapse",
+      "enter",
+      "expand",
+      "move"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a general downward direction or an action that moves content downwards.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-left",
+    "name": "arrow left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 19 12 L 5 12 M 12 19 L 5 12 L 12 5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "left",
+      "previous",
+      "back",
+      "navigate",
+      "slide",
+      "rewind"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a navigation action to move left or return to a previous state.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-right-circle",
+    "name": "arrow right circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 12 16 L 16 12 L 12 8 M 8 12 L 16 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "right",
+      "circle",
+      "next",
+      "forward",
+      "proceed",
+      "enter",
+      "advance"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a rightward action or navigation within a contained interface element.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-left-circle",
+    "name": "arrow left circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 12 8 L 8 12 L 12 16 M 16 12 L 8 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "left",
+      "circle",
+      "previous",
+      "back",
+      "return",
+      "navigate",
+      "rewind"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a leftward action or navigation within a contained interface element.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-right",
+    "name": "arrow right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 12 L 19 12 M 12 5 L 19 12 L 12 19",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "right",
+      "next",
+      "forward",
+      "proceed",
+      "advance",
+      "go"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a navigation action to move right or proceed to the next step.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-up",
+    "name": "arrow up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 19 L 12 5 M 5 12 L 12 5 L 19 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "up",
+      "direction",
+      "navigate",
+      "sort",
+      "increase",
+      "top"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents an upward direction, commonly used for navigating to the top of a page or indicating an increase.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-up-circle",
+    "name": "arrow up circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 16 12 L 12 8 L 8 12 M 12 16 L 12 8",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "up",
+      "circle",
+      "upload",
+      "move-up",
+      "scroll-up",
+      "circular",
+      "direction"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Denotes an upward direction or action, often used for uploading content or navigating to a previous state within a circular boundary.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-up-left",
+    "name": "arrow up left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 17 17 L 7 7 M 7 17 L 7 7 L 17 7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "up",
+      "left",
+      "diagonal",
+      "pointer",
+      "northwest",
+      "return",
+      "move"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates movement or direction towards the top-left, useful for navigating or resizing operations.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-arrow-up-right",
+    "name": "arrow up right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7 17 L 17 7 M 7 7 L 17 7 L 17 17",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "arrow",
+      "up",
+      "right",
+      "diagonal",
+      "pointer",
+      "northeast",
+      "external",
+      "link"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a direction or action towards the top-right, often used for external links or expanding elements.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-at-sign",
+    "name": "at sign",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 12 A 4 4 0 1 0 16 12 A 4 4 0 1 0 8 12 Z M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "at",
+      "sign",
+      "email",
+      "address",
+      "mention",
+      "contact",
+      "social"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes an 'at' sign, commonly used to denote an email address, user mention, or contact information.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bar-chart-2",
+    "name": "bar chart 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 18 20 L 18 10 M 12 20 L 12 4 M 6 20 L 6 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bar",
+      "chart",
+      "2",
+      "graph",
+      "statistics",
+      "data",
+      "analytics",
+      "progress"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a bar chart with three bars of different heights, indicating statistical data or progress.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-battery",
+    "name": "battery",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 6 H 17 A 2 2 0 0 1 19 8 V 16 A 2 2 0 0 1 17 18 H 3 A 2 2 0 0 1 1 16 V 8 A 2 2 0 0 1 3 6 Z M 23 13 L 23 11",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "battery",
+      "power",
+      "charge",
+      "energy",
+      "device",
+      "level"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a generic battery, often used to indicate power status or energy levels of a device.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-award",
+    "name": "award",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 8 A 7 7 0 1 0 19 8 A 7 7 0 1 0 5 8 Z M 8.21 13.89 L 7 23 L 12 20 L 17 23 L 15.79 13.88",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "award",
+      "prize",
+      "medal",
+      "trophy",
+      "recognition",
+      "success"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents an award or achievement, typically used to signify recognition, success, or a reward.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-battery-charging",
+    "name": "battery charging",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M5 18H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.19M15 6h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3.19 M 23 13 L 23 11 M 11 6 L 7 12 L 13 12 L 9 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "battery",
+      "charging",
+      "power-up",
+      "electric",
+      "recharge",
+      "energy"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a battery currently in the process of charging, indicating power replenishment.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bar-chart",
+    "name": "bar chart",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 20 L 12 10 M 18 20 L 18 4 M 6 20 L 6 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bar",
+      "chart",
+      "graph",
+      "statistics",
+      "data",
+      "report",
+      "growth"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a bar chart with three bars of different heights, typically used to visualize data trends or comparisons.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bell-off",
+    "name": "bell off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M13.73 21a2 2 0 0 1-3.46 0 M18.63 13A17.89 17.89 0 0 1 18 8 M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14 M18 8a6 6 0 0 0-9.33-5 M 1 1 L 23 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bell",
+      "off",
+      "notification",
+      "alert",
+      "mute",
+      "silent",
+      "disabled"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a notification bell that is turned off or muted, signaling no alerts will be received.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bell",
+    "name": "bell",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bell",
+      "notification",
+      "alarm",
+      "chime",
+      "sound",
+      "ring"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a standard bell, commonly used to signify active notifications or alerts.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bluetooth",
+    "name": "bluetooth",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6.5 6.5 L 17.5 17.5 L 12 23 L 12 1 L 17.5 6.5 L 6.5 17.5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bluetooth",
+      "wireless",
+      "connection",
+      "device",
+      "pairing",
+      "technology"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates the Bluetooth symbol, indicating wireless connectivity or device pairing.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "intersection",
+        "symmetry",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bold",
+    "name": "bold",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bold",
+      "text",
+      "format",
+      "weight",
+      "strong",
+      "typography"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the bold text formatting option, commonly found in text editors and word processors.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-book-open",
+    "name": "book open",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "book",
+      "open",
+      "reading",
+      "knowledge",
+      "library",
+      "story",
+      "education"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Shows an open book, symbolizing reading, learning, or access to information.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-briefcase",
+    "name": "briefcase",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 7 H 20 A 2 2 0 0 1 22 9 V 19 A 2 2 0 0 1 20 21 H 4 A 2 2 0 0 1 2 19 V 9 A 2 2 0 0 1 4 7 Z M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "briefcase",
+      "business",
+      "work",
+      "job",
+      "career",
+      "portfolio"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a briefcase, commonly associated with work, business, or professional documentation.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-box",
+    "name": "box",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M 3.27 6.96 L 12 12.01 L 20.73 6.96 M 12 22.08 L 12 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "box",
+      "package",
+      "storage",
+      "shipping",
+      "container",
+      "product"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a three-dimensional box, typically used to represent packaging, storage, or products.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "symmetry",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-bookmark",
+    "name": "bookmark",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "bookmark",
+      "save",
+      "favorite",
+      "archive",
+      "mark",
+      "important"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a bookmark, used to mark pages or save content for later reference.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-book",
+    "name": "book",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "book",
+      "literature",
+      "journal",
+      "document",
+      "manual",
+      "guide"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a closed book, symbolizing knowledge, literature, or documentation.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-calendar",
+    "name": "calendar",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 4 H 19 A 2 2 0 0 1 21 6 V 20 A 2 2 0 0 1 19 22 H 5 A 2 2 0 0 1 3 20 V 6 A 2 2 0 0 1 5 4 Z M 16 2 L 16 6 M 8 2 L 8 6 M 3 10 L 21 10",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "calendar",
+      "date",
+      "schedule",
+      "event",
+      "appointment",
+      "planning"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Shows a calendar page, commonly used for scheduling, dates, or event management.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-check-square",
+    "name": "check square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 9 11 L 12 14 L 22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "check",
+      "square",
+      "box",
+      "select",
+      "task",
+      "done",
+      "confirm"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a selected or completed item within a square boundary.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cast",
+    "name": "cast",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6 M 2 20 L 2.01 20",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cast",
+      "stream",
+      "broadcast",
+      "mirror",
+      "display",
+      "connect"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates the action of broadcasting or mirroring content to another screen.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "compound",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-check-circle",
+    "name": "check circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22 11.08V12a10 10 0 1 1-5.93-9.14 M 22 4 L 12 14.01 L 9 11.01",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "check",
+      "circle",
+      "confirm",
+      "verified",
+      "accepted",
+      "valid",
+      "complete"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Denotes a successful action, validation, or completion within a circular frame.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-camera-off",
+    "name": "camera off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 1 L 23 23 M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34m-7.72-2.06a4 4 0 1 1-5.56-5.56",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "camera",
+      "off",
+      "disabled",
+      "no-photo",
+      "shutter",
+      "video",
+      "blocked"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates that camera functionality is currently disabled or unavailable.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-camera",
+    "name": "camera",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M 8 13 A 4 4 0 1 0 16 13 A 4 4 0 1 0 8 13 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "camera",
+      "photo",
+      "picture",
+      "shoot",
+      "capture",
+      "image"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a physical camera device used for taking photographs or recording videos.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevron-left",
+    "name": "chevron left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 18 L 9 12 L 15 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevron",
+      "left",
+      "arrow",
+      "back",
+      "previous",
+      "caret",
+      "point"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a backward direction or a collapsed state in a user interface.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevron-right",
+    "name": "chevron right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 9 18 L 15 12 L 9 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevron",
+      "right",
+      "arrow",
+      "next",
+      "forward",
+      "point",
+      "expand"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a forward direction or an expanded state in a user interface.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevron-down",
+    "name": "chevron down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 9 L 12 15 L 18 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevron",
+      "down",
+      "arrow",
+      "collapse",
+      "dropdown",
+      "select",
+      "point"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a downward direction, a dropdown menu, or an expandable section in a user interface.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-check",
+    "name": "check",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 20 6 L 9 17 L 4 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "check",
+      "tick",
+      "confirm",
+      "done",
+      "valid",
+      "correct"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Signifies a successful action, validation, or agreement.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevron-up",
+    "name": "chevron up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 18 15 L 12 9 L 6 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevron",
+      "up",
+      "arrow",
+      "expand",
+      "scroll",
+      "point",
+      "menu"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates an upward direction, to expand a section, or to scroll up in a user interface.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevrons-right",
+    "name": "chevrons right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 13 17 L 18 12 L 13 7 M 6 17 L 11 12 L 6 7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevrons",
+      "right",
+      "next",
+      "forward",
+      "advance",
+      "proceed",
+      "navigate"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a user interface element indicating progression to the next item or section.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevrons-left",
+    "name": "chevrons left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 17 L 6 12 L 11 7 M 18 17 L 13 12 L 18 7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevrons",
+      "left",
+      "previous",
+      "back",
+      "reverse",
+      "rewind",
+      "history"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a user interface element indicating navigation to the previous item or section.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevrons-up",
+    "name": "chevrons up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 17 11 L 12 6 L 7 11 M 17 18 L 12 13 L 7 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevrons",
+      "up",
+      "expand",
+      "collapse",
+      "ascend",
+      "top",
+      "increase"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a user interface element indicating expansion, scrolling up, or increasing value.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chevrons-down",
+    "name": "chevrons down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7 13 L 12 18 L 17 13 M 7 6 L 12 11 L 17 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chevrons",
+      "down",
+      "scroll",
+      "descend",
+      "bottom",
+      "decrease",
+      "more"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a user interface element indicating scrolling down, showing more content, or decreasing value.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-chrome",
+    "name": "chrome",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 8 12 A 4 4 0 1 0 16 12 A 4 4 0 1 0 8 12 Z M 21.17 8 L 12 8 M 3.95 6.06 L 8.54 14 M 10.88 21.94 L 15.46 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "chrome",
+      "browser",
+      "web",
+      "internet",
+      "google",
+      "application"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the Google Chrome web browser, used for accessing and navigating the internet.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "nested",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cloud-drizzle",
+    "name": "cloud drizzle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 19 L 8 21 M 8 13 L 8 15 M 16 19 L 16 21 M 16 13 L 16 15 M 12 21 L 12 23 M 12 15 L 12 17 M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cloud",
+      "drizzle",
+      "weather",
+      "rain",
+      "precipitation",
+      "forecast",
+      "meteorology"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a cloud with vertical lines indicating light rain or drizzle, commonly used for weather conditions.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-circle",
+    "name": "circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "circle",
+      "round",
+      "dot",
+      "sphere",
+      "disc",
+      "ring"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a simple circular shape, often used as a bullet point, indicator, or placeholder.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 1,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-clock",
+    "name": "clock",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 12 6 L 12 12 L 16 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "clock",
+      "time",
+      "timer",
+      "schedule",
+      "hour",
+      "minute"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a classic analog clock face with hands, commonly used to represent time, deadlines, or scheduling.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-clipboard",
+    "name": "clipboard",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M 9 2 H 15 A 1 1 0 0 1 16 3 V 5 A 1 1 0 0 1 15 6 H 9 A 1 1 0 0 1 8 5 V 3 A 1 1 0 0 1 9 2 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "clipboard",
+      "notes",
+      "document",
+      "list",
+      "record",
+      "copy"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a clipboard, often used in user interfaces to signify copying, pasting, or managing lists and documents.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cloud-lightning",
+    "name": "cloud lightning",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9 M 13 11 L 9 17 L 15 17 L 11 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cloud",
+      "lightning",
+      "weather",
+      "storm",
+      "thunder",
+      "electricity",
+      "energy"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a cloud with a lightning bolt, commonly used to represent stormy weather or electrical events.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-code",
+    "name": "code",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 16 18 L 22 12 L 16 6 M 8 6 L 2 12 L 8 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "code",
+      "development",
+      "programming",
+      "script",
+      "markup",
+      "brackets"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents programming code or developer-related content, often used to indicate a code block or development tools.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cloud-snow",
+    "name": "cloud snow",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25 M 8 16 L 8.01 16 M 8 20 L 8.01 20 M 12 18 L 12.01 18 M 12 22 L 12.01 22 M 16 16 L 16.01 16 M 16 20 L 16.01 20",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cloud",
+      "snow",
+      "weather",
+      "forecast",
+      "winter",
+      "flakes",
+      "precipitation"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a cloud with snow falling, typically used to depict weather conditions or a winter forecast.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "fine-detail",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cloud-off",
+    "name": "cloud off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3 M 1 1 L 23 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cloud",
+      "off",
+      "disabled",
+      "unavailable",
+      "offline",
+      "disconnect",
+      "network"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates that cloud services or storage are unavailable, disconnected, or turned off.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cloud-rain",
+    "name": "cloud rain",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 16 13 L 16 21 M 8 13 L 8 21 M 12 15 L 12 23 M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cloud",
+      "rain",
+      "weather",
+      "forecast",
+      "droplet",
+      "shower",
+      "wet"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a cloud with falling rain, commonly used to signify rainy weather or precipitation forecasts.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cloud",
+    "name": "cloud",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cloud",
+      "weather",
+      "storage",
+      "sky",
+      "server",
+      "data"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a simple cloud, often used to represent weather, cloud storage services, or online data.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-coffee",
+    "name": "coffee",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18 8h1a4 4 0 0 1 0 8h-1 M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z M 6 1 L 6 4 M 10 1 L 10 4 M 14 1 L 14 4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "coffee",
+      "beverage",
+      "drink",
+      "mug",
+      "break",
+      "hot"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a hot coffee cup with steam, symbolizing a break, refreshment, or a hot drink.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-command",
+    "name": "command",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "command",
+      "key",
+      "keyboard",
+      "shortcut",
+      "apple",
+      "option"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the command key on a keyboard, often used in user interfaces to denote keyboard shortcuts or actions.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "nested",
+        "containment"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-codepen",
+    "name": "codepen",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 2 L 22 8.5 L 22 15.5 L 12 22 L 2 15.5 L 2 8.5 L 12 2 Z M 12 22 L 12 15.5 M 22 8.5 L 12 15.5 L 2 8.5 M 2 15.5 L 12 8.5 L 22 15.5 M 12 2 L 12 8.5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "codepen",
+      "platform",
+      "website",
+      "editor",
+      "frontend",
+      "developer"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Functions as a brand icon for Codepen, representing an online code editor and social development environment.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-codesandbox",
+    "name": "codesandbox",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M 7.5 4.21 L 12 6.81 L 16.5 4.21 M 7.5 19.79 L 7.5 14.6 L 3 12 M 21 12 L 16.5 14.6 L 16.5 19.79 M 3.27 6.96 L 12 12.01 L 20.73 6.96 M 12 22.08 L 12 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "codesandbox",
+      "sandbox",
+      "online",
+      "ide",
+      "preview",
+      "development"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Serves as a brand icon for CodeSandbox, indicating an online development environment for quick prototyping and collaboration.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 4,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound",
+        "intersection",
+        "nested"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-columns",
+    "name": "columns",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "columns",
+      "layout",
+      "grid",
+      "split",
+      "divide",
+      "sidebar"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a multi-column layout or a split view, commonly used in user interfaces for content arrangement.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-left-down",
+    "name": "corner left down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 14 15 L 9 20 L 4 15 M20 4h-7a4 4 0 0 0-4 4v12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "left",
+      "down",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that turns left and then proceeds downwards.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-down-left",
+    "name": "corner down left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 9 10 L 4 15 L 9 20 M20 4v7a4 4 0 0 1-4 4H4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "down",
+      "left",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that first goes down and then turns left.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-compass",
+    "name": "compass",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 16.24 7.76 L 14.12 14.12 L 7.76 16.24 L 9.88 9.88 L 16.24 7.76 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "compass",
+      "navigation",
+      "direction",
+      "location",
+      "bearing",
+      "guide"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a compass, used for navigation and indicating direction or location.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "intersection",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-down-right",
+    "name": "corner down right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 10 L 20 15 L 15 20 M4 4v7a4 4 0 0 0 4 4h12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "down",
+      "right",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that first goes down and then turns right.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-copy",
+    "name": "copy",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 9 H 20 A 2 2 0 0 1 22 11 V 20 A 2 2 0 0 1 20 22 H 11 A 2 2 0 0 1 9 20 V 11 A 2 2 0 0 1 11 9 Z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "copy",
+      "duplicate",
+      "replicate",
+      "clone",
+      "document",
+      "file"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes the action of duplicating content, represented by two stacked documents.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "intersection",
+        "nested",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-right-down",
+    "name": "corner right down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 10 15 L 15 20 L 20 15 M4 4h7a4 4 0 0 1 4 4v12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "right",
+      "down",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that turns right and then proceeds downwards.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-right-up",
+    "name": "corner right up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 10 9 L 15 4 L 20 9 M4 20h7a4 4 0 0 0 4-4V4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "right",
+      "up",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that turns right and then proceeds upwards.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-left-up",
+    "name": "corner left up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 14 9 L 9 4 L 4 9 M20 20h-7a4 4 0 0 1-4-4V4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "left",
+      "up",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that turns left and then proceeds upwards.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-up-left",
+    "name": "corner up left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 9 14 L 4 9 L 9 4 M20 20v-7a4 4 0 0 0-4-4H4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "up",
+      "left",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that first goes up and then turns left.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-corner-up-right",
+    "name": "corner up right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 14 L 20 9 L 15 4 M4 20v-7a4 4 0 0 1 4-4h12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "corner",
+      "up",
+      "right",
+      "directional",
+      "arrow",
+      "turn",
+      "route",
+      "path"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a UI element indicating a directional path that first goes up and then turns right.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-crosshair",
+    "name": "crosshair",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 22 12 L 18 12 M 6 12 L 2 12 M 12 6 L 12 2 M 12 22 L 12 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "crosshair",
+      "aim",
+      "target",
+      "focus",
+      "scope"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents aiming, targeting, or focusing on a specific point or objective.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "compound",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-crop",
+    "name": "crop",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M6.13 1L6 16a2 2 0 0 0 2 2h15 M1 6.13L16 6a2 2 0 0 1 2 2v15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "crop",
+      "trim",
+      "cut",
+      "resize",
+      "image"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Denotes the action of trimming or resizing an image or visual content to a desired area.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-cpu",
+    "name": "cpu",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 4 H 18 A 2 2 0 0 1 20 6 V 18 A 2 2 0 0 1 18 20 H 6 A 2 2 0 0 1 4 18 V 6 A 2 2 0 0 1 6 4 Z M 9 9 H 15 V 15 H 9 Z M 9 1 L 9 4 M 15 1 L 15 4 M 9 20 L 9 23 M 15 20 L 15 23 M 20 9 L 23 9 M 20 14 L 23 14 M 1 9 L 4 9 M 1 14 L 4 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "cpu",
+      "processor",
+      "chip",
+      "computer",
+      "hardware"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a central processing unit (CPU) chip, symbolizing computing power or core system components.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "compound",
+        "fine-detail",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-credit-card",
+    "name": "credit card",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 4 H 21 A 2 2 0 0 1 23 6 V 18 A 2 2 0 0 1 21 20 H 3 A 2 2 0 0 1 1 18 V 6 A 2 2 0 0 1 3 4 Z M 1 10 L 23 10",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "credit",
+      "card",
+      "payment",
+      "banking",
+      "finance",
+      "debit"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a credit or debit card, commonly used for financial transactions and payments.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-database",
+    "name": "database",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 5 A 9 3 0 1 0 21 5 A 9 3 0 1 0 3 5 Z M21 12c0 1.66-4 3-9 3s-9-1.34-9-3 M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "database",
+      "storage",
+      "server",
+      "data",
+      "records"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes a database, representing data storage, management, and information systems.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "nested",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-delete",
+    "name": "delete",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z M 18 9 L 12 15 M 12 9 L 18 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "delete",
+      "remove",
+      "clear",
+      "erase",
+      "cancel"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates the action to remove, erase, or delete an item or content.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-disc",
+    "name": "disc",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 9 12 A 3 3 0 1 0 15 12 A 3 3 0 1 0 9 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "disc",
+      "record",
+      "cd",
+      "vinyl",
+      "media"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a disc, such as a CD or record, often symbolizing media, music, or data storage.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-divide",
+    "name": "divide",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 10 6 A 2 2 0 1 0 14 6 A 2 2 0 1 0 10 6 Z M 5 12 L 19 12 M 10 18 A 2 2 0 1 0 14 18 A 2 2 0 1 0 10 18 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "divide",
+      "math",
+      "arithmetic",
+      "calculate",
+      "split"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the mathematical operation of division, used in calculators or data separation contexts.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-divide-square",
+    "name": "divide square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 8 12 L 16 12 M 12 16 L 12 16 M 12 8 L 12 8",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "divide",
+      "square",
+      "math",
+      "arithmetic",
+      "calculus",
+      "operation"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the division mathematical operation enclosed within a square, often used in calculator interfaces or symbol sets.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "compound",
+        "symmetry",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-divide-circle",
+    "name": "divide circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 12 L 16 12 M 12 16 L 12 16 M 12 8 L 12 8 M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "divide",
+      "circle",
+      "math",
+      "arithmetic",
+      "calculus",
+      "calculation"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the division mathematical operation enclosed within a circle, suitable for scientific or calculator applications.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "compound",
+        "symmetry",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-droplet",
+    "name": "droplet",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "droplet",
+      "water",
+      "liquid",
+      "tear",
+      "humidity",
+      "moisture"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a single drop of liquid, often used to symbolize water, humidity, or a small quantity of something.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-download",
+    "name": "download",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M 7 10 L 12 15 L 17 10 M 12 15 L 12 3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "download",
+      "save",
+      "retrieve",
+      "import",
+      "acquire",
+      "transfer"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts an arrow pointing into a tray, symbolizing the action of downloading or saving data from a remote source.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound",
+        "symmetry",
+        "containment"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-dollar-sign",
+    "name": "dollar sign",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 1 L 12 23 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "dollar",
+      "sign",
+      "currency",
+      "money",
+      "finance",
+      "price",
+      "cost"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Features a vertical line intersecting a stylized 'S' shape, representing the dollar currency symbol.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-dribbble",
+    "name": "dribbble",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "dribbble",
+      "basketball",
+      "sport",
+      "branding",
+      "dribble",
+      "social-media"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Displays a circular shape enclosing three distinct curved lines, reminiscent of a basketball, often used to represent the Dribbble platform.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "containment",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-download-cloud",
+    "name": "download cloud",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 17 L 12 21 L 16 17 M 12 12 L 12 21 M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "download",
+      "cloud",
+      "cloud-storage",
+      "remote",
+      "synchronize",
+      "retrieve",
+      "online"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Combines a downward-pointing arrow with a cloud graphic, signifying the action of downloading data from a cloud-based service.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "compound",
+        "containment"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-edit-2",
+    "name": "edit 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "edit",
+      "2",
+      "write",
+      "compose",
+      "modify",
+      "revise",
+      "annotate"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "A minimalist representation of a pen or pencil, symbolizing the act of editing, writing, or making changes.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-edit",
+    "name": "edit",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "edit",
+      "document",
+      "write",
+      "update",
+      "modify",
+      "paperwork"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Features a pen overlapping a document icon, indicating the action of editing or updating a file or record.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "intersection",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-eye-off",
+    "name": "eye off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24 M 1 1 L 23 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "eye",
+      "off",
+      "hide",
+      "invisible",
+      "obscure",
+      "privacy",
+      "unsee"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts an eye with a diagonal line drawn through it, signifying that something is hidden, invisible, or not visible.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "intersection",
+        "compound",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-edit-3",
+    "name": "edit 3",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "edit",
+      "3",
+      "compose",
+      "draft",
+      "modify",
+      "notepad",
+      "writing"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Shows a pen-like object with an additional horizontal line, symbolizing the act of editing or drawing, possibly in a digital context.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "compound",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-external-link",
+    "name": "external link",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6 M 15 3 L 21 3 L 21 9 M 10 14 L 21 3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "external",
+      "link",
+      "redirect",
+      "hyperlink",
+      "open",
+      "new-tab",
+      "navigate"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Features a square with an arrow pointing diagonally upwards and outwards, indicating a link that opens to an external location or new window.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-fast-forward",
+    "name": "fast forward",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 13 19 L 22 12 L 13 5 L 13 19 Z M 2 19 L 11 12 L 2 5 L 2 19 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "fast",
+      "forward",
+      "speed",
+      "media",
+      "playback",
+      "advance",
+      "skip"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Used in media players to advance quickly through content or skip to the next item.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-feather",
+    "name": "feather",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z M 16 8 L 2 22 M 17.5 15 L 9 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "feather",
+      "quill",
+      "write",
+      "bird",
+      "natural",
+      "soft"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a feather, often associated with writing, lightness, or a bird.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "fine-detail",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-eye",
+    "name": "eye",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M 9 12 A 3 3 0 1 0 15 12 A 3 3 0 1 0 9 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "eye",
+      "vision",
+      "view",
+      "visible",
+      "see",
+      "watch"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a human eye, commonly used to signify visibility, viewing, or observation.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "symmetry",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-facebook",
+    "name": "facebook",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "facebook",
+      "social",
+      "share",
+      "network",
+      "platform",
+      "connect"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the Facebook social media platform, typically used for sharing content or linking to profiles.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 3,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-figma",
+    "name": "figma",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z M12 2h3.5a3.5 3.5 0 1 1 0 7H12V2z M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "figma",
+      "design",
+      "prototyping",
+      "tool",
+      "software",
+      "creative"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the Figma design and prototyping tool, often used to indicate design files or collaborative design activities.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-file-plus",
+    "name": "file plus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M 14 2 L 14 8 L 20 8 M 12 18 L 12 12 M 9 15 L 15 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "file",
+      "plus",
+      "add",
+      "create",
+      "document",
+      "new",
+      "upload"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates the action of adding a new file or document to a system.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "intersection",
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-film",
+    "name": "film",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4.18 2 H 19.82 A 2.18 2.18 0 0 1 22 4.18 V 19.82 A 2.18 2.18 0 0 1 19.82 22 H 4.18 A 2.18 2.18 0 0 1 2 19.82 V 4.18 A 2.18 2.18 0 0 1 4.18 2 Z M 7 2 L 7 22 M 17 2 L 17 22 M 2 12 L 22 12 M 2 7 L 7 7 M 2 17 L 7 17 M 17 17 L 22 17 M 17 7 L 22 7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "film",
+      "movie",
+      "cinema",
+      "video",
+      "reel",
+      "media"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a film strip, commonly used to symbolize video, movies, or media content.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "open-path",
+        "intersection",
+        "fine-detail",
+        "symmetry",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-file",
+    "name": "file",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z M 13 2 L 13 9 L 20 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "file",
+      "document",
+      "page",
+      "paperwork",
+      "record",
+      "data"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a generic file or document, used to indicate any type of digital or physical record.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-file-minus",
+    "name": "file minus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M 14 2 L 14 8 L 20 8 M 9 15 L 15 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "file",
+      "minus",
+      "remove",
+      "delete",
+      "subtract",
+      "decrease",
+      "discard"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates the action of removing or deleting a file or document from a system.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-file-text",
+    "name": "file text",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M 14 2 L 14 8 L 20 8 M 16 13 L 8 13 M 16 17 L 8 17 M 10 9 L 9 9 L 8 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "file",
+      "text",
+      "written",
+      "content",
+      "draft",
+      "article",
+      "document"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a file containing text content, typically used to signify documents with written information.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-folder-minus",
+    "name": "folder minus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z M 9 14 L 15 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "folder",
+      "minus",
+      "remove",
+      "delete",
+      "decrease",
+      "subtract",
+      "directory"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a folder from which an item or content is being removed or indicates a decreased quantity within.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-folder",
+    "name": "folder",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "folder",
+      "directory",
+      "files",
+      "archive",
+      "storage",
+      "organize"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a generic folder used for organizing and storing digital files or documents.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-filter",
+    "name": "filter",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 22 3 L 2 3 L 10 12.46 L 10 19 L 14 21 L 14 12.46 L 22 3 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "filter",
+      "sort",
+      "refine",
+      "funnel",
+      "search",
+      "process"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes the action of refining or narrowing down a set of data, results, or options.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-folder-plus",
+    "name": "folder plus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z M 12 11 L 12 17 M 9 14 L 15 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "folder",
+      "plus",
+      "add",
+      "create",
+      "new",
+      "increase",
+      "append"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a folder where new items or content can be added or indicates an increased quantity within.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "intersection",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-flag",
+    "name": "flag",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z M 4 22 L 4 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "flag",
+      "mark",
+      "report",
+      "banner",
+      "marker",
+      "pennant"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Denotes a marker, a saved item, or a notification status, often used for highlighting important content.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-framer",
+    "name": "framer",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M5 16V9h14V2H5l14 14h-7m-7 0l7 7v-7m-7 0h7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "framer",
+      "logo",
+      "design",
+      "prototype",
+      "software",
+      "brand"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the Framer brand or platform, often used in contexts related to design and prototyping tools.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-gift",
+    "name": "gift",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 20 12 L 20 22 L 4 22 L 4 12 M 2 7 H 22 V 12 H 2 Z M 12 22 L 12 7 M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "gift",
+      "present",
+      "reward",
+      "bonus",
+      "surprise",
+      "wrapped"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a present or gift box, commonly used to symbolize rewards, promotions, or special offerings.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "intersection",
+        "symmetry",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-frown",
+    "name": "frown",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M16 16s-1.5-2-4-2-4 2-4 2 M 9 9 L 9.01 9 M 15 9 L 15.01 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "frown",
+      "sad",
+      "unhappy",
+      "displeased",
+      "negative",
+      "mood"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a negative emotion or dissatisfaction, often used to indicate an error, disapproval, or a bad user experience.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-git-commit",
+    "name": "git commit",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 12 A 4 4 0 1 0 16 12 A 4 4 0 1 0 8 12 Z M 1.05 12 L 7 12 M 17.01 12 L 22.96 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "git",
+      "commit",
+      "version",
+      "revision",
+      "history",
+      "save",
+      "code"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes a commit point in a Git version control system, marking a saved state of changes.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-git-branch",
+    "name": "git branch",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 3 L 6 15 M 15 6 A 3 3 0 1 0 21 6 A 3 3 0 1 0 15 6 Z M 3 18 A 3 3 0 1 0 9 18 A 3 3 0 1 0 3 18 Z M18 9a9 9 0 0 1-9 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "git",
+      "branch",
+      "fork",
+      "merge",
+      "version",
+      "code",
+      "workflow"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a branch in a Git version control system, indicating a divergent line of development.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-git-pull-request",
+    "name": "git pull request",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 18 A 3 3 0 1 0 21 18 A 3 3 0 1 0 15 18 Z M 3 6 A 3 3 0 1 0 9 6 A 3 3 0 1 0 3 6 Z M13 6h3a2 2 0 0 1 2 2v7 M 6 9 L 6 21",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "git",
+      "pull",
+      "request",
+      "branch",
+      "code",
+      "merge",
+      "development"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the action of requesting to integrate changes from one code branch into another within a version control system.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-globe",
+    "name": "globe",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 2 12 L 22 12 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "globe",
+      "world",
+      "earth",
+      "international",
+      "planet"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a spherical planet, symbolizing worldwide reach, internationality, or global connectivity.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "intersection",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-github",
+    "name": "github",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "github",
+      "octocat",
+      "repository",
+      "code",
+      "development"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the GitHub platform, a popular web-based hosting service for version control using Git.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 4,
+      "geometricTraits": [
+        "fine-detail",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-gitlab",
+    "name": "gitlab",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.42.42 0 0 1 4.82 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.49h8.1l2.44-7.51A.42.42 0 0 1 18.6 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.51L23 13.45a.84.84 0 0 1-.35.94z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "gitlab",
+      "fox",
+      "repository",
+      "devops",
+      "platform"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the GitLab platform, an open-source Git repository manager providing full DevOps lifecycle features.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 4,
+      "geometricTraits": [
+        "fine-detail",
+        "symmetry",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-git-merge",
+    "name": "git merge",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 18 A 3 3 0 1 0 21 18 A 3 3 0 1 0 15 18 Z M 3 6 A 3 3 0 1 0 9 6 A 3 3 0 1 0 3 6 Z M6 21V9a9 9 0 0 0 9 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "git",
+      "merge",
+      "branch",
+      "combine",
+      "integrate",
+      "code"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes the action of combining two different branches of code or development histories in a version control system.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-heart",
+    "name": "heart",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "heart",
+      "love",
+      "favorite",
+      "like",
+      "emotion"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents affection, preference, or an item saved to a list of favorites.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-hard-drive",
+    "name": "hard drive",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 22 12 L 2 12 M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z M 6 16 L 6.01 16 M 10 16 L 10.01 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "hard",
+      "drive",
+      "storage",
+      "disk",
+      "memory",
+      "data"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents data storage, a hard drive, or server infrastructure.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "fine-detail",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-grid",
+    "name": "grid",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 3 H 10 V 10 H 3 Z M 14 3 H 21 V 10 H 14 Z M 14 14 H 21 V 21 H 14 Z M 3 14 H 10 V 21 H 3 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "grid",
+      "layout",
+      "view",
+      "dashboard",
+      "matrix"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a grid layout, a view option, or a dashboard of multiple elements.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-headphones",
+    "name": "headphones",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "headphones",
+      "audio",
+      "music",
+      "listen",
+      "sound",
+      "headset"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents audio output, listening, or a device for private sound consumption.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-hash",
+    "name": "hash",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 9 L 20 9 M 4 15 L 20 15 M 10 3 L 8 21 M 16 3 L 14 21",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "hash",
+      "number",
+      "pound",
+      "hashtag",
+      "symbol"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a hash symbol, used for numbering, identifying sections, or as a hashtag.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 1,
+      "geometricTraits": [
+        "intersection",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-image",
+    "name": "image",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 7 8.5 A 1.5 1.5 0 1 0 10 8.5 A 1.5 1.5 0 1 0 7 8.5 Z M 21 15 L 16 10 L 5 21",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "image",
+      "photo",
+      "picture",
+      "gallery",
+      "media",
+      "snapshot"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a visual media file, often used to indicate image uploads, galleries, or picture display.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "fine-detail",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-hexagon",
+    "name": "hexagon",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "hexagon",
+      "shape",
+      "polygon",
+      "six-sided",
+      "honeycomb",
+      "module"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a six-sided polygon, often used as a generic geometric shape or a building block in design.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 1,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-inbox",
+    "name": "inbox",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 22 12 L 16 12 L 14 15 L 10 15 L 8 12 L 2 12 M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "inbox",
+      "mail",
+      "messages",
+      "container",
+      "receive",
+      "queue"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a receiving container for digital mail or messages, commonly used for email applications or notification centers.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-home",
+    "name": "home",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M 9 22 L 9 12 L 15 12 L 15 22",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "home",
+      "house",
+      "dwelling",
+      "residence",
+      "main",
+      "dashboard"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a primary dwelling or the main landing page/dashboard within a user interface.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-help-circle",
+    "name": "help circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3 M 12 17 L 12.01 17",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "help",
+      "circle",
+      "query",
+      "support",
+      "faq",
+      "question",
+      "assistant"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates access to assistance, frequently asked questions, or general support information within an application.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "fine-detail",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-italic",
+    "name": "italic",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 19 4 L 10 4 M 14 20 L 5 20 M 15 4 L 9 20",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "italic",
+      "text",
+      "format",
+      "style",
+      "font",
+      "typography"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes the italicization of text, used in rich text editors and word processing applications.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-info",
+    "name": "info",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 12 16 L 12 12 M 12 8 L 12.01 8",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "info",
+      "notice",
+      "details",
+      "message",
+      "alert",
+      "knowledge"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Provides a visual cue for important information, alerts, or further details available to the user.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "fine-detail",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-instagram",
+    "name": "instagram",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7 2 H 17 A 5 5 0 0 1 22 7 V 17 A 5 5 0 0 1 17 22 H 7 A 5 5 0 0 1 2 17 V 7 A 5 5 0 0 1 7 2 Z M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z M 17.5 6.5 L 17.51 6.5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "instagram",
+      "social",
+      "app",
+      "share",
+      "network",
+      "camera"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the Instagram social media platform, symbolizing photo sharing and digital community engagement.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "fine-detail",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-key",
+    "name": "key",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "key",
+      "access",
+      "secure",
+      "password",
+      "lock",
+      "authentication"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Symbolizes security, access control, or the management of passwords and protected resources.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 4,
+      "geometricTraits": [
+        "fine-detail",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-layers",
+    "name": "layers",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 2 L 2 7 L 12 12 L 22 7 L 12 2 Z M 2 17 L 12 22 L 22 17 M 2 12 L 12 17 L 22 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "layers",
+      "stack",
+      "order",
+      "hierarchy",
+      "levels",
+      "depth"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the concept of stacked elements, multiple layers, or hierarchical organization within a design or data structure.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "nested",
+        "symmetry",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-life-buoy",
+    "name": "life buoy",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 8 12 A 4 4 0 1 0 16 12 A 4 4 0 1 0 8 12 Z M 4.93 4.93 L 9.17 9.17 M 14.83 14.83 L 19.07 19.07 M 14.83 9.17 L 19.07 4.93 M 14.83 9.17 L 18.36 5.64 M 4.93 19.07 L 9.17 14.83",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "life",
+      "buoy",
+      "rescue",
+      "float",
+      "safety",
+      "aid",
+      "ring"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a safety device used for buoyancy and rescue in water.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "intersection",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-link",
+    "name": "link",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "link",
+      "chain",
+      "connect",
+      "url",
+      "web",
+      "attach"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates two interlocking chain links, commonly used to represent a hyperlink or connection.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-linkedin",
+    "name": "linkedin",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M 2 9 H 6 V 21 H 2 Z M 2 4 A 2 2 0 1 0 6 4 A 2 2 0 1 0 2 4 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "linkedin",
+      "social",
+      "network",
+      "profile",
+      "business",
+      "professional"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the simplified logo of LinkedIn, signifying professional networking and profiles.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-layout",
+    "name": "layout",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 3 9 L 21 9 M 9 21 L 9 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "layout",
+      "grid",
+      "arrange",
+      "window",
+      "design",
+      "panel"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a general layout or window structure, often used for content arrangement or UI design.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-link-2",
+    "name": "link 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3 M 8 12 L 16 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "link",
+      "2",
+      "hyperlink",
+      "URL",
+      "connect",
+      "join",
+      "attachment"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Shows two open chain links connected by a central bar, indicating a hyperlink or a connection between elements.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-list",
+    "name": "list",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 6 L 21 6 M 8 12 L 21 12 M 8 18 L 21 18 M 3 6 L 3.01 6 M 3 12 L 3.01 12 M 3 18 L 3.01 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "list",
+      "items",
+      "menu",
+      "bullet",
+      "order",
+      "catalog"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a bulleted list, commonly used to display a sequence of items or options.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-loader",
+    "name": "loader",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 2 L 12 6 M 12 18 L 12 22 M 4.93 4.93 L 7.76 7.76 M 16.24 16.24 L 19.07 19.07 M 2 12 L 6 12 M 18 12 L 22 12 M 4.93 19.07 L 7.76 16.24 M 16.24 7.76 L 19.07 4.93",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "loader",
+      "progress",
+      "spinner",
+      "loading",
+      "busy",
+      "wait"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates a radial spinner, typically indicating that content is loading or an operation is in progress.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-lock",
+    "name": "lock",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 11 H 19 A 2 2 0 0 1 21 13 V 20 A 2 2 0 0 1 19 22 H 5 A 2 2 0 0 1 3 20 V 13 A 2 2 0 0 1 5 11 Z M7 11V7a5 5 0 0 1 10 0v4",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "lock",
+      "secure",
+      "security",
+      "private",
+      "padlock",
+      "safety"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a padlock, symbolizing security, privacy, or restricted access.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-log-out",
+    "name": "log out",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M 16 17 L 21 12 L 16 7 M 21 12 L 9 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "log",
+      "out",
+      "exit",
+      "sign-out",
+      "leave",
+      "close",
+      "terminate"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Shows an arrow pointing out of an open rectangle, commonly used to represent logging out or exiting an application.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-log-in",
+    "name": "log in",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4 M 10 17 L 15 12 L 10 7 M 15 12 L 3 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "log",
+      "in",
+      "enter",
+      "sign-in",
+      "access",
+      "portal",
+      "authenticate"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Displays an arrow pointing into an open rectangle, symbolizing logging in or gaining access to a system.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-map-pin",
+    "name": "map pin",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z M 9 10 A 3 3 0 1 0 15 10 A 3 3 0 1 0 9 10 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "map",
+      "pin",
+      "location",
+      "marker",
+      "pointer",
+      "geotag",
+      "address"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a geographical marker used to indicate a specific location on a map or in navigation.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "symmetry",
+        "fine-detail"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-mail",
+    "name": "mail",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M 22 6 L 12 13 L 2 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "mail",
+      "envelope",
+      "letter",
+      "message",
+      "email",
+      "communication"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents an envelope, typically used to signify email, messaging, or communication within an application.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "intersection",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-maximize",
+    "name": "maximize",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "maximize",
+      "expand",
+      "fullscreen",
+      "resize",
+      "enlarge",
+      "window"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Signifies the action of expanding an element, window, or view to its maximum possible size or fullscreen mode.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-map",
+    "name": "map",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 6 L 1 22 L 8 18 L 16 22 L 23 18 L 23 2 L 16 6 L 8 2 L 1 6 Z M 8 2 L 8 18 M 16 6 L 16 22",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "map",
+      "navigation",
+      "geography",
+      "terrain",
+      "location",
+      "guide"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a geographical map, often used for navigation, location-based services, or viewing spatial data.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-maximize-2",
+    "name": "maximize 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 3 L 21 3 L 21 9 M 9 21 L 3 21 L 3 15 M 21 3 L 14 10 M 3 21 L 10 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "maximize",
+      "2",
+      "expand",
+      "fullscreen",
+      "zoom",
+      "grow",
+      "enlarge"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Denotes an action to expand an element, window, or view, often implying a fullscreen or focus mode.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-message-square",
+    "name": "message square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "message",
+      "square",
+      "chat",
+      "comment",
+      "bubble",
+      "dialog",
+      "conversation"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a square-shaped speech bubble, commonly used to indicate chat functionality or comment sections.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-message-circle",
+    "name": "message circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "message",
+      "circle",
+      "chat",
+      "comment",
+      "bubble",
+      "dialog",
+      "speak"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a circular speech bubble, frequently used to indicate chat functionality or direct messaging.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-menu",
+    "name": "menu",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 12 L 21 12 M 3 6 L 21 6 M 3 18 L 21 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "menu",
+      "hamburger",
+      "navigation",
+      "options",
+      "list",
+      "more"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a hamburger menu icon, typically used to toggle the visibility of a navigation menu or a list of options.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-mic-off",
+    "name": "mic off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 1 L 23 23 M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6 M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23 M 12 19 L 12 23 M 8 23 L 16 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "mic",
+      "off",
+      "mute",
+      "sound",
+      "audio",
+      "voice",
+      "disable"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Indicates a microphone that is currently muted or disabled, commonly used in audio/video conferencing applications.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 4,
+      "geometricTraits": [
+        "intersection",
+        "fine-detail",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-meh",
+    "name": "meh",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 8 15 L 16 15 M 9 9 L 9.01 9 M 15 9 L 15.01 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "meh",
+      "indifferent",
+      "neutral",
+      "emotion",
+      "feeling",
+      "unamused"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a neutral or indifferent facial expression, often used for feedback or emotional status.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "fine-detail",
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-minus-square",
+    "name": "minus square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 8 12 L 16 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "minus",
+      "square",
+      "subtract",
+      "remove",
+      "delete",
+      "collapse",
+      "decrease"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents an action to reduce a value, remove an item, or collapse a section within a squared boundary.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-minus-circle",
+    "name": "minus circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 8 12 L 16 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "minus",
+      "circle",
+      "subtract",
+      "remove",
+      "delete",
+      "collapse",
+      "decrease"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Denotes an action to subtract, remove, or collapse content, often used in interactive elements.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "containment",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-mic",
+    "name": "mic",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M 12 19 L 12 23 M 8 23 L 16 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "mic",
+      "microphone",
+      "audio",
+      "record",
+      "voice",
+      "sound"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a microphone, commonly used for audio recording, voice input, or sound-related functions.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-minimize-2",
+    "name": "minimize 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 14 L 10 14 L 10 20 M 20 10 L 14 10 L 14 4 M 14 10 L 21 3 M 3 21 L 10 14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "minimize",
+      "2",
+      "collapse",
+      "shrink",
+      "contract",
+      "close",
+      "downsize"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Illustrates the action of minimizing or collapsing a window or element, often used to reduce its size or hide it.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-minimize",
+    "name": "minimize",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "minimize",
+      "collapse",
+      "shrink",
+      "contract",
+      "close",
+      "fold"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents the action of reducing the size of a window or UI element, indicated by four inward-pointing corner brackets.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "open-path",
+        "symmetry",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-moon",
+    "name": "moon",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "moon",
+      "night",
+      "dark-mode",
+      "crescent",
+      "celestial",
+      "sleep"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Depicts a crescent moon, often used to represent night, dark mode themes, or celestial themes.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-more-vertical",
+    "name": "more vertical",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 12 A 1 1 0 1 0 13 12 A 1 1 0 1 0 11 12 Z M 11 5 A 1 1 0 1 0 13 5 A 1 1 0 1 0 11 5 Z M 11 19 A 1 1 0 1 0 13 19 A 1 1 0 1 0 11 19 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "more",
+      "vertical",
+      "options",
+      "menu",
+      "ellipses",
+      "context",
+      "settings"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a vertical ellipsis, commonly used in user interfaces to indicate a 'more options' menu or contextual actions.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-more-horizontal",
+    "name": "more horizontal",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 12 A 1 1 0 1 0 13 12 A 1 1 0 1 0 11 12 Z M 18 12 A 1 1 0 1 0 20 12 A 1 1 0 1 0 18 12 Z M 4 12 A 1 1 0 1 0 6 12 A 1 1 0 1 0 4 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "more",
+      "horizontal",
+      "options",
+      "menu",
+      "ellipses",
+      "context",
+      "settings"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a horizontal ellipsis, widely used in user interfaces to signify 'more options' or additional content.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-minus",
+    "name": "minus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 12 L 19 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "minus",
+      "subtract",
+      "remove",
+      "decrease",
+      "dash",
+      "separator"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "A simple horizontal line representing subtraction, a collapsed state, or a divider.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 1,
+      "geometricTraits": [
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-monitor",
+    "name": "monitor",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 3 H 20 A 2 2 0 0 1 22 5 V 15 A 2 2 0 0 1 20 17 H 4 A 2 2 0 0 1 2 15 V 5 A 2 2 0 0 1 4 3 Z M 8 21 L 16 21 M 12 17 L 12 21",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "monitor",
+      "screen",
+      "display",
+      "computer",
+      "desktop",
+      "device"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "Represents a computer monitor or display screen, indicating visual output or a computing device.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "open-path",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-move",
+    "name": "move",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 9 L 2 12 L 5 15 M 9 5 L 12 2 L 15 5 M 15 19 L 12 22 L 9 19 M 19 9 L 22 12 L 19 15 M 2 12 L 22 12 M 12 2 L 12 22",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "move",
+      "shift",
+      "drag",
+      "relocate",
+      "reposition",
+      "transfer"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon signifies the ability to change the position of an element or item within an interface.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry",
+        "open-path",
+        "compound"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-navigation-2",
+    "name": "navigation 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 2 L 19 21 L 12 17 L 5 21 L 12 2 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "navigation",
+      "2",
+      "direction",
+      "map",
+      "compass",
+      "guide",
+      "locate"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon represents a compass needle or an arrow pointing forward, commonly used to indicate location or direct movement in applications.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-navigation",
+    "name": "navigation",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 11 L 22 2 L 13 21 L 11 13 L 3 11 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "navigation",
+      "send",
+      "locate",
+      "direction",
+      "map",
+      "route"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon depicts a paper airplane or dart, often used to signify sending a message or navigating to a specific location.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-mouse-pointer",
+    "name": "mouse pointer",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z M13 13l6 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "mouse",
+      "pointer",
+      "cursor",
+      "select",
+      "click",
+      "arrow",
+      "choose"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon represents a standard mouse cursor, indicating an interactive element or the act of selecting something.",
+    "aiMetadata": {
+      "semanticCategory": "ui",
+      "complexity": 2,
+      "geometricTraits": [
+        "open-path",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-music",
+    "name": "music",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M9 18V5l12-2v13 M 3 18 A 3 3 0 1 0 9 18 A 3 3 0 1 0 3 18 Z M 15 16 A 3 3 0 1 0 21 16 A 3 3 0 1 0 15 16 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "music",
+      "audio",
+      "sound",
+      "song",
+      "melody",
+      "tune"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon depicts a musical note, symbolizing audio playback, sound settings, or musical content.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "compound",
+        "open-path",
+        "intersection"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-package",
+    "name": "package",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 16.5 9.4 L 7.5 4.21 M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M 3.27 6.96 L 12 12.01 L 20.73 6.96 M 12 22.08 L 12 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "package",
+      "box",
+      "shipping",
+      "delivery",
+      "container",
+      "product"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon illustrates a package or box, commonly used to represent products, shipments, or storage.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-octagon",
+    "name": "octagon",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7.86 2 L 16.14 2 L 22 7.86 L 22 16.14 L 16.14 22 L 7.86 22 L 2 16.14 L 2 7.86 L 7.86 2 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "octagon",
+      "shape",
+      "stop",
+      "border",
+      "container",
+      "geometric"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon depicts a perfect octagon, often used as a general shape, a warning symbol, or a container for other interface elements.",
+    "aiMetadata": {
+      "semanticCategory": "abstract",
+      "complexity": 2,
+      "geometricTraits": [
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-paperclip",
+    "name": "paperclip",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "paperclip",
+      "attachment",
+      "document",
+      "file",
+      "link",
+      "connect"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon represents a paperclip, typically signifying a file attachment or a link to related content.",
+    "aiMetadata": {
+      "semanticCategory": "object",
+      "complexity": 3,
+      "geometricTraits": [
+        "intersection",
+        "open-path"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-pause",
+    "name": "pause",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 4 H 10 V 20 H 6 Z M 14 4 H 18 V 20 H 14 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "pause",
+      "stop",
+      "hold",
+      "break",
+      "suspend",
+      "media"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon displays two vertical bars, commonly used to indicate pausing media playback or suspending an ongoing process.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 2,
+      "geometricTraits": [
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-pause-circle",
+    "name": "pause circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 10 15 L 10 9 M 14 15 L 14 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "pause",
+      "circle",
+      "media",
+      "stop",
+      "hold",
+      "video",
+      "audio"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": [],
+    "aiDescription": "This icon features a pause symbol (two vertical bars) enclosed within a circle, signifying the action of pausing media playback or a process within a circular control.",
+    "aiMetadata": {
+      "semanticCategory": "action",
+      "complexity": 3,
+      "geometricTraits": [
+        "containment",
+        "compound",
+        "symmetry"
+      ],
+      "confidence": 0.8
+    }
+  },
+  {
+    "id": "feather-icons-percent",
+    "name": "percent",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 19 5 L 5 19 M 4 6.5 A 2.5 2.5 0 1 0 9 6.5 A 2.5 2.5 0 1 0 4 6.5 Z M 15 17.5 A 2.5 2.5 0 1 0 20 17.5 A 2.5 2.5 0 1 0 15 17.5 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "percent"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone-call",
+    "name": "phone call",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone",
+      "call"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-pen-tool",
+    "name": "pen tool",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M12 19l7-7 3 3-7 7-3-3z M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z M2 2l7.586 7.586 M 9 11 A 2 2 0 1 0 13 11 A 2 2 0 1 0 9 11 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "pen",
+      "tool"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone-incoming",
+    "name": "phone incoming",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 16 2 L 16 8 L 22 8 M 23 1 L 16 8 M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone",
+      "incoming"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone-forwarded",
+    "name": "phone forwarded",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 19 1 L 23 5 L 19 9 M 15 5 L 23 5 M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone",
+      "forwarded"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone-outgoing",
+    "name": "phone outgoing",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 7 L 23 1 L 17 1 M 16 8 L 23 1 M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone",
+      "outgoing"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-pie-chart",
+    "name": "pie chart",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21.21 15.89A10 10 0 1 1 8 2.83 M22 12A10 10 0 0 0 12 2v10z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "pie",
+      "chart"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone-off",
+    "name": "phone off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91 M 23 1 L 1 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone",
+      "off"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone-missed",
+    "name": "phone missed",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 1 L 17 7 M 17 1 L 23 7 M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone",
+      "missed"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-phone",
+    "name": "phone",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "phone"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-play-circle",
+    "name": "play circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 10 8 L 16 12 L 10 16 L 10 8 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "play",
+      "circle"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-plus-square",
+    "name": "plus square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 12 8 L 12 16 M 8 12 L 16 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "plus",
+      "square"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-play",
+    "name": "play",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 L 19 12 L 5 21 L 5 3 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "play"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-plus-circle",
+    "name": "plus circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 12 8 L 12 16 M 8 12 L 16 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "plus",
+      "circle"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-plus",
+    "name": "plus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 5 L 12 19 M 5 12 L 19 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "plus"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-radio",
+    "name": "radio",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 10 12 A 2 2 0 1 0 14 12 A 2 2 0 1 0 10 12 Z M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "radio"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-power",
+    "name": "power",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M18.36 6.64a9 9 0 1 1-12.73 0 M 12 2 L 12 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "power"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-printer",
+    "name": "printer",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 9 L 6 2 L 18 2 L 18 9 M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2 M 6 14 H 18 V 22 H 6 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "printer"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-refresh-ccw",
+    "name": "refresh ccw",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 4 L 1 10 L 7 10 M 23 20 L 23 14 L 17 14 M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "refresh",
+      "ccw"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-pocket",
+    "name": "pocket",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M4 3h16a2 2 0 0 1 2 2v6a10 10 0 0 1-10 10A10 10 0 0 1 2 11V5a2 2 0 0 1 2-2z M 8 10 L 12 14 L 16 10",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "pocket"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-rotate-ccw",
+    "name": "rotate ccw",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 4 L 1 10 L 7 10 M3.51 15a9 9 0 1 0 2.13-9.36L1 10",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "rotate",
+      "ccw"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-refresh-cw",
+    "name": "refresh cw",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 4 L 23 10 L 17 10 M 1 20 L 1 14 L 7 14 M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "refresh",
+      "cw"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-rotate-cw",
+    "name": "rotate cw",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 4 L 23 10 L 17 10 M20.49 15a9 9 0 1 1-2.12-9.36L23 10",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "rotate",
+      "cw"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-rewind",
+    "name": "rewind",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 19 L 2 12 L 11 5 L 11 19 Z M 22 19 L 13 12 L 22 5 L 22 19 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "rewind"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-repeat",
+    "name": "repeat",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 17 1 L 21 5 L 17 9 M3 11V9a4 4 0 0 1 4-4h14 M 7 23 L 3 19 L 7 15 M21 13v2a4 4 0 0 1-4 4H3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "repeat"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-scissors",
+    "name": "scissors",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 6 A 3 3 0 1 0 9 6 A 3 3 0 1 0 3 6 Z M 3 18 A 3 3 0 1 0 9 18 A 3 3 0 1 0 3 18 Z M 20 4 L 8.12 15.88 M 14.47 14.48 L 20 20 M 8.12 8.12 L 12 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "scissors"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-search",
+    "name": "search",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 11 A 8 8 0 1 0 19 11 A 8 8 0 1 0 3 11 Z M 21 21 L 16.65 16.65",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "search"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-rss",
+    "name": "rss",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M4 11a9 9 0 0 1 9 9 M4 4a16 16 0 0 1 16 16 M 4 19 A 1 1 0 1 0 6 19 A 1 1 0 1 0 4 19 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "rss"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-save",
+    "name": "save",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M 17 21 L 17 13 L 7 13 L 7 21 M 7 3 L 7 8 L 15 8",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "save"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-send",
+    "name": "send",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 22 2 L 11 13 M 22 2 L 15 22 L 11 13 L 2 9 L 22 2 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "send"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-share-2",
+    "name": "share 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 15 5 A 3 3 0 1 0 21 5 A 3 3 0 1 0 15 5 Z M 3 12 A 3 3 0 1 0 9 12 A 3 3 0 1 0 3 12 Z M 15 19 A 3 3 0 1 0 21 19 A 3 3 0 1 0 15 19 Z M 8.59 13.51 L 15.42 17.49 M 15.41 6.51 L 8.59 10.49",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "share",
+      "2"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-share",
+    "name": "share",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M 16 6 L 12 2 L 8 6 M 12 2 L 12 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "share"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-server",
+    "name": "server",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 2 H 20 A 2 2 0 0 1 22 4 V 8 A 2 2 0 0 1 20 10 H 4 A 2 2 0 0 1 2 8 V 4 A 2 2 0 0 1 4 2 Z M 4 14 H 20 A 2 2 0 0 1 22 16 V 20 A 2 2 0 0 1 20 22 H 4 A 2 2 0 0 1 2 20 V 16 A 2 2 0 0 1 4 14 Z M 6 6 L 6.01 6 M 6 18 L 6.01 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "server"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-shield-off",
+    "name": "shield off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M19.69 14a6.9 6.9 0 0 0 .31-2V5l-8-3-3.16 1.18 M4.73 4.73L4 5v7c0 6 8 10 8 10a20.29 20.29 0 0 0 5.62-4.38 M 1 1 L 23 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "shield",
+      "off"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-settings",
+    "name": "settings",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 9 12 A 3 3 0 1 0 15 12 A 3 3 0 1 0 9 12 Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "settings"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-shield",
+    "name": "shield",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "shield"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-shuffle",
+    "name": "shuffle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 16 3 L 21 3 L 21 8 M 4 20 L 21 3 M 21 16 L 21 21 L 16 21 M 15 15 L 21 21 M 4 4 L 9 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "shuffle"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-shopping-bag",
+    "name": "shopping bag",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M 3 6 L 21 6 M16 10a4 4 0 0 1-8 0",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "shopping",
+      "bag"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-sidebar",
+    "name": "sidebar",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 9 3 L 9 21",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "sidebar"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-shopping-cart",
+    "name": "shopping cart",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 21 A 1 1 0 1 0 10 21 A 1 1 0 1 0 8 21 Z M 19 21 A 1 1 0 1 0 21 21 A 1 1 0 1 0 19 21 Z M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "shopping",
+      "cart"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-slash",
+    "name": "slash",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 4.93 4.93 L 19.07 19.07",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "slash"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-sliders",
+    "name": "sliders",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 21 L 4 14 M 4 10 L 4 3 M 12 21 L 12 12 M 12 8 L 12 3 M 20 21 L 20 16 M 20 12 L 20 3 M 1 14 L 7 14 M 9 8 L 15 8 M 17 16 L 23 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "sliders"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-slack",
+    "name": "slack",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "slack"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-skip-back",
+    "name": "skip back",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 19 20 L 9 12 L 19 4 L 19 20 Z M 5 19 L 5 5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "skip",
+      "back"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-skip-forward",
+    "name": "skip forward",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 4 L 15 12 L 5 20 L 5 4 Z M 19 5 L 19 19",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "skip",
+      "forward"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-smartphone",
+    "name": "smartphone",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7 2 H 17 A 2 2 0 0 1 19 4 V 20 A 2 2 0 0 1 17 22 H 7 A 2 2 0 0 1 5 20 V 4 A 2 2 0 0 1 7 2 Z M 12 18 L 12.01 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "smartphone"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-smile",
+    "name": "smile",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M8 14s1.5 2 4 2 4-2 4-2 M 9 9 L 9.01 9 M 15 9 L 15.01 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "smile"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-speaker",
+    "name": "speaker",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 2 H 18 A 2 2 0 0 1 20 4 V 20 A 2 2 0 0 1 18 22 H 6 A 2 2 0 0 1 4 20 V 4 A 2 2 0 0 1 6 2 Z M 8 14 A 4 4 0 1 0 16 14 A 4 4 0 1 0 8 14 Z M 12 6 L 12.01 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "speaker"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-square",
+    "name": "square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "square"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-star",
+    "name": "star",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12 2 L 15.09 8.26 L 22 9.27 L 17 14.14 L 18.18 21.02 L 12 17.77 L 5.82 21.02 L 7 14.14 L 2 9.27 L 8.91 8.26 L 12 2 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "star"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-table",
+    "name": "table",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "table"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-sun",
+    "name": "sun",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7 12 A 5 5 0 1 0 17 12 A 5 5 0 1 0 7 12 Z M 12 1 L 12 3 M 12 21 L 12 23 M 4.22 4.22 L 5.64 5.64 M 18.36 18.36 L 19.78 19.78 M 1 12 L 3 12 M 21 12 L 23 12 M 4.22 19.78 L 5.64 18.36 M 18.36 5.64 L 19.78 4.22",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "sun"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-stop-circle",
+    "name": "stop circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 9 9 H 15 V 15 H 9 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "stop",
+      "circle"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-sunrise",
+    "name": "sunrise",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M17 18a5 5 0 0 0-10 0 M 12 2 L 12 9 M 4.22 10.22 L 5.64 11.64 M 1 18 L 3 18 M 21 18 L 23 18 M 18.36 11.64 L 19.78 10.22 M 23 22 L 1 22 M 8 6 L 12 2 L 16 6",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "sunrise"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-sunset",
+    "name": "sunset",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M17 18a5 5 0 0 0-10 0 M 12 9 L 12 2 M 4.22 10.22 L 5.64 11.64 M 1 18 L 3 18 M 21 18 L 23 18 M 18.36 11.64 L 19.78 10.22 M 23 22 L 1 22 M 16 5 L 12 9 L 8 5",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "sunset"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-tag",
+    "name": "tag",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M 7 7 L 7.01 7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "tag"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-thermometer",
+    "name": "thermometer",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "thermometer"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-terminal",
+    "name": "terminal",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 17 L 10 11 L 4 5 M 12 19 L 20 19",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "terminal"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-target",
+    "name": "target",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 6 12 A 6 6 0 1 0 18 12 A 6 6 0 1 0 6 12 Z M 10 12 A 2 2 0 1 0 14 12 A 2 2 0 1 0 10 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "target"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-tablet",
+    "name": "tablet",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 6 2 H 18 A 2 2 0 0 1 20 4 V 20 A 2 2 0 0 1 18 22 H 6 A 2 2 0 0 1 4 20 V 4 A 2 2 0 0 1 6 2 Z M 12 18 L 12.01 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "tablet"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-toggle-right",
+    "name": "toggle right",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 5 H 16 A 7 7 0 0 1 23 12 V 12 A 7 7 0 0 1 16 19 H 8 A 7 7 0 0 1 1 12 V 12 A 7 7 0 0 1 8 5 Z M 13 12 A 3 3 0 1 0 19 12 A 3 3 0 1 0 13 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "toggle",
+      "right"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-thumbs-up",
+    "name": "thumbs up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "thumbs",
+      "up"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-toggle-left",
+    "name": "toggle left",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 8 5 H 16 A 7 7 0 0 1 23 12 V 12 A 7 7 0 0 1 16 19 H 8 A 7 7 0 0 1 1 12 V 12 A 7 7 0 0 1 8 5 Z M 5 12 A 3 3 0 1 0 11 12 A 3 3 0 1 0 5 12 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "toggle",
+      "left"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-thumbs-down",
+    "name": "thumbs down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "thumbs",
+      "down"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-tool",
+    "name": "tool",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "tool"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-trash",
+    "name": "trash",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 6 L 5 6 L 21 6 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "trash"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-trello",
+    "name": "trello",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 7 7 H 10 V 16 H 7 Z M 14 7 H 17 V 12 H 14 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "trello"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-trending-down",
+    "name": "trending down",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 18 L 13.5 8.5 L 8.5 13.5 L 1 6 M 17 18 L 23 18 L 23 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "trending",
+      "down"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-trending-up",
+    "name": "trending up",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 6 L 13.5 15.5 L 8.5 10.5 L 1 18 M 17 6 L 23 6 L 23 12",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "trending",
+      "up"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-trash-2",
+    "name": "trash 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 6 L 5 6 L 21 6 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M 10 11 L 10 17 M 14 11 L 14 17",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "trash",
+      "2"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-truck",
+    "name": "truck",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 3 H 16 V 16 H 1 Z M 16 8 L 20 8 L 23 11 L 23 16 L 16 16 L 16 8 Z M 3 18.5 A 2.5 2.5 0 1 0 8 18.5 A 2.5 2.5 0 1 0 3 18.5 Z M 16 18.5 A 2.5 2.5 0 1 0 21 18.5 A 2.5 2.5 0 1 0 16 18.5 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "truck"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-twitch",
+    "name": "twitch",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "twitch"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-triangle",
+    "name": "triangle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "triangle"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-tv",
+    "name": "tv",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 7 H 20 A 2 2 0 0 1 22 9 V 20 A 2 2 0 0 1 20 22 H 4 A 2 2 0 0 1 2 20 V 9 A 2 2 0 0 1 4 7 Z M 17 2 L 12 7 L 7 2",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "tv"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-twitter",
+    "name": "twitter",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "twitter"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-umbrella",
+    "name": "umbrella",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M23 12a11.05 11.05 0 0 0-22 0zm-5 7a3 3 0 0 1-6 0v-7",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "umbrella"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-type",
+    "name": "type",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 4 7 L 4 4 L 20 4 L 20 7 M 9 20 L 15 20 M 12 4 L 12 20",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "type"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-underline",
+    "name": "underline",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3 M 4 21 L 20 21",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "underline"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-unlock",
+    "name": "unlock",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 11 H 19 A 2 2 0 0 1 21 13 V 20 A 2 2 0 0 1 19 22 H 5 A 2 2 0 0 1 3 20 V 13 A 2 2 0 0 1 5 11 Z M7 11V7a5 5 0 0 1 9.9-1",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "unlock"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-upload-cloud",
+    "name": "upload cloud",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 16 16 L 12 12 L 8 16 M 12 12 L 12 21 M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3 M 16 16 L 12 12 L 8 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "upload",
+      "cloud"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-user-plus",
+    "name": "user plus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M 4.5 7 A 4 4 0 1 0 12.5 7 A 4 4 0 1 0 4.5 7 Z M 20 8 L 20 14 M 23 11 L 17 11",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "user",
+      "plus"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-upload",
+    "name": "upload",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M 17 8 L 12 3 L 7 8 M 12 3 L 12 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "upload"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-user-x",
+    "name": "user x",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M 4.5 7 A 4 4 0 1 0 12.5 7 A 4 4 0 1 0 4.5 7 Z M 18 8 L 23 13 M 23 8 L 18 13",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "user",
+      "x"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-user-minus",
+    "name": "user minus",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M 4.5 7 A 4 4 0 1 0 12.5 7 A 4 4 0 1 0 4.5 7 Z M 23 11 L 17 11",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "user",
+      "minus"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-user-check",
+    "name": "user check",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M 4.5 7 A 4 4 0 1 0 12.5 7 A 4 4 0 1 0 4.5 7 Z M 17 11 L 19 13 L 23 9",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "user",
+      "check"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-video-off",
+    "name": "video off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10 M 1 1 L 23 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "video",
+      "off"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-voicemail",
+    "name": "voicemail",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 11.5 A 4.5 4.5 0 1 0 10 11.5 A 4.5 4.5 0 1 0 1 11.5 Z M 14 11.5 A 4.5 4.5 0 1 0 23 11.5 A 4.5 4.5 0 1 0 14 11.5 Z M 5.5 16 L 18.5 16",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "voicemail"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-users",
+    "name": "users",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M 5 7 A 4 4 0 1 0 13 7 A 4 4 0 1 0 5 7 Z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "users"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-video",
+    "name": "video",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 23 7 L 16 12 L 23 17 L 23 7 Z M 3 5 H 14 A 2 2 0 0 1 16 7 V 17 A 2 2 0 0 1 14 19 H 3 A 2 2 0 0 1 1 17 V 7 A 2 2 0 0 1 3 5 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "video"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-user",
+    "name": "user",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M 8 7 A 4 4 0 1 0 16 7 A 4 4 0 1 0 8 7 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "user"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-watch",
+    "name": "watch",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 12 A 7 7 0 1 0 19 12 A 7 7 0 1 0 5 12 Z M 12 9 L 12 12 L 13.5 13.5 M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "watch"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-volume",
+    "name": "volume",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 5 L 6 9 L 2 9 L 2 15 L 6 15 L 11 19 L 11 5 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "volume"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-volume-2",
+    "name": "volume 2",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 5 L 6 9 L 2 9 L 2 15 L 6 15 L 11 19 L 11 5 Z M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "volume",
+      "2"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-volume-x",
+    "name": "volume x",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 5 L 6 9 L 2 9 L 2 15 L 6 15 L 11 19 L 11 5 Z M 23 9 L 17 15 M 17 9 L 23 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "volume",
+      "x"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-volume-1",
+    "name": "volume 1",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 11 5 L 6 9 L 2 9 L 2 15 L 6 15 L 11 19 L 11 5 Z M15.54 8.46a5 5 0 0 1 0 7.07",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "volume",
+      "1"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-wifi",
+    "name": "wifi",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M5 12.55a11 11 0 0 1 14.08 0 M1.42 9a16 16 0 0 1 21.16 0 M8.53 16.11a6 6 0 0 1 6.95 0 M 12 20 L 12.01 20",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "wifi"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-wifi-off",
+    "name": "wifi off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 1 1 L 23 23 M16.72 11.06A10.94 10.94 0 0 1 19 12.55 M5 12.55a10.94 10.94 0 0 1 5.17-2.39 M10.71 5.05A16 16 0 0 1 22.58 9 M1.42 9a15.91 15.91 0 0 1 4.7-2.88 M8.53 16.11a6 6 0 0 1 6.95 0 M 12 20 L 12.01 20",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "wifi",
+      "off"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-wind",
+    "name": "wind",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "wind"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-x-octagon",
+    "name": "x octagon",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 7.86 2 L 16.14 2 L 22 7.86 L 22 16.14 L 16.14 22 L 7.86 22 L 2 16.14 L 2 7.86 L 7.86 2 Z M 15 9 L 9 15 M 9 9 L 15 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "x",
+      "octagon"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-x-circle",
+    "name": "x circle",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 2 12 A 10 10 0 1 0 22 12 A 10 10 0 1 0 2 12 Z M 15 9 L 9 15 M 9 9 L 15 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "x",
+      "circle"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-x",
+    "name": "x",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 18 6 L 6 18 M 6 6 L 18 18",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "x"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-zap-off",
+    "name": "zap off",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 12.41 6.75 L 13 2 L 10.57 4.92 M 18.57 12.91 L 21 10 L 15.66 10 M 8 8 L 3 14 L 12 14 L 11 22 L 16 16 M 1 1 L 23 23",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "zap",
+      "off"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-youtube",
+    "name": "youtube",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z M 9.75 15.02 L 15.5 11.75 L 9.75 8.48 L 9.75 15.02 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "youtube"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-x-square",
+    "name": "x square",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z M 9 9 L 15 15 M 15 9 L 9 15",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "x",
+      "square"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-zap",
+    "name": "zap",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 13 2 L 3 14 L 12 14 L 11 22 L 21 10 L 12 10 L 13 2 Z",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "zap"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-zoom-in",
+    "name": "zoom in",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 11 A 8 8 0 1 0 19 11 A 8 8 0 1 0 3 11 Z M 21 21 L 16.65 16.65 M 11 8 L 11 14 M 8 11 L 14 11",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "zoom",
+      "in"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  },
+  {
+    "id": "feather-icons-zoom-out",
+    "name": "zoom out",
+    "library": "feather",
+    "style": "outline",
+    "renderStyle": "stroke",
+    "path": "M 3 11 A 8 8 0 1 0 19 11 A 8 8 0 1 0 3 11 Z M 21 21 L 16.65 16.65 M 8 11 L 14 11",
+    "viewBox": "0 0 24 24",
+    "tags": [
+      "zoom",
+      "out"
+    ],
+    "categories": [
+      "imported"
+    ],
+    "synonyms": []
+  }
+]

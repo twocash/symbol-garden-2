@@ -1,17 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
+import { getIconSources } from "@/lib/storage";
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface AIIconGeneratorModalProps {
     isOpen: boolean;
@@ -20,203 +28,224 @@ interface AIIconGeneratorModalProps {
 
 export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalProps) {
     const { currentProject, addIconToProject } = useProject();
-    const { icons: globalIcons } = useSearch();
+    const { icons: globalIcons, libraries } = useSearch();
     const [prompt, setPrompt] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-    const [generatedStrategy, setGeneratedStrategy] = useState<string | null>(null);
-    const [visualWeight, setVisualWeight] = useState<number | null>(null);
-    const [targetFillRatio, setTargetFillRatio] = useState<number | null>(null);
-    const [targetGrid, setTargetGrid] = useState<number | null>(null);
-    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+    const [generatedSvgs, setGeneratedSvgs] = useState<string[]>([]);
+    const [selectedSvgIndex, setSelectedSvgIndex] = useState<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [guidanceScale, setGuidanceScale] = useState<number>(50); // DEV: Tunable prompt adherence parameter
 
-    // Derive favorites from currentProject and globalIcons
+    // Generation options
+    const [libraryOverride, setLibraryOverride] = useState<string | null>(null);
+    const [variantCount, setVariantCount] = useState<number>(3);
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [fewShotCount, setFewShotCount] = useState<number>(4);
+    const [temperature, setTemperature] = useState<number>(0.2);
+
+    // Metadata from generation
+    const [metadata, setMetadata] = useState<{
+        fewShotExamples?: string[];
+        decompositionSource?: string;
+        attempts?: number;
+    } | null>(null);
+
+    // Icon sources (for accessing styleManifest)
+    const [iconSources, setIconSources] = useState<Array<{
+        id: string;
+        name: string;
+        styleManifest?: string;
+    }>>([]);
+
+    // Determine available libraries from ingested icons
+    const availableLibraries = libraries.filter(lib => lib !== "custom");
+
+    // Derive favorites and detect dominant library
     const favorites = currentProject?.favorites
         .map(id => globalIcons.find(i => i.id === id))
-        .filter((icon): icon is NonNullable<typeof icon> => !!icon) || [];
+        .filter((icon): icon is NonNullable<typeof icon> => !!icon && !!icon.path) || [];
 
-    const seedsCount = favorites.length;
-    const canGenerate = seedsCount >= 8;
+    // Detect dominant library from favorites (like the original flow)
+    const detectedLibrary = (() => {
+        if (favorites.length >= 3) {
+            const libraryCount: Record<string, number> = {};
+            favorites.forEach(icon => {
+                if (icon.library) {
+                    libraryCount[icon.library] = (libraryCount[icon.library] || 0) + 1;
+                }
+            });
+            const sorted = Object.entries(libraryCount).sort((a, b) => b[1] - a[1]);
+            if (sorted.length > 0) {
+                return { library: sorted[0][0], count: sorted[0][1], total: favorites.length };
+            }
+        }
+        // Fallback: use the library with most icons
+        if (availableLibraries.length > 0) {
+            const libCounts = availableLibraries.map(lib => ({
+                lib,
+                count: globalIcons.filter(i => i.library === lib).length
+            }));
+            libCounts.sort((a, b) => b.count - a.count);
+            return { library: libCounts[0].lib, count: libCounts[0].count, total: globalIcons.length, fromAll: true };
+        }
+        return null;
+    })();
 
-    // Reset state when opening
+    // The effective library to use
+    const effectiveLibrary = libraryOverride || detectedLibrary?.library || availableLibraries[0];
+
+    // Reset state when opening and load icon sources
     useEffect(() => {
         if (isOpen) {
             setPrompt("");
-            setGeneratedImages([]);
-            setGeneratedStrategy(null);
-            setVisualWeight(null);
-            setTargetFillRatio(null);
-            setTargetGrid(null);
-            setSelectedImageIndex(null);
+            setGeneratedSvgs([]);
+            setSelectedSvgIndex(null);
+            setMetadata(null);
+            setLibraryOverride(null); // Reset override on open
+
+            // Load icon sources to access styleManifest
+            getIconSources().then(sources => {
+                setIconSources(sources);
+            });
         }
     }, [isOpen]);
 
-    // Helper to construct SVG string
-    const getSvgString = (icon: typeof favorites[0]) => {
-        const isStroke = icon.renderStyle === 'stroke';
-        const attrs = isStroke
-            ? 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
-            : 'fill="currentColor"';
-
-        return `<svg viewBox="${icon.viewBox}" xmlns="http://www.w3.org/2000/svg">
-    <path d="${icon.path}" ${attrs} />
-</svg>`;
-    };
-
     const handleGenerate = async () => {
-        if (!prompt.trim()) return;
-        if (favorites.length < 8) {
-            toast.error("You need at least 8 favorites to generate icons.");
+        if (!prompt.trim()) {
+            toast.error("Please enter an icon concept");
+            return;
+        }
+
+        if (!effectiveLibrary) {
+            toast.error("No icon library available. Please ingest a library first.");
+            return;
+        }
+
+        // Get icons for the effective library
+        const libraryIcons = globalIcons.filter(icon =>
+            icon.library === effectiveLibrary && icon.path
+        );
+
+        if (libraryIcons.length < 10) {
+            toast.error(`Not enough icons in "${effectiveLibrary}" library. Need at least 10 icons.`);
             return;
         }
 
         setIsGenerating(true);
-        setGeneratedImages([]);
-        setSelectedImageIndex(null);
+        setGeneratedSvgs([]);
+        setSelectedSvgIndex(null);
+        setMetadata(null);
 
         try {
-            // Detect library from seeds
-            const seedLibraries = favorites.slice(0, 12).map(icon => icon.library).filter(Boolean);
-            const libraryCount: Record<string, number> = {};
-            seedLibraries.forEach(lib => libraryCount[lib] = (libraryCount[lib] || 0) + 1);
-            const dominantLibrary = Object.entries(libraryCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+            // Find the styleManifest for this library from icon sources
+            const librarySource = iconSources.find(s => s.name === effectiveLibrary);
+            const styleManifest = librarySource?.styleManifest;
 
-            console.log('[Modal] Seed libraries:', libraryCount);
-            console.log('[Modal] Dominant library:', dominantLibrary);
+            console.log(`[Modal] Generating "${prompt}" in style of ${effectiveLibrary} (${libraryIcons.length} icons)${styleManifest ? ' with Style DNA' : ''}`);
 
-            // Prepare form data
-            const formData = new FormData();
-            formData.append("prompt", prompt);
-            if (dominantLibrary) {
-                formData.append("libraryHint", dominantLibrary);
-            }
-
-            favorites.slice(0, 12).forEach((icon, index) => {
-                const svgString = getSvgString(icon);
-                const blob = new Blob([svgString], { type: "image/svg+xml" });
-                formData.append("styleReferences", blob, `seed-${index}.svg`);
-            });
-
-            formData.append('guidanceScale', guidanceScale.toString());
-
-            // Check global setting for legacy pipeline
-            const useLegacy = localStorage.getItem("use_legacy_prompt") === "true";
-            formData.append('useMetaPrompt', (!useLegacy).toString());
-
-            const response = await fetch("/api/generate", {
+            const response = await fetch("/api/generate-svg", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    concept: prompt.trim(),
+                    libraryId: effectiveLibrary,
+                    icons: libraryIcons.slice(0, 100), // Send up to 100 icons for reference
+                    styleManifest, // Pass Style DNA if available
+                    options: {
+                        variants: variantCount,
+                        fewShotCount,
+                        temperature,
+                        decompositionMode: "auto",
+                        includePatternLibrary: true,
+                    },
+                }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
 
-                // Handle Quota Exceeded (429)
-                if (response.status === 429 || errorData.error?.code === 429 || JSON.stringify(errorData).includes("Quota exceeded")) {
-                    throw new Error("API Quota Exceeded. Please wait 60 seconds and try again.");
+                if (response.status === 429) {
+                    throw new Error("API Quota Exceeded. Please wait a moment and try again.");
                 }
 
-                // Extract meaningful message (handle nested error objects)
-                const errorMsg = errorData.details || errorData.error?.message || errorData.message || "Generation failed";
-                throw new Error(errorMsg);
+                throw new Error(errorData.details || errorData.error || "Generation failed");
             }
 
             const data = await response.json();
-            setGeneratedImages(data.images);
-            setGeneratedStrategy(data.strategy);
-            setVisualWeight(data.visualWeight);
-            setTargetFillRatio(data.targetFillRatio);
-            setTargetGrid(data.targetGrid);
-            toast.success("Icons generated successfully!");
+
+            // Handle single or multiple SVGs
+            const svgs = data.svgs || (data.svg ? [data.svg] : []);
+            setGeneratedSvgs(svgs);
+            setMetadata(data.metadata);
+
+            if (svgs.length > 0) {
+                toast.success(`Generated ${svgs.length} icon variant${svgs.length > 1 ? 's' : ''}!`);
+            } else {
+                toast.error("No icons were generated");
+            }
         } catch (error) {
             console.error(error);
-            const errorMessage = error instanceof Error ? error.message : "Failed to generate icons";
-            toast.error(errorMessage);
+            toast.error(error instanceof Error ? error.message : "Failed to generate icons");
         } finally {
             setIsGenerating(false);
         }
     };
 
     const handleSave = async () => {
-        if (selectedImageIndex === null || !currentProject) return;
+        if (selectedSvgIndex === null || !currentProject) return;
 
         setIsSaving(true);
         try {
-            const imageBase64 = generatedImages[selectedImageIndex];
+            const svg = generatedSvgs[selectedSvgIndex];
 
-            // Convert base64 to blob
-            const res = await fetch(imageBase64);
-            const blob = await res.blob();
-
-            // Send to vectorize API
-            const formData = new FormData();
-            formData.append("image", blob, "generated-icon.png");
-
-            if (generatedStrategy) {
-                formData.append("strategy", generatedStrategy);
-            }
-
-            if (visualWeight !== null && visualWeight !== undefined) {
-                formData.append("visualWeight", visualWeight.toString());
-            }
-
-            if (targetFillRatio !== null && targetFillRatio !== undefined) {
-                formData.append("targetFillRatio", targetFillRatio.toString());
-            }
-
-            if (targetGrid !== null && targetGrid !== undefined) {
-                formData.append("targetGrid", targetGrid.toString());
-            }
-
-            const vectorizeRes = await fetch("/api/vectorize", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!vectorizeRes.ok) {
-                const errorData = await vectorizeRes.json();
-                throw new Error(errorData.error || "Vectorization failed");
-            }
-
-            const { svg } = await vectorizeRes.json();
-
-            // Add to project
-            const newIconId = crypto.randomUUID();
-
-            // Extract path and viewBox
+            // Extract viewBox from the SVG
             const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
-            const pathMatch = svg.match(/d="([^"]+)"/);
             const fillRuleMatch = svg.match(/fill-rule="([^"]+)"/);
 
-            // If we have a path, use path-based icon
-            const newIcon: any = {
-                id: newIconId,
-                name: prompt || "Generated Icon",
-                library: "custom",
-                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 512 512",
-                tags: ["ai-generated", "sprout"],
-                categories: ["Generated"],
-                renderStyle: "fill",
-                fillRule: fillRuleMatch ? fillRuleMatch[1] : undefined,
-            };
+            // Extract ALL path elements and combine their d attributes
+            // Generated SVGs often have multiple <path> elements for complex icons
+            const pathMatches = [...svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
 
-            if (pathMatch) {
-                newIcon.path = pathMatch[1];
-                addIconToProject(newIcon, true); // Auto-favorite
-                toast.success(`"${prompt}" saved!`);
-                onClose();
-            } else {
+            if (pathMatches.length === 0) {
                 throw new Error("Could not extract vector path from generated SVG");
             }
 
+            // Combine all path d attributes into a single path string
+            // Each path becomes a separate move command in the combined path
+            const combinedPath = pathMatches.map(match => match[1]).join(' ');
+
+            console.log(`[Modal] Saving icon with ${pathMatches.length} path(s), combined length: ${combinedPath.length}`);
+
+            const newIcon = {
+                id: crypto.randomUUID(),
+                name: prompt || "Generated Icon",
+                library: "custom",
+                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
+                path: combinedPath,
+                tags: ["ai-generated", "sprout"],
+                categories: ["Generated"],
+                renderStyle: "stroke" as const,
+                fillRule: fillRuleMatch ? fillRuleMatch[1] : undefined,
+            };
+
+            addIconToProject(newIcon, true); // Auto-favorite
+            toast.success(`"${prompt}" saved to workspace!`);
+            onClose();
         } catch (error) {
             console.error('Save error:', error);
             toast.error(error instanceof Error ? error.message : "Failed to save icon");
         } finally {
             setIsSaving(false);
         }
+    };
+
+    // Helper to render SVG preview
+    const renderSvgPreview = (svg: string) => {
+        // Add stroke styling for preview
+        const styledSvg = svg
+            .replace(/<svg/, '<svg class="w-full h-full"')
+            .replace(/stroke="[^"]*"/, 'stroke="currentColor"')
+            .replace(/fill="[^"]*"/, 'fill="none"');
+        return styledSvg;
     };
 
     return (
@@ -228,65 +257,135 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                         Sprout Custom Icon
                     </DialogTitle>
                     <DialogDescription>
-                        Generate brand-consistent icons using your favorites as seeds.
+                        Generate native SVG icons that match your library&apos;s style.
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="flex-1 flex gap-6 min-h-0 py-4">
                     {/* Left Column: Controls */}
-                    <div className="w-1/3 flex flex-col gap-6">
+                    <div className="w-1/3 flex flex-col gap-4">
                         <div className="space-y-2">
                             <Label>Icon Concept</Label>
                             <Input
-                                placeholder="e.g. Battery charging with lightning bolt"
+                                placeholder="e.g. rocket, brain, magic-wand"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+                                onKeyDown={(e) => e.key === "Enter" && !isGenerating && handleGenerate()}
                                 disabled={isGenerating}
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="flex justify-between">
-                                <span>Prompt Adherence (Dev)</span>
-                                <span className="text-xs text-muted-foreground">{guidanceScale}</span>
-                            </Label>
-                            <input
-                                type="range"
-                                min="15"
-                                max="100"
-                                step="5"
-                                value={guidanceScale}
-                                onChange={(e) => setGuidanceScale(Number(e.target.value))}
-                                className="w-full"
-                            />
+                            <p className="text-xs text-muted-foreground">
+                                Describe the icon you want to create
+                            </p>
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="flex justify-between">
-                                <span>Style Seeds</span>
-                                <span className={cn("text-xs", canGenerate ? "text-muted-foreground" : "text-destructive")}>
-                                    {seedsCount}/8 required
-                                </span>
-                            </Label>
-                            <div className="grid grid-cols-4 gap-2 p-2 bg-muted/50 rounded-lg border">
-                                {favorites.slice(0, 12).map((icon) => (
-                                    <div key={icon.id} className="aspect-square bg-background rounded p-1 flex items-center justify-center border">
-                                        <div
-                                            className="w-full h-full text-foreground"
-                                            dangerouslySetInnerHTML={{ __html: getSvgString(icon) }}
+                            <Label>Style Library</Label>
+                            {libraryOverride ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-1 px-3 py-2 rounded-md border bg-muted/50 text-sm">
+                                        {libraryOverride.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setLibraryOverride(null)}
+                                        className="text-xs"
+                                    >
+                                        Reset
+                                    </Button>
+                                </div>
+                            ) : detectedLibrary ? (
+                                <div className="px-3 py-2 rounded-md border bg-muted/50">
+                                    <div className="text-sm font-medium">
+                                        {detectedLibrary.library.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {detectedLibrary.fromAll
+                                            ? `Largest library (${detectedLibrary.count} icons)`
+                                            : `Detected from ${detectedLibrary.count}/${detectedLibrary.total} favorites`}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="px-3 py-2 rounded-md border bg-muted/50 text-sm text-muted-foreground">
+                                    No library available
+                                </div>
+                            )}
+                            {availableLibraries.length > 1 && !libraryOverride && (
+                                <Select value="" onValueChange={(v) => v && setLibraryOverride(v)}>
+                                    <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue placeholder="Override library..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableLibraries.map(lib => (
+                                            <SelectItem key={lib} value={lib}>
+                                                {lib.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Variants</Label>
+                            <Select value={variantCount.toString()} onValueChange={(v) => setVariantCount(parseInt(v))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="1">1 variant</SelectItem>
+                                    <SelectItem value="2">2 variants</SelectItem>
+                                    <SelectItem value="3">3 variants</SelectItem>
+                                    <SelectItem value="4">4 variants</SelectItem>
+                                    <SelectItem value="5">5 variants</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Advanced Options Toggle */}
+                        <div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full justify-start text-xs text-muted-foreground"
+                                onClick={() => setShowAdvanced(!showAdvanced)}
+                            >
+                                <Settings2 className="w-3 h-3 mr-2" />
+                                {showAdvanced ? "Hide" : "Show"} Advanced Options
+                            </Button>
+                            {showAdvanced && (
+                                <div className="space-y-3 pt-2 px-1">
+                                    <div className="space-y-1">
+                                        <Label className="text-xs flex justify-between">
+                                            <span>Few-shot Examples</span>
+                                            <span className="text-muted-foreground">{fewShotCount}</span>
+                                        </Label>
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="8"
+                                            step="1"
+                                            value={fewShotCount}
+                                            onChange={(e) => setFewShotCount(Number(e.target.value))}
+                                            className="w-full h-2"
                                         />
                                     </div>
-                                ))}
-                                {Array.from({ length: Math.max(0, 8 - seedsCount) }).map((_, i) => (
-                                    <div key={`empty-${i}`} className="aspect-square bg-muted/20 rounded border border-dashed flex items-center justify-center text-muted-foreground/20">
-                                        <div className="w-2 h-2 rounded-full bg-current" />
+                                    <div className="space-y-1">
+                                        <Label className="text-xs flex justify-between">
+                                            <span>Temperature</span>
+                                            <span className="text-muted-foreground">{temperature.toFixed(1)}</span>
+                                        </Label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.1"
+                                            value={temperature}
+                                            onChange={(e) => setTemperature(Number(e.target.value))}
+                                            className="w-full h-2"
+                                        />
                                     </div>
-                                ))}
-                            </div>
-                            {!canGenerate && (
-                                <p className="text-xs text-destructive">
-                                    Favorite at least {8 - seedsCount} more icons in {currentProject?.name || "this workspace"} to use this feature.
-                                </p>
+                                </div>
                             )}
                         </div>
 
@@ -294,20 +393,25 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             <Button
                                 className="w-full"
                                 onClick={handleGenerate}
-                                disabled={!canGenerate || !prompt.trim() || isGenerating}
+                                disabled={!prompt.trim() || isGenerating || globalIcons.length < 10}
                             >
                                 {isGenerating ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Sprouting...
+                                        Generating...
                                     </>
                                 ) : (
                                     <>
                                         <Sparkles className="w-4 h-4 mr-2" />
-                                        Sprout Icon
+                                        Generate Icon
                                     </>
                                 )}
                             </Button>
+                            {globalIcons.length < 10 && (
+                                <p className="text-xs text-destructive mt-2 text-center">
+                                    Ingest an icon library first to enable generation
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -315,22 +419,32 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
                     {/* Right Column: Results */}
                     <div className="flex-1 flex flex-col min-h-0">
-                        <Label className="mb-2">Nursery (Results)</Label>
+                        <div className="flex items-center justify-between mb-2">
+                            <Label>Generated Icons</Label>
+                            {metadata && (
+                                <span className="text-xs text-muted-foreground">
+                                    {metadata.fewShotExamples?.length || 0} examples used
+                                    {metadata.decompositionSource && ` · ${metadata.decompositionSource} decomposition`}
+                                </span>
+                            )}
+                        </div>
                         <ScrollArea className="flex-1 bg-muted/30 rounded-lg border p-4">
-                            {generatedImages.length > 0 ? (
+                            {generatedSvgs.length > 0 ? (
                                 <div className="grid grid-cols-3 gap-4">
-                                    {generatedImages.map((src, index) => (
+                                    {generatedSvgs.map((svg, index) => (
                                         <button
                                             key={index}
                                             className={cn(
-                                                "relative aspect-square rounded-lg border-2 overflow-hidden bg-background transition-all hover:border-primary/50 focus:outline-none",
-                                                selectedImageIndex === index ? "border-primary ring-2 ring-primary/20" : "border-transparent"
+                                                "relative aspect-square rounded-lg border-2 overflow-hidden bg-background transition-all hover:border-primary/50 focus:outline-none p-4",
+                                                selectedSvgIndex === index ? "border-primary ring-2 ring-primary/20" : "border-muted"
                                             )}
-                                            onClick={() => setSelectedImageIndex(index)}
+                                            onClick={() => setSelectedSvgIndex(index)}
                                         >
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={src} alt={`Generated variant ${index + 1}`} className="w-full h-full object-contain p-4" />
-                                            {selectedImageIndex === index && (
+                                            <div
+                                                className="w-full h-full text-foreground"
+                                                dangerouslySetInnerHTML={{ __html: renderSvgPreview(svg) }}
+                                            />
+                                            {selectedSvgIndex === index && (
                                                 <div className="absolute top-2 right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-sm">
                                                     <Check className="w-3 h-3" />
                                                 </div>
@@ -341,8 +455,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             ) : (
                                 <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-center p-8">
                                     <Sparkles className="w-12 h-12 mb-4 opacity-20" />
-                                    <p className="text-sm font-medium">Ready to sprout</p>
-                                    <p className="text-xs mt-1">Enter a prompt and click generate to see results here.</p>
+                                    <p className="text-sm font-medium">Ready to generate</p>
+                                    <p className="text-xs mt-1">Enter a concept and click generate to create icons.</p>
                                 </div>
                             )}
                         </ScrollArea>
@@ -353,7 +467,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             </Button>
                             <Button
                                 onClick={handleSave}
-                                disabled={selectedImageIndex === null || isSaving}
+                                disabled={selectedSvgIndex === null || isSaving}
                             >
                                 {isSaving ? (
                                     <>

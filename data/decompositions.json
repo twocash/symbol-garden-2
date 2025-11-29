@@ -1,0 +1,1880 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "description": "Pre-computed structural decompositions for common icon concepts",
+    "count": 74,
+    "lastUpdated": "2025-01-28"
+  },
+  "decompositions": {
+    "gift": {
+      "components": [
+        {
+          "name": "box_body",
+          "description": "U-shaped box body (open at top)",
+          "type": "path",
+          "suggestedPath": "M20 12v10H4V12"
+        },
+        {
+          "name": "lid",
+          "description": "Closed rectangle lid, slightly wider than body",
+          "type": "path",
+          "suggestedPath": "M2 7h20v5H2z"
+        },
+        {
+          "name": "ribbon_vertical",
+          "description": "Vertical ribbon through center",
+          "type": "line",
+          "suggestedPath": "M12 7v15",
+          "pierces": true
+        },
+        {
+          "name": "bow_left",
+          "description": "Left decorative bow loop",
+          "type": "arc-loop",
+          "suggestedPath": "M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"
+        },
+        {
+          "name": "bow_right",
+          "description": "Right decorative bow loop",
+          "type": "arc-loop",
+          "suggestedPath": "M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"
+        }
+      ],
+      "connectionRules": [
+        "Ribbon pierces through lid and body - this is intentional",
+        "Bow loops meet at center point (12, 7)",
+        "Lid sits directly on top of body at y=12"
+      ],
+      "patterns": ["container-with-lid", "through-line", "arc-loop"]
+    },
+
+    "headphones": {
+      "components": [
+        {
+          "name": "headband",
+          "description": "Arc from left to right over the top",
+          "type": "path",
+          "suggestedPath": "M3 18v-6a9 9 0 0 1 18 0v6"
+        },
+        {
+          "name": "left_earcup",
+          "description": "Rounded rectangle on left side",
+          "type": "path",
+          "suggestedPath": "M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+        },
+        {
+          "name": "right_earcup",
+          "description": "Rounded rectangle on right side (mirrors left)",
+          "type": "path",
+          "suggestedPath": "M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"
+        }
+      ],
+      "connectionRules": [
+        "Headband ends at y=18, earcups are positioned below",
+        "Visual gap between headband and earcups - no T-intersection",
+        "Earcups are symmetric around x=12"
+      ],
+      "patterns": ["symmetric-pair"]
+    },
+
+    "coffee": {
+      "components": [
+        {
+          "name": "cup_body",
+          "description": "Main cup container with rounded bottom",
+          "type": "path",
+          "suggestedPath": "M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"
+        },
+        {
+          "name": "handle",
+          "description": "C-shaped handle on right side",
+          "type": "path",
+          "suggestedPath": "M17 8h1a4 4 0 1 1 0 8h-1"
+        },
+        {
+          "name": "steam_left",
+          "description": "Left steam line",
+          "type": "line",
+          "suggestedPath": "M6 2v2"
+        },
+        {
+          "name": "steam_center",
+          "description": "Center steam line",
+          "type": "line",
+          "suggestedPath": "M10 2v2"
+        },
+        {
+          "name": "steam_right",
+          "description": "Right steam line",
+          "type": "line",
+          "suggestedPath": "M14 2v2"
+        }
+      ],
+      "connectionRules": [
+        "Handle starts at x=17 where cup body ends",
+        "Steam lines are separate <line> elements above the cup",
+        "Handle and body share a point but are separate paths"
+      ],
+      "patterns": ["attached-handle", "stacked-lines"]
+    },
+
+    "umbrella": {
+      "components": [
+        {
+          "name": "canopy",
+          "description": "Wide arc across the top",
+          "type": "path",
+          "suggestedPath": "M23 12a11.05 11.05 0 0 0-22 0"
+        },
+        {
+          "name": "shaft",
+          "description": "Vertical line from canopy down",
+          "type": "line",
+          "suggestedPath": "M12 12v10"
+        },
+        {
+          "name": "handle",
+          "description": "Small curved hook at bottom",
+          "type": "path",
+          "suggestedPath": "M12 22c-2 0-3-1.5-3-3"
+        }
+      ],
+      "connectionRules": [
+        "Shaft starts at y=12 where canopy ends - no overlap",
+        "Handle connects at y=22 where shaft ends",
+        "Elements connect at endpoints, not mid-path"
+      ],
+      "patterns": []
+    },
+
+    "camera": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Main camera body rectangle",
+          "type": "path",
+          "suggestedPath": "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+        },
+        {
+          "name": "lens",
+          "description": "Circular lens in center",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=13 r=4"
+        }
+      ],
+      "connectionRules": [
+        "Lens is centered in the body",
+        "Body includes viewfinder bump via the l2-3h6l2 3 segment",
+        "Use <circle> for the lens, not a path arc"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "home": {
+      "components": [
+        {
+          "name": "roof_and_walls",
+          "description": "House outline with pointed roof",
+          "type": "path",
+          "suggestedPath": "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+        },
+        {
+          "name": "door",
+          "description": "Rectangular door at bottom center",
+          "type": "polyline",
+          "suggestedPath": "9 22 9 12 15 12 15 22"
+        }
+      ],
+      "connectionRules": [
+        "Door connects to bottom of house at y=22",
+        "Roof peak is at center (x=12)",
+        "Door is centered horizontally"
+      ],
+      "patterns": []
+    },
+
+    "heart": {
+      "components": [
+        {
+          "name": "heart_shape",
+          "description": "Heart outline with two curved lobes meeting at a point",
+          "type": "path",
+          "suggestedPath": "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+        }
+      ],
+      "connectionRules": [
+        "Single continuous path",
+        "Symmetric around x=12",
+        "Point at bottom center (12, ~21)"
+      ],
+      "patterns": ["arc-loop"]
+    },
+
+    "star": {
+      "components": [
+        {
+          "name": "star_shape",
+          "description": "5-pointed star outline",
+          "type": "polygon",
+          "suggestedPath": "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+        }
+      ],
+      "connectionRules": [
+        "Use <polygon> element with points attribute",
+        "5 outer points, 5 inner points alternating",
+        "Centered at (12, 12)"
+      ],
+      "patterns": []
+    },
+
+    "settings": {
+      "components": [
+        {
+          "name": "gear_outer",
+          "description": "Gear/cog outline with teeth",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=3"
+        },
+        {
+          "name": "gear_path",
+          "description": "Gear teeth path",
+          "type": "path",
+          "suggestedPath": "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+        }
+      ],
+      "connectionRules": [
+        "Central circle for the gear hub",
+        "Complex path for gear teeth around the outside",
+        "Both centered at (12, 12)"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "search": {
+      "components": [
+        {
+          "name": "magnifier_circle",
+          "description": "Circular lens of magnifying glass",
+          "type": "circle",
+          "suggestedPath": "cx=11 cy=11 r=8"
+        },
+        {
+          "name": "handle",
+          "description": "Diagonal handle extending from circle",
+          "type": "line",
+          "suggestedPath": "M21 21l-4.35-4.35"
+        }
+      ],
+      "connectionRules": [
+        "Handle extends from circle edge at ~45 degree angle",
+        "Circle is offset slightly from center (cx=11)",
+        "Handle goes toward bottom-right corner"
+      ],
+      "patterns": ["attached-handle"]
+    },
+
+    "user": {
+      "components": [
+        {
+          "name": "head",
+          "description": "Circular head",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=7 r=4"
+        },
+        {
+          "name": "body",
+          "description": "Curved body/shoulders below head",
+          "type": "path",
+          "suggestedPath": "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+        }
+      ],
+      "connectionRules": [
+        "Head is above body with visual gap",
+        "Body curves to suggest shoulders",
+        "Symmetric around x=12"
+      ],
+      "patterns": []
+    },
+
+    "bell": {
+      "components": [
+        {
+          "name": "bell_body",
+          "description": "Bell shape with curved sides",
+          "type": "path",
+          "suggestedPath": "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+        },
+        {
+          "name": "clapper",
+          "description": "Small circle or arc at bottom for clapper",
+          "type": "path",
+          "suggestedPath": "M13.73 21a2 2 0 0 1-3.46 0"
+        }
+      ],
+      "connectionRules": [
+        "Bell body widens toward bottom",
+        "Clapper hangs below the bell opening",
+        "Symmetric around x=12"
+      ],
+      "patterns": []
+    },
+
+    "mail": {
+      "components": [
+        {
+          "name": "envelope",
+          "description": "Rectangular envelope body",
+          "type": "path",
+          "suggestedPath": "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+        },
+        {
+          "name": "flap",
+          "description": "V-shaped flap lines",
+          "type": "polyline",
+          "suggestedPath": "22 6 12 13 2 6"
+        }
+      ],
+      "connectionRules": [
+        "Flap creates V pointing to center bottom",
+        "Envelope has rounded corners",
+        "Flap connects at top edge of envelope"
+      ],
+      "patterns": []
+    },
+
+    "phone": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Rectangular phone body with rounded corners",
+          "type": "rect",
+          "suggestedPath": "x=5 y=2 width=14 height=20 rx=2"
+        },
+        {
+          "name": "screen_line",
+          "description": "Horizontal line separating screen from body",
+          "type": "line",
+          "suggestedPath": "M12 18h.01"
+        }
+      ],
+      "connectionRules": [
+        "Phone is tall rectangle (portrait orientation)",
+        "Small dot or line at bottom for home button area",
+        "Rounded corners with rx=2"
+      ],
+      "patterns": []
+    },
+
+    "moon": {
+      "components": [
+        {
+          "name": "crescent",
+          "description": "Crescent moon shape",
+          "type": "path",
+          "suggestedPath": "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+        }
+      ],
+      "connectionRules": [
+        "Single path creating crescent via overlapping circles",
+        "Uses arc commands for smooth curves",
+        "Opening faces right"
+      ],
+      "patterns": ["arc-loop"]
+    },
+
+    "sun": {
+      "components": [
+        {
+          "name": "center",
+          "description": "Central sun circle",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=5"
+        },
+        {
+          "name": "rays",
+          "description": "Radiating sun rays",
+          "type": "path",
+          "suggestedPath": "M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+        }
+      ],
+      "connectionRules": [
+        "8 rays extending from center circle",
+        "Rays are evenly spaced (45 degrees apart)",
+        "Rays don't touch the center circle"
+      ],
+      "patterns": ["stacked-lines"]
+    },
+
+    "cloud": {
+      "components": [
+        {
+          "name": "cloud_shape",
+          "description": "Fluffy cloud outline",
+          "type": "path",
+          "suggestedPath": "M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"
+        }
+      ],
+      "connectionRules": [
+        "Single continuous path",
+        "Uses arcs for puffy cloud shape",
+        "Flat bottom edge"
+      ],
+      "patterns": ["arc-loop"]
+    },
+
+    "trash": {
+      "components": [
+        {
+          "name": "lid",
+          "description": "Trash can lid",
+          "type": "path",
+          "suggestedPath": "M1 4h22"
+        },
+        {
+          "name": "lid_handle",
+          "description": "Small handle on lid",
+          "type": "path",
+          "suggestedPath": "M9 4V2h6v2"
+        },
+        {
+          "name": "can_body",
+          "description": "Trash can body",
+          "type": "path",
+          "suggestedPath": "M4 4l2 17h12l2-17"
+        },
+        {
+          "name": "lines",
+          "description": "Vertical lines inside can",
+          "type": "path",
+          "suggestedPath": "M9 9v8M12 9v8M15 9v8"
+        }
+      ],
+      "connectionRules": [
+        "Lid sits on top of body at y=4",
+        "Body tapers slightly toward bottom",
+        "Internal lines suggest slots/sections"
+      ],
+      "patterns": ["container-with-lid", "stacked-lines"]
+    },
+
+    "folder": {
+      "components": [
+        {
+          "name": "folder_shape",
+          "description": "Folder body with tab",
+          "type": "path",
+          "suggestedPath": "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+        }
+      ],
+      "connectionRules": [
+        "Tab on upper left (l2 3 creates the step)",
+        "Rounded corners",
+        "Single continuous path"
+      ],
+      "patterns": []
+    },
+
+    "music": {
+      "components": [
+        {
+          "name": "notes",
+          "description": "Two connected music notes",
+          "type": "path",
+          "suggestedPath": "M9 18V5l12-2v13"
+        },
+        {
+          "name": "note_head_left",
+          "description": "Left note oval",
+          "type": "circle",
+          "suggestedPath": "cx=6 cy=18 r=3"
+        },
+        {
+          "name": "note_head_right",
+          "description": "Right note oval",
+          "type": "circle",
+          "suggestedPath": "cx=18 cy=16 r=3"
+        }
+      ],
+      "connectionRules": [
+        "Vertical stems connected by diagonal beam",
+        "Circular note heads at bottom of stems",
+        "Right note slightly higher than left"
+      ],
+      "patterns": []
+    },
+
+    "lock": {
+      "components": [
+        {
+          "name": "shackle",
+          "description": "U-shaped shackle at top",
+          "type": "path",
+          "suggestedPath": "M7 11V7a5 5 0 0 1 10 0v4"
+        },
+        {
+          "name": "body",
+          "description": "Rectangular lock body",
+          "type": "rect",
+          "suggestedPath": "x=3 y=11 width=18 height=11 rx=2"
+        }
+      ],
+      "connectionRules": [
+        "Shackle sits above body, connecting at y=11",
+        "Shackle is a semicircle/arc shape",
+        "Body has rounded corners"
+      ],
+      "patterns": ["arc-loop"]
+    },
+
+    "unlock": {
+      "components": [
+        {
+          "name": "shackle",
+          "description": "Open U-shaped shackle",
+          "type": "path",
+          "suggestedPath": "M7 11V7a5 5 0 0 1 9.9-1"
+        },
+        {
+          "name": "body",
+          "description": "Rectangular lock body",
+          "type": "rect",
+          "suggestedPath": "x=3 y=11 width=18 height=11 rx=2"
+        }
+      ],
+      "connectionRules": [
+        "Shackle is open (not fully closed arc)",
+        "Right side of shackle is disconnected/raised",
+        "Body same as locked version"
+      ],
+      "patterns": ["arc-loop"]
+    },
+
+    "key": {
+      "components": [
+        {
+          "name": "bow",
+          "description": "Circular/oval bow (grip) at top",
+          "type": "circle",
+          "suggestedPath": "cx=8 cy=8 r=5"
+        },
+        {
+          "name": "blade",
+          "description": "Horizontal blade extending from bow",
+          "type": "path",
+          "suggestedPath": "M13 8h8"
+        },
+        {
+          "name": "teeth",
+          "description": "Key teeth at end of blade",
+          "type": "path",
+          "suggestedPath": "M18 8v4m3-4v4"
+        }
+      ],
+      "connectionRules": [
+        "Blade extends from right side of bow",
+        "Teeth are vertical lines at end of blade",
+        "Simple flat key profile"
+      ],
+      "patterns": ["attached-handle"]
+    },
+
+    "shield": {
+      "components": [
+        {
+          "name": "shield_shape",
+          "description": "Shield outline with pointed bottom",
+          "type": "path",
+          "suggestedPath": "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+        }
+      ],
+      "connectionRules": [
+        "Single continuous path",
+        "Pointed at bottom, flat at top",
+        "Symmetric around x=12"
+      ],
+      "patterns": []
+    },
+
+    "eye": {
+      "components": [
+        {
+          "name": "outer_shape",
+          "description": "Eye outline (almond shape)",
+          "type": "path",
+          "suggestedPath": "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+        },
+        {
+          "name": "pupil",
+          "description": "Circular pupil/iris",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=3"
+        }
+      ],
+      "connectionRules": [
+        "Outer shape is almond/ellipse shape",
+        "Pupil is centered within the eye",
+        "Symmetric around both axes"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "eye-off": {
+      "components": [
+        {
+          "name": "outer_shape",
+          "description": "Eye outline (almond shape)",
+          "type": "path",
+          "suggestedPath": "M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+        },
+        {
+          "name": "strike",
+          "description": "Diagonal strike-through line",
+          "type": "line",
+          "suggestedPath": "M1 1l22 22"
+        }
+      ],
+      "connectionRules": [
+        "Diagonal line from corner to corner",
+        "Eye shape is partially visible",
+        "Strike-through indicates 'off' state"
+      ],
+      "patterns": ["through-line"]
+    },
+
+    "bookmark": {
+      "components": [
+        {
+          "name": "bookmark_shape",
+          "description": "Bookmark with notched bottom",
+          "type": "path",
+          "suggestedPath": "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+        }
+      ],
+      "connectionRules": [
+        "Rectangular top with pointed/notched bottom",
+        "V-shaped notch at bottom center",
+        "Single continuous path"
+      ],
+      "patterns": []
+    },
+
+    "clock": {
+      "components": [
+        {
+          "name": "face",
+          "description": "Circular clock face",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=10"
+        },
+        {
+          "name": "hour_hand",
+          "description": "Short hour hand",
+          "type": "polyline",
+          "suggestedPath": "12 6 12 12 16 14"
+        }
+      ],
+      "connectionRules": [
+        "Clock face is large circle",
+        "Hands originate from center (12, 12)",
+        "Hour hand is shorter than minute hand"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "calendar": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Calendar body rectangle",
+          "type": "rect",
+          "suggestedPath": "x=3 y=4 width=18 height=18 rx=2"
+        },
+        {
+          "name": "header_line",
+          "description": "Line separating header from body",
+          "type": "line",
+          "suggestedPath": "M3 10h18"
+        },
+        {
+          "name": "hangers",
+          "description": "Calendar ring hangers",
+          "type": "path",
+          "suggestedPath": "M16 2v4M8 2v4"
+        }
+      ],
+      "connectionRules": [
+        "Hangers extend above the top edge",
+        "Horizontal line creates header section",
+        "Body has rounded corners"
+      ],
+      "patterns": []
+    },
+
+    "download": {
+      "components": [
+        {
+          "name": "arrow",
+          "description": "Downward pointing arrow",
+          "type": "path",
+          "suggestedPath": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+        },
+        {
+          "name": "arrow_line",
+          "description": "Vertical arrow shaft with head",
+          "type": "polyline",
+          "suggestedPath": "7 10 12 15 17 10"
+        },
+        {
+          "name": "arrow_stem",
+          "description": "Arrow stem",
+          "type": "line",
+          "suggestedPath": "M12 15V3"
+        }
+      ],
+      "connectionRules": [
+        "Arrow points downward",
+        "Base shows destination/container",
+        "Arrow extends from top to near bottom"
+      ],
+      "patterns": []
+    },
+
+    "upload": {
+      "components": [
+        {
+          "name": "base",
+          "description": "Destination container base",
+          "type": "path",
+          "suggestedPath": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+        },
+        {
+          "name": "arrow_head",
+          "description": "Upward pointing arrow head",
+          "type": "polyline",
+          "suggestedPath": "17 8 12 3 7 8"
+        },
+        {
+          "name": "arrow_stem",
+          "description": "Arrow stem",
+          "type": "line",
+          "suggestedPath": "M12 3v12"
+        }
+      ],
+      "connectionRules": [
+        "Arrow points upward",
+        "Base shows source/container",
+        "Arrow extends from bottom to near top"
+      ],
+      "patterns": []
+    },
+
+    "link": {
+      "components": [
+        {
+          "name": "link1",
+          "description": "First chain link",
+          "type": "path",
+          "suggestedPath": "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+        },
+        {
+          "name": "link2",
+          "description": "Second chain link",
+          "type": "path",
+          "suggestedPath": "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+        }
+      ],
+      "connectionRules": [
+        "Two interlocking chain links",
+        "Diagonal orientation",
+        "Links overlap in the middle"
+      ],
+      "patterns": ["intersection"]
+    },
+
+    "external-link": {
+      "components": [
+        {
+          "name": "box",
+          "description": "Box representing current window",
+          "type": "path",
+          "suggestedPath": "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+        },
+        {
+          "name": "arrow",
+          "description": "Arrow going out",
+          "type": "polyline",
+          "suggestedPath": "15 3 21 3 21 9"
+        },
+        {
+          "name": "arrow_line",
+          "description": "Arrow line",
+          "type": "line",
+          "suggestedPath": "M10 14L21 3"
+        }
+      ],
+      "connectionRules": [
+        "Box is in bottom-left corner",
+        "Arrow exits toward top-right",
+        "Arrow connects box to external"
+      ],
+      "patterns": ["corner-anchored"]
+    },
+
+    "share": {
+      "components": [
+        {
+          "name": "node1",
+          "description": "Top-right node",
+          "type": "circle",
+          "suggestedPath": "cx=18 cy=5 r=3"
+        },
+        {
+          "name": "node2",
+          "description": "Left node",
+          "type": "circle",
+          "suggestedPath": "cx=6 cy=12 r=3"
+        },
+        {
+          "name": "node3",
+          "description": "Bottom-right node",
+          "type": "circle",
+          "suggestedPath": "cx=18 cy=19 r=3"
+        },
+        {
+          "name": "line1",
+          "description": "Line from left to top-right",
+          "type": "line",
+          "suggestedPath": "M8.59 13.51l6.83 3.98"
+        },
+        {
+          "name": "line2",
+          "description": "Line from left to bottom-right",
+          "type": "line",
+          "suggestedPath": "M8.59 10.49l6.83-3.98"
+        }
+      ],
+      "connectionRules": [
+        "Three circles connected by lines",
+        "Left circle connects to both right circles",
+        "Forms a share/network pattern"
+      ],
+      "patterns": ["compound"]
+    },
+
+    "copy": {
+      "components": [
+        {
+          "name": "back_rect",
+          "description": "Back rectangle (offset)",
+          "type": "rect",
+          "suggestedPath": "x=9 y=9 width=13 height=13 rx=2"
+        },
+        {
+          "name": "front_path",
+          "description": "Front rectangle with cutout",
+          "type": "path",
+          "suggestedPath": "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+        }
+      ],
+      "connectionRules": [
+        "Two overlapping rectangles",
+        "Back rectangle is offset down-right",
+        "Front rectangle is behind/below"
+      ],
+      "patterns": []
+    },
+
+    "scissors": {
+      "components": [
+        {
+          "name": "blade1",
+          "description": "First scissor blade",
+          "type": "circle",
+          "suggestedPath": "cx=6 cy=6 r=3"
+        },
+        {
+          "name": "blade2",
+          "description": "Second scissor blade",
+          "type": "circle",
+          "suggestedPath": "cx=6 cy=18 r=3"
+        },
+        {
+          "name": "cut_lines",
+          "description": "Cutting lines extending from blades",
+          "type": "path",
+          "suggestedPath": "M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"
+        }
+      ],
+      "connectionRules": [
+        "Two circular handles",
+        "Lines extend from handles to cutting point",
+        "Lines cross in the middle"
+      ],
+      "patterns": ["symmetric-pair", "intersection"]
+    },
+
+    "image": {
+      "components": [
+        {
+          "name": "frame",
+          "description": "Rectangular image frame",
+          "type": "rect",
+          "suggestedPath": "x=3 y=3 width=18 height=18 rx=2"
+        },
+        {
+          "name": "sun",
+          "description": "Small sun/light source",
+          "type": "circle",
+          "suggestedPath": "cx=8.5 cy=8.5 r=1.5"
+        },
+        {
+          "name": "mountains",
+          "description": "Mountain/landscape silhouette",
+          "type": "polyline",
+          "suggestedPath": "21 15 16 10 5 21"
+        }
+      ],
+      "connectionRules": [
+        "Frame contains sun and mountain scene",
+        "Sun is in upper left quadrant",
+        "Mountains span lower portion"
+      ],
+      "patterns": ["containment"]
+    },
+
+    "video": {
+      "components": [
+        {
+          "name": "camera_body",
+          "description": "Main camera body",
+          "type": "rect",
+          "suggestedPath": "x=2 y=7 width=14 height=10 rx=2"
+        },
+        {
+          "name": "lens",
+          "description": "Camera lens/viewfinder",
+          "type": "path",
+          "suggestedPath": "M23 7l-7 5 7 5z"
+        }
+      ],
+      "connectionRules": [
+        "Camera body is rectangular",
+        "Triangular lens/viewfinder on right",
+        "Lens points toward subject"
+      ],
+      "patterns": []
+    },
+
+    "microphone": {
+      "components": [
+        {
+          "name": "mic_head",
+          "description": "Microphone capsule",
+          "type": "path",
+          "suggestedPath": "M12 1a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z"
+        },
+        {
+          "name": "holder",
+          "description": "Microphone holder arc",
+          "type": "path",
+          "suggestedPath": "M19 10v2a7 7 0 0 1-14 0v-2"
+        },
+        {
+          "name": "stand",
+          "description": "Microphone stand",
+          "type": "line",
+          "suggestedPath": "M12 19v4"
+        },
+        {
+          "name": "base",
+          "description": "Stand base",
+          "type": "line",
+          "suggestedPath": "M8 23h8"
+        }
+      ],
+      "connectionRules": [
+        "Capsule at top with rounded top",
+        "Holder arc surrounds lower portion",
+        "Stand extends from bottom center"
+      ],
+      "patterns": []
+    },
+
+    "speaker": {
+      "components": [
+        {
+          "name": "speaker_body",
+          "description": "Speaker cone shape",
+          "type": "path",
+          "suggestedPath": "M11 5L6 9H2v6h4l5 4V5z"
+        },
+        {
+          "name": "sound_wave1",
+          "description": "Inner sound wave",
+          "type": "path",
+          "suggestedPath": "M15.54 8.46a5 5 0 0 1 0 7.07"
+        },
+        {
+          "name": "sound_wave2",
+          "description": "Outer sound wave",
+          "type": "path",
+          "suggestedPath": "M19.07 4.93a10 10 0 0 1 0 14.14"
+        }
+      ],
+      "connectionRules": [
+        "Speaker cone on left",
+        "Sound waves arc on right",
+        "Waves are concentric arcs"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "wifi": {
+      "components": [
+        {
+          "name": "wave1",
+          "description": "Inner wave arc",
+          "type": "path",
+          "suggestedPath": "M8.5 16.5a5 5 0 0 1 7 0"
+        },
+        {
+          "name": "wave2",
+          "description": "Middle wave arc",
+          "type": "path",
+          "suggestedPath": "M5 12.55a10 10 0 0 1 14 0"
+        },
+        {
+          "name": "wave3",
+          "description": "Outer wave arc",
+          "type": "path",
+          "suggestedPath": "M1.5 8.55a16 16 0 0 1 21 0"
+        },
+        {
+          "name": "dot",
+          "description": "Connection point",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=20 r=1"
+        }
+      ],
+      "connectionRules": [
+        "Concentric arcs radiating from center bottom",
+        "Dot at bottom center represents device",
+        "Arcs get wider toward top"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "battery": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Main battery body",
+          "type": "rect",
+          "suggestedPath": "x=1 y=6 width=18 height=12 rx=2"
+        },
+        {
+          "name": "terminal",
+          "description": "Positive terminal",
+          "type": "line",
+          "suggestedPath": "M23 13v-2"
+        }
+      ],
+      "connectionRules": [
+        "Horizontal orientation",
+        "Terminal extends from right side",
+        "Body has rounded corners"
+      ],
+      "patterns": []
+    },
+
+    "power": {
+      "components": [
+        {
+          "name": "arc",
+          "description": "Power button arc",
+          "type": "path",
+          "suggestedPath": "M18.36 6.64a9 9 0 1 1-12.73 0"
+        },
+        {
+          "name": "line",
+          "description": "Power line through arc",
+          "type": "line",
+          "suggestedPath": "M12 2v10"
+        }
+      ],
+      "connectionRules": [
+        "Arc is open at top (horseshoe shape)",
+        "Vertical line extends from top through arc",
+        "Standard power button symbol"
+      ],
+      "patterns": ["through-line"]
+    },
+
+    "zap": {
+      "components": [
+        {
+          "name": "bolt",
+          "description": "Lightning bolt shape",
+          "type": "polygon",
+          "suggestedPath": "13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+        }
+      ],
+      "connectionRules": [
+        "Zigzag lightning bolt pattern",
+        "Wider at middle, narrow at ends",
+        "Single continuous polygon"
+      ],
+      "patterns": []
+    },
+
+    "refresh": {
+      "components": [
+        {
+          "name": "arrow1",
+          "description": "Upper refresh arrow",
+          "type": "polyline",
+          "suggestedPath": "23 4 23 10 17 10"
+        },
+        {
+          "name": "arrow2",
+          "description": "Lower refresh arrow",
+          "type": "polyline",
+          "suggestedPath": "1 20 1 14 7 14"
+        },
+        {
+          "name": "path1",
+          "description": "Upper arc path",
+          "type": "path",
+          "suggestedPath": "M3.51 9a9 9 0 0 1 14.85-3.36L23 10"
+        },
+        {
+          "name": "path2",
+          "description": "Lower arc path",
+          "type": "path",
+          "suggestedPath": "M20.49 15a9 9 0 0 1-14.85 3.36L1 14"
+        }
+      ],
+      "connectionRules": [
+        "Two arrows forming a cycle",
+        "Arrows at opposite corners",
+        "Circular motion indicated"
+      ],
+      "patterns": ["symmetric-pair"]
+    },
+
+    "check": {
+      "components": [
+        {
+          "name": "checkmark",
+          "description": "Checkmark shape",
+          "type": "polyline",
+          "suggestedPath": "20 6 9 17 4 12"
+        }
+      ],
+      "connectionRules": [
+        "Simple V-shaped checkmark",
+        "Longer stroke on right",
+        "Single polyline element"
+      ],
+      "patterns": []
+    },
+
+    "x": {
+      "components": [
+        {
+          "name": "line1",
+          "description": "First diagonal line",
+          "type": "line",
+          "suggestedPath": "M18 6L6 18"
+        },
+        {
+          "name": "line2",
+          "description": "Second diagonal line",
+          "type": "line",
+          "suggestedPath": "M6 6l12 12"
+        }
+      ],
+      "connectionRules": [
+        "Two crossing diagonal lines",
+        "Lines are equal length",
+        "Centered at (12, 12)"
+      ],
+      "patterns": ["intersection"]
+    },
+
+    "plus": {
+      "components": [
+        {
+          "name": "vertical",
+          "description": "Vertical line",
+          "type": "line",
+          "suggestedPath": "M12 5v14"
+        },
+        {
+          "name": "horizontal",
+          "description": "Horizontal line",
+          "type": "line",
+          "suggestedPath": "M5 12h14"
+        }
+      ],
+      "connectionRules": [
+        "Perpendicular crossing lines",
+        "Lines are equal length",
+        "Centered at (12, 12)"
+      ],
+      "patterns": ["intersection"]
+    },
+
+    "minus": {
+      "components": [
+        {
+          "name": "line",
+          "description": "Horizontal line",
+          "type": "line",
+          "suggestedPath": "M5 12h14"
+        }
+      ],
+      "connectionRules": [
+        "Single horizontal line",
+        "Centered vertically",
+        "Simple subtraction symbol"
+      ],
+      "patterns": []
+    },
+
+    "arrow-up": {
+      "components": [
+        {
+          "name": "shaft",
+          "description": "Arrow shaft",
+          "type": "line",
+          "suggestedPath": "M12 19V5"
+        },
+        {
+          "name": "head",
+          "description": "Arrow head",
+          "type": "polyline",
+          "suggestedPath": "5 12 12 5 19 12"
+        }
+      ],
+      "connectionRules": [
+        "Vertical shaft with chevron head",
+        "Head points upward",
+        "Shaft connects to head apex"
+      ],
+      "patterns": []
+    },
+
+    "arrow-down": {
+      "components": [
+        {
+          "name": "shaft",
+          "description": "Arrow shaft",
+          "type": "line",
+          "suggestedPath": "M12 5v14"
+        },
+        {
+          "name": "head",
+          "description": "Arrow head",
+          "type": "polyline",
+          "suggestedPath": "19 12 12 19 5 12"
+        }
+      ],
+      "connectionRules": [
+        "Vertical shaft with chevron head",
+        "Head points downward",
+        "Shaft connects to head apex"
+      ],
+      "patterns": []
+    },
+
+    "arrow-left": {
+      "components": [
+        {
+          "name": "shaft",
+          "description": "Arrow shaft",
+          "type": "line",
+          "suggestedPath": "M19 12H5"
+        },
+        {
+          "name": "head",
+          "description": "Arrow head",
+          "type": "polyline",
+          "suggestedPath": "12 19 5 12 12 5"
+        }
+      ],
+      "connectionRules": [
+        "Horizontal shaft with chevron head",
+        "Head points left",
+        "Shaft connects to head apex"
+      ],
+      "patterns": []
+    },
+
+    "arrow-right": {
+      "components": [
+        {
+          "name": "shaft",
+          "description": "Arrow shaft",
+          "type": "line",
+          "suggestedPath": "M5 12h14"
+        },
+        {
+          "name": "head",
+          "description": "Arrow head",
+          "type": "polyline",
+          "suggestedPath": "12 5 19 12 12 19"
+        }
+      ],
+      "connectionRules": [
+        "Horizontal shaft with chevron head",
+        "Head points right",
+        "Shaft connects to head apex"
+      ],
+      "patterns": []
+    },
+
+    "chevron-up": {
+      "components": [
+        {
+          "name": "chevron",
+          "description": "Upward pointing chevron",
+          "type": "polyline",
+          "suggestedPath": "18 15 12 9 6 15"
+        }
+      ],
+      "connectionRules": [
+        "Simple V-shape pointing up",
+        "Symmetric around center",
+        "Single polyline"
+      ],
+      "patterns": []
+    },
+
+    "chevron-down": {
+      "components": [
+        {
+          "name": "chevron",
+          "description": "Downward pointing chevron",
+          "type": "polyline",
+          "suggestedPath": "6 9 12 15 18 9"
+        }
+      ],
+      "connectionRules": [
+        "Simple V-shape pointing down",
+        "Symmetric around center",
+        "Single polyline"
+      ],
+      "patterns": []
+    },
+
+    "menu": {
+      "components": [
+        {
+          "name": "line1",
+          "description": "Top line",
+          "type": "line",
+          "suggestedPath": "M3 12h18"
+        },
+        {
+          "name": "line2",
+          "description": "Middle line",
+          "type": "line",
+          "suggestedPath": "M3 6h18"
+        },
+        {
+          "name": "line3",
+          "description": "Bottom line",
+          "type": "line",
+          "suggestedPath": "M3 18h18"
+        }
+      ],
+      "connectionRules": [
+        "Three horizontal parallel lines",
+        "Equal spacing between lines",
+        "Classic hamburger menu icon"
+      ],
+      "patterns": ["stacked-lines"]
+    },
+
+    "more-horizontal": {
+      "components": [
+        {
+          "name": "dot1",
+          "description": "Left dot",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=1"
+        },
+        {
+          "name": "dot2",
+          "description": "Middle dot",
+          "type": "circle",
+          "suggestedPath": "cx=19 cy=12 r=1"
+        },
+        {
+          "name": "dot3",
+          "description": "Right dot",
+          "type": "circle",
+          "suggestedPath": "cx=5 cy=12 r=1"
+        }
+      ],
+      "connectionRules": [
+        "Three dots in horizontal row",
+        "Equal spacing between dots",
+        "Vertically centered"
+      ],
+      "patterns": []
+    },
+
+    "more-vertical": {
+      "components": [
+        {
+          "name": "dot1",
+          "description": "Top dot",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=1"
+        },
+        {
+          "name": "dot2",
+          "description": "Middle dot",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=5 r=1"
+        },
+        {
+          "name": "dot3",
+          "description": "Bottom dot",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=19 r=1"
+        }
+      ],
+      "connectionRules": [
+        "Three dots in vertical column",
+        "Equal spacing between dots",
+        "Horizontally centered"
+      ],
+      "patterns": []
+    },
+
+    "filter": {
+      "components": [
+        {
+          "name": "funnel",
+          "description": "Funnel/filter shape",
+          "type": "polygon",
+          "suggestedPath": "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+        }
+      ],
+      "connectionRules": [
+        "Wide at top, narrow at bottom",
+        "Triangular funnel shape",
+        "Single polygon element"
+      ],
+      "patterns": []
+    },
+
+    "edit": {
+      "components": [
+        {
+          "name": "pencil",
+          "description": "Pencil body",
+          "type": "path",
+          "suggestedPath": "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+        },
+        {
+          "name": "pencil_tip",
+          "description": "Pencil editing path",
+          "type": "path",
+          "suggestedPath": "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+        }
+      ],
+      "connectionRules": [
+        "Document/frame on left side",
+        "Pencil extends from upper right",
+        "Pencil tip points to content"
+      ],
+      "patterns": []
+    },
+
+    "save": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Floppy disk body",
+          "type": "path",
+          "suggestedPath": "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+        },
+        {
+          "name": "notch",
+          "description": "Label area",
+          "type": "polyline",
+          "suggestedPath": "17 21 17 13 7 13 7 21"
+        },
+        {
+          "name": "window",
+          "description": "Disk window",
+          "type": "polyline",
+          "suggestedPath": "7 3 7 8 15 8"
+        }
+      ],
+      "connectionRules": [
+        "Floppy disk shape with corner cut",
+        "Label area at bottom",
+        "Window/shutter at top"
+      ],
+      "patterns": []
+    },
+
+    "file": {
+      "components": [
+        {
+          "name": "body",
+          "description": "File body with folded corner",
+          "type": "path",
+          "suggestedPath": "M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+        },
+        {
+          "name": "fold",
+          "description": "Corner fold",
+          "type": "polyline",
+          "suggestedPath": "13 2 13 9 20 9"
+        }
+      ],
+      "connectionRules": [
+        "Document with folded top-right corner",
+        "Fold creates dog-ear effect",
+        "Rounded corners at bottom"
+      ],
+      "patterns": []
+    },
+
+    "printer": {
+      "components": [
+        {
+          "name": "top_paper",
+          "description": "Paper coming out of top",
+          "type": "path",
+          "suggestedPath": "M6 9V2h12v7"
+        },
+        {
+          "name": "body",
+          "description": "Printer body",
+          "type": "path",
+          "suggestedPath": "M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+        },
+        {
+          "name": "output_tray",
+          "description": "Output paper tray",
+          "type": "path",
+          "suggestedPath": "M6 14h12v8H6z"
+        }
+      ],
+      "connectionRules": [
+        "Paper feeds in from top",
+        "Printer body is middle section",
+        "Output tray extends below"
+      ],
+      "patterns": ["container-with-lid"]
+    },
+
+    "database": {
+      "components": [
+        {
+          "name": "top",
+          "description": "Top ellipse",
+          "type": "ellipse",
+          "suggestedPath": "cx=12 cy=5 rx=9 ry=3"
+        },
+        {
+          "name": "body",
+          "description": "Cylinder body",
+          "type": "path",
+          "suggestedPath": "M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"
+        },
+        {
+          "name": "bottom",
+          "description": "Bottom curve",
+          "type": "path",
+          "suggestedPath": "M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"
+        }
+      ],
+      "connectionRules": [
+        "Cylinder shape viewed from angle",
+        "Elliptical top and bottom",
+        "Middle ellipse shows depth"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "server": {
+      "components": [
+        {
+          "name": "unit1",
+          "description": "Top server unit",
+          "type": "rect",
+          "suggestedPath": "x=2 y=2 width=20 height=8 rx=2"
+        },
+        {
+          "name": "unit2",
+          "description": "Bottom server unit",
+          "type": "rect",
+          "suggestedPath": "x=2 y=14 width=20 height=8 rx=2"
+        },
+        {
+          "name": "light1",
+          "description": "Status light top unit",
+          "type": "line",
+          "suggestedPath": "M6 6h.01"
+        },
+        {
+          "name": "light2",
+          "description": "Status light bottom unit",
+          "type": "line",
+          "suggestedPath": "M6 18h.01"
+        }
+      ],
+      "connectionRules": [
+        "Two stacked rectangular units",
+        "Small status indicator on each",
+        "Equal sized units with gap"
+      ],
+      "patterns": ["stacked-lines"]
+    },
+
+    "globe": {
+      "components": [
+        {
+          "name": "outer",
+          "description": "Outer circle",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=10"
+        },
+        {
+          "name": "meridian",
+          "description": "Vertical meridian line",
+          "type": "path",
+          "suggestedPath": "M2 12h20"
+        },
+        {
+          "name": "equator",
+          "description": "Center ellipse",
+          "type": "path",
+          "suggestedPath": "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+        }
+      ],
+      "connectionRules": [
+        "Outer circle represents Earth",
+        "Internal lines show longitude/latitude",
+        "Suggests 3D sphere on 2D"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "map": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Folded map shape",
+          "type": "polygon",
+          "suggestedPath": "1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"
+        },
+        {
+          "name": "fold1",
+          "description": "Left fold line",
+          "type": "line",
+          "suggestedPath": "M8 2v16"
+        },
+        {
+          "name": "fold2",
+          "description": "Right fold line",
+          "type": "line",
+          "suggestedPath": "M16 6v16"
+        }
+      ],
+      "connectionRules": [
+        "Folded accordion-style map",
+        "Three sections visible",
+        "Fold lines divide sections"
+      ],
+      "patterns": ["through-line"]
+    },
+
+    "compass": {
+      "components": [
+        {
+          "name": "outer",
+          "description": "Outer circle",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=10"
+        },
+        {
+          "name": "needle",
+          "description": "Compass needle",
+          "type": "polygon",
+          "suggestedPath": "16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
+        }
+      ],
+      "connectionRules": [
+        "Circular compass body",
+        "Diamond-shaped needle at center",
+        "Needle rotated 45 degrees"
+      ],
+      "patterns": ["concentric-circles"]
+    },
+
+    "flag": {
+      "components": [
+        {
+          "name": "pole",
+          "description": "Vertical flag pole",
+          "type": "line",
+          "suggestedPath": "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
+        },
+        {
+          "name": "flag",
+          "description": "Waving flag",
+          "type": "path",
+          "suggestedPath": "M4 22v-7"
+        }
+      ],
+      "connectionRules": [
+        "Pole extends full height on left",
+        "Flag waves to the right",
+        "Flag attached at top of pole"
+      ],
+      "patterns": []
+    },
+
+    "tag": {
+      "components": [
+        {
+          "name": "body",
+          "description": "Tag body with pointed end",
+          "type": "path",
+          "suggestedPath": "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+        },
+        {
+          "name": "hole",
+          "description": "Tag hole/loop",
+          "type": "line",
+          "suggestedPath": "M7 7h.01"
+        }
+      ],
+      "connectionRules": [
+        "Pointed end on right side",
+        "Small circle/hole in corner",
+        "Rectangular body tapers to point"
+      ],
+      "patterns": []
+    },
+
+    "award": {
+      "components": [
+        {
+          "name": "badge",
+          "description": "Award badge circle",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=8 r=7"
+        },
+        {
+          "name": "ribbon1",
+          "description": "Left ribbon",
+          "type": "polyline",
+          "suggestedPath": "8.21 13.89 7 23 12 20"
+        },
+        {
+          "name": "ribbon2",
+          "description": "Right ribbon",
+          "type": "polyline",
+          "suggestedPath": "15.79 13.89 17 23 12 20"
+        }
+      ],
+      "connectionRules": [
+        "Circular badge at top",
+        "Two ribbons hang below",
+        "Ribbons meet at center bottom"
+      ],
+      "patterns": []
+    },
+
+    "trophy": {
+      "components": [
+        {
+          "name": "cup",
+          "description": "Trophy cup body",
+          "type": "path",
+          "suggestedPath": "M6 9H4.5a2.5 2.5 0 0 1 0-5H6"
+        },
+        {
+          "name": "cup2",
+          "description": "Right handle",
+          "type": "path",
+          "suggestedPath": "M18 9h1.5a2.5 2.5 0 0 0 0-5H18"
+        },
+        {
+          "name": "body",
+          "description": "Cup body",
+          "type": "path",
+          "suggestedPath": "M6 2h12v7a6 6 0 0 1-12 0V2z"
+        },
+        {
+          "name": "base",
+          "description": "Trophy base",
+          "type": "path",
+          "suggestedPath": "M12 15v5M8 22h8"
+        }
+      ],
+      "connectionRules": [
+        "Cup with two side handles",
+        "Stem extends to base",
+        "Base is horizontal line"
+      ],
+      "patterns": ["symmetric-pair"]
+    },
+
+    "lightbulb": {
+      "components": [
+        {
+          "name": "bulb",
+          "description": "Light bulb glass",
+          "type": "path",
+          "suggestedPath": "M9 18h6M10 22h4M12 2a7 7 0 0 0-5 12v4h10v-4a7 7 0 0 0-5-12z"
+        }
+      ],
+      "connectionRules": [
+        "Rounded bulb at top",
+        "Narrows at screw base",
+        "Horizontal lines at base"
+      ],
+      "patterns": []
+    },
+
+    "target": {
+      "components": [
+        {
+          "name": "outer",
+          "description": "Outer circle",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=10"
+        },
+        {
+          "name": "middle",
+          "description": "Middle circle",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=6"
+        },
+        {
+          "name": "inner",
+          "description": "Inner circle (bullseye)",
+          "type": "circle",
+          "suggestedPath": "cx=12 cy=12 r=2"
+        }
+      ],
+      "connectionRules": [
+        "Three concentric circles",
+        "All centered at (12, 12)",
+        "Classic target/bullseye pattern"
+      ],
+      "patterns": ["concentric-circles"]
+    }
+  }
+}
