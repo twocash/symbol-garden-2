@@ -622,7 +622,7 @@ INPUT: "secure user"
 | **F1** | Style Enforcer | 3-4h | ✅ Complete | Deterministic SVG mutation for compliance |
 | **F2** | Ghost Preview | 2-3h | ✅ Complete | Show candidate between library icons |
 | **F3** | Component Indexer | 4-5h | ✅ Complete | Semantic tagging of icon parts |
-| **F4** | Kitbash Engine | 6-8h | 🔴 Not Started | Assembly from existing components |
+| **F4** | Kitbash Engine | 6-8h | ✅ Complete | Assembly from existing components |
 | **F5** | Skeleton-First UI | 4-5h | 🔴 Not Started | Composition approval before styling |
 
 ### F1: Style Enforcer (Quick Win)
@@ -700,13 +700,48 @@ shield (simple) → shield-body [container] Tags: protection, security
 arrow-right (simple) → arrow-right [indicator] Tags: directional, forward
 ```
 
-### F4: Kitbash Engine
+### F4: Kitbash Engine ✅ COMPLETE
 
 **Goal:** Assemble icons from proven parts instead of generating from scratch.
 
-**Process:**
-1. Decompose concept: "secure user" → ["user", "shield"]
-2. Search component index for matches
+**Implementation:**
+
+1. **New File: `src/lib/kitbash-engine.ts`**
+   - `AssemblyStrategy` type: graft (100% parts), hybrid (some + AI), adapt (single part), generate (no parts)
+   - `KitbashPlan` interface with coverage calculation and suggested layouts
+   - `planKitbash(concept, componentIndex)` - Analyze concept and find matching parts
+   - `executeKitbash(plan, layoutIndex, rules)` - Assemble SVG from parts
+   - `isKitbashable(concept, componentIndex)` - Quick check for viability
+   - `kitbash(concept, componentIndex)` - Full pipeline in one call
+
+2. **New API: `/api/kitbash`**
+   - Two modes: `plan` and `execute`
+   - Plan mode returns coverage, strategy, found/missing parts, suggested layouts
+   - Execute mode returns assembled SVG with enforcement rules applied
+
+3. **Strategy Selection:**
+   - Coverage ≥ 90% → GRAFT (pure mechanical assembly)
+   - Coverage ≥ 50% → HYBRID (AI fills gaps)
+   - Coverage > 0% with single match → ADAPT (modify existing)
+   - Coverage = 0% → GENERATE (full AI generation needed)
+
+4. **Layout System:**
+   - LLM suggests 3 layout options per concept
+   - Each layout describes spatial arrangement (side-by-side, badge, overlay, etc.)
+   - User can select preferred layout before execution
+
+**Test Results:**
+```
+"secure user"    → HYBRID (50% coverage) - body found, head generated
+"verified check" → GENERATE (0% coverage) - not kitbashable
+"user shield"    → HYBRID (50% coverage) - body found, head generated
+"dragon"         → GENERATE (0% coverage) - 8 parts dynamically decomposed
+"lock check"     → HYBRID (50% coverage) - body found, shackle generated
+```
+
+**Process Flow:**
+1. Decompose concept: "secure user" → ["head", "body"] (from static/dynamic decomposition)
+2. Search component index for matches by name and semantic tags
 3. Calculate coverage (% of parts found)
 4. If coverage > 70%: GRAFT (mechanical assembly)
 5. If coverage < 70%: HYBRID (AI fills gaps)
@@ -747,6 +782,7 @@ arrow-right (simple) → arrow-right [indicator] Tags: directional, forward
 src/lib/hybrid-generator.ts      # Native SVG generation
 src/lib/style-enforcer.ts        # Sprout Engine F1 - style compliance
 src/lib/component-indexer.ts     # Sprout Engine F3 - semantic component tagging
+src/lib/kitbash-engine.ts        # Sprout Engine F4 - component assembly
 src/lib/similar-icon-finder.ts   # Trait-aware selection
 src/lib/decomposition-service.ts # Icon structure
 src/lib/svg-prompt-builder.ts    # Prompt construction
