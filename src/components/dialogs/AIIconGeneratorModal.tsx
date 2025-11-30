@@ -10,7 +10,7 @@ import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
 import { getRelatedSearchTerms } from "@/lib/iconify-service";
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle, Puzzle, Wand2, ChevronRight } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle, Puzzle, Wand2, ChevronRight, RefreshCw } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -140,6 +140,12 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     const [kitbashSvg, setKitbashSvg] = useState<string | null>(null);
     const [isExecutingKitbash, setIsExecutingKitbash] = useState(false);
 
+    // Refinery state (Sprint 06: transforms draft assemblies into cohesive icons)
+    const [isRefining, setIsRefining] = useState(false);
+    const [refinedSvg, setRefinedSvg] = useState<string | null>(null);
+    const [refinementChanges, setRefinementChanges] = useState<string[]>([]);
+    const [showRefinedView, setShowRefinedView] = useState(true); // Toggle between draft/refined
+
     // Determine available libraries from ingested icons
     const availableLibraries = libraries.filter(lib => lib !== "custom");
 
@@ -195,6 +201,11 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setKitbashPlan(null);
             setSelectedLayoutIndex(0);
             setKitbashSvg(null);
+
+            // Refinery: Reset refinement state
+            setRefinedSvg(null);
+            setRefinementChanges([]);
+            setShowRefinedView(true);
 
             // Load icon sources to access styleManifest
             getIconSources().then(sources => {
@@ -516,6 +527,105 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setIsSaving(false);
         }
     }, [kitbashSvg, currentProject, prompt, addIconToProject, onClose]);
+
+    // Refinery: Polish a kitbash assembly into a cohesive icon
+    const handleRefineKitbash = useCallback(async () => {
+        if (!kitbashSvg) {
+            toast.error("No assembly to refine");
+            return;
+        }
+
+        // Get API key from localStorage (user's System Settings)
+        const apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey) {
+            toast.error("Please set your Google API key in System Settings");
+            return;
+        }
+
+        // Get styleManifest for the library
+        const librarySource = iconSources.find(s => s.name === effectiveLibrary);
+        const styleManifest = librarySource?.styleManifest;
+
+        setIsRefining(true);
+        setRefinedSvg(null);
+        setRefinementChanges([]);
+
+        try {
+            const response = await fetch("/api/kitbash", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mode: "refine",
+                    concept: prompt.trim(),
+                    draftSvg: kitbashSvg,
+                    styleManifest,
+                    apiKey,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.details || error.error || "Refinement failed");
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                setRefinedSvg(data.svg);
+                setRefinementChanges(data.changes || []);
+                setShowRefinedView(true);
+                toast.success("Icon refined successfully!");
+            } else {
+                toast.warning("Refinement returned original - no changes needed");
+                setRefinedSvg(kitbashSvg);
+                setRefinementChanges(data.changes || ["No changes applied"]);
+            }
+        } catch (error) {
+            console.error("[Refinery] Refinement failed:", error);
+            toast.error(error instanceof Error ? error.message : "Refinement failed");
+        } finally {
+            setIsRefining(false);
+        }
+    }, [kitbashSvg, prompt, effectiveLibrary, iconSources]);
+
+    // Refinery: Save the refined version
+    const handleSaveRefined = useCallback(async () => {
+        const svgToSave = refinedSvg || kitbashSvg;
+        if (!svgToSave || !currentProject) return;
+
+        setIsSaving(true);
+        try {
+            // Extract viewBox and path from SVG
+            const viewBoxMatch = svgToSave.match(/viewBox="([^"]+)"/);
+            const pathMatches = [...svgToSave.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
+
+            if (pathMatches.length === 0) {
+                throw new Error("Could not extract path from refined SVG");
+            }
+
+            const combinedPath = pathMatches.map(match => match[1]).join(' ');
+
+            const newIcon = {
+                id: crypto.randomUUID(),
+                name: prompt || "Kitbashed Icon",
+                library: "custom",
+                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
+                path: combinedPath,
+                tags: ["ai-generated", "kitbash", "refined", "sprout"],
+                categories: ["Generated"],
+                renderStyle: "stroke" as const,
+            };
+
+            addIconToProject(newIcon, true);
+            toast.success(`"${prompt}" saved to workspace!`);
+            onClose();
+        } catch (error) {
+            console.error('[Refinery] Save error:', error);
+            toast.error(error instanceof Error ? error.message : "Failed to save icon");
+        } finally {
+            setIsSaving(false);
+        }
+    }, [refinedSvg, kitbashSvg, currentProject, prompt, addIconToProject, onClose]);
 
     const handleGenerate = async () => {
         if (!prompt.trim()) {
@@ -1171,43 +1281,141 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                             </div>
                         )}
 
-                        {/* F5: Kitbash Result Preview */}
+                        {/* F5: Kitbash Result Preview with Refinery */}
                         {generationMode === 'kitbash' && kitbashSvg && (
-                            <div className="mb-4 p-4 rounded-lg border-2 border-green-500/50 bg-green-50/50 dark:bg-green-900/10">
+                            <div className={cn(
+                                "mb-4 p-4 rounded-lg border-2",
+                                refinedSvg
+                                    ? "border-purple-500/50 bg-purple-50/50 dark:bg-purple-900/10"
+                                    : "border-green-500/50 bg-green-50/50 dark:bg-green-900/10"
+                            )}>
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                        <span className="text-sm font-medium text-green-700 dark:text-green-400">Icon Assembled!</span>
+                                        <CheckCircle2 className={cn(
+                                            "w-5 h-5",
+                                            refinedSvg ? "text-purple-500" : "text-green-500"
+                                        )} />
+                                        <span className={cn(
+                                            "text-sm font-medium",
+                                            refinedSvg
+                                                ? "text-purple-700 dark:text-purple-400"
+                                                : "text-green-700 dark:text-green-400"
+                                        )}>
+                                            {refinedSvg ? "Icon Refined!" : "Icon Assembled!"}
+                                        </span>
                                     </div>
-                                    <Button
-                                        size="sm"
-                                        onClick={handleSaveKitbash}
-                                        disabled={isSaving}
-                                        className="bg-green-600 hover:bg-green-700"
-                                    >
-                                        {isSaving ? (
-                                            <>
-                                                <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-                                                Saving...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Download className="w-3 h-3 mr-1.5" />
-                                                Save to Workspace
-                                            </>
+                                    <div className="flex items-center gap-2">
+                                        {/* Refine button - only show if not yet refined */}
+                                        {!refinedSvg && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={handleRefineKitbash}
+                                                disabled={isRefining}
+                                                className="border-purple-300 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-900/20"
+                                            >
+                                                {isRefining ? (
+                                                    <>
+                                                        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                                                        Refining...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <RefreshCw className="w-3 h-3 mr-1.5" />
+                                                        Refine
+                                                    </>
+                                                )}
+                                            </Button>
                                         )}
-                                    </Button>
+                                        <Button
+                                            size="sm"
+                                            onClick={refinedSvg ? handleSaveRefined : handleSaveKitbash}
+                                            disabled={isSaving}
+                                            className={refinedSvg ? "bg-purple-600 hover:bg-purple-700" : "bg-green-600 hover:bg-green-700"}
+                                        >
+                                            {isSaving ? (
+                                                <>
+                                                    <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Download className="w-3 h-3 mr-1.5" />
+                                                    Save to Workspace
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
+
+                                {/* Draft/Refined toggle when refined version exists */}
+                                {refinedSvg && (
+                                    <div className="flex justify-center gap-2 mb-3">
+                                        <button
+                                            onClick={() => setShowRefinedView(false)}
+                                            className={cn(
+                                                "text-xs px-3 py-1 rounded-full transition-colors",
+                                                !showRefinedView
+                                                    ? "bg-muted text-foreground"
+                                                    : "text-muted-foreground hover:text-foreground"
+                                            )}
+                                        >
+                                            Draft
+                                        </button>
+                                        <button
+                                            onClick={() => setShowRefinedView(true)}
+                                            className={cn(
+                                                "text-xs px-3 py-1 rounded-full transition-colors",
+                                                showRefinedView
+                                                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                                                    : "text-muted-foreground hover:text-foreground"
+                                            )}
+                                        >
+                                            Refined
+                                        </button>
+                                    </div>
+                                )}
+
                                 <div className="flex justify-center">
-                                    <div className="w-28 h-28 p-3 rounded-lg border-2 border-green-500 bg-background shadow-sm">
+                                    <div className={cn(
+                                        "w-28 h-28 p-3 rounded-lg border-2 bg-background shadow-sm",
+                                        refinedSvg && showRefinedView ? "border-purple-500" : "border-green-500"
+                                    )}>
                                         <div
                                             className="w-full h-full text-foreground"
-                                            dangerouslySetInnerHTML={{ __html: renderSvgPreview(kitbashSvg) }}
+                                            dangerouslySetInnerHTML={{
+                                                __html: renderSvgPreview(
+                                                    refinedSvg && showRefinedView ? refinedSvg : kitbashSvg
+                                                )
+                                            }}
                                         />
                                     </div>
                                 </div>
+
+                                {/* Refinement changes */}
+                                {refinedSvg && refinementChanges.length > 0 && showRefinedView && (
+                                    <div className="mt-3 pt-2 border-t border-purple-200 dark:border-purple-800">
+                                        <p className="text-[10px] text-purple-600 dark:text-purple-400 font-medium mb-1">
+                                            Refinement applied:
+                                        </p>
+                                        <ul className="text-[10px] text-muted-foreground space-y-0.5">
+                                            {refinementChanges.slice(0, 4).map((change, i) => (
+                                                <li key={i} className="flex items-center gap-1">
+                                                    <CheckCircle2 className="w-2.5 h-2.5 text-purple-500" />
+                                                    {change}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
                                 <p className="text-xs text-center text-muted-foreground mt-2">
                                     &quot;{prompt}&quot; ready to add to your workspace
+                                    {!refinedSvg && (
+                                        <span className="block text-[10px] mt-1">
+                                            Tip: Click &quot;Refine&quot; to smooth overlapping paths
+                                        </span>
+                                    )}
                                 </p>
                             </div>
                         )}

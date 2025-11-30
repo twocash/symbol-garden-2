@@ -3,17 +3,19 @@
  *
  * Part of the Sprout Engine (F4) - Assembly from existing components
  *
- * Two modes:
+ * Three modes:
  * 1. Plan: Analyze concept and return kitbash plan with coverage/strategy
  * 2. Execute: Run the plan to produce an assembled SVG
+ * 3. Refine: Polish a draft assembly into a cohesive icon (Sprint 06)
  *
  * POST /api/kitbash
  * Body: {
- *   mode: 'plan' | 'execute',
+ *   mode: 'plan' | 'execute' | 'refine',
  *   concept: string,              // e.g., "secure user"
  *   icons: Icon[],                // Library icons with components indexed
  *   layoutIndex?: number,         // Which layout to use (default: 0)
  *   plan?: KitbashPlan,           // For execute mode, pass previous plan
+ *   draftSvg?: string,            // For refine mode, the SVG to refine
  * }
  *
  * Response (plan mode): {
@@ -24,6 +26,12 @@
  * Response (execute mode): {
  *   result: KitbashResult,
  *   svg: string,
+ * }
+ *
+ * Response (refine mode): {
+ *   svg: string,                  // Refined SVG
+ *   success: boolean,             // Was refinement successful?
+ *   changes: string[],            // What was fixed
  * }
  */
 
@@ -37,6 +45,7 @@ import {
   KitbashPlan,
 } from '@/lib/kitbash-engine';
 import { rulesFromStyleDNA, rulesFromManifest, FEATHER_RULES } from '@/lib/style-enforcer';
+import { refineIcon } from '@/lib/hybrid-generator';
 
 export async function POST(req: NextRequest) {
   try {
@@ -133,9 +142,37 @@ export async function POST(req: NextRequest) {
         usedGeneration: result.usedGeneration,
         generatedParts: result.generatedParts,
       });
+    } else if (mode === 'refine') {
+      // Refinery mode (Sprint 06) - Polish draft assembly into cohesive icon
+      const { draftSvg } = body;
+
+      if (!draftSvg || typeof draftSvg !== 'string') {
+        return NextResponse.json(
+          { error: 'Missing required field: draftSvg for refine mode' },
+          { status: 400 }
+        );
+      }
+
+      console.log(`[API] Kitbash Refinery: Refining "${concept}" (${draftSvg.length} chars)`);
+
+      const result = await refineIcon(draftSvg, {
+        concept,
+        styleManifest,
+        apiKey,
+        temperature: 0.1, // Low temperature for precise topology repair
+      });
+
+      console.log(`[API] Kitbash Refinery: ${result.success ? 'SUCCESS' : 'FAILED'} (${result.processingTimeMs.toFixed(0)}ms)`);
+
+      return NextResponse.json({
+        svg: result.svg,
+        success: result.success,
+        changes: result.changes,
+        processingTimeMs: result.processingTimeMs,
+      });
     } else {
       return NextResponse.json(
-        { error: `Invalid mode: ${mode}. Use 'plan' or 'execute'.` },
+        { error: `Invalid mode: ${mode}. Use 'plan', 'execute', or 'refine'.` },
         { status: 400 }
       );
     }
@@ -161,6 +198,7 @@ export async function GET() {
     modes: {
       plan: 'Analyze concept and return assembly plan with coverage/strategy',
       execute: 'Execute plan to produce assembled SVG',
+      refine: 'Polish draft assembly into cohesive icon (Sprint 06 Refinery)',
     },
     strategies: {
       graft: '100% parts found - pure mechanical assembly',
@@ -169,6 +207,6 @@ export async function GET() {
       generate: 'No parts found - full AI generation needed',
     },
     requiredFields: ['concept', 'icons'],
-    optionalFields: ['mode', 'layoutIndex', 'plan', 'styleManifest'],
+    optionalFields: ['mode', 'layoutIndex', 'plan', 'styleManifest', 'draftSvg'],
   });
 }

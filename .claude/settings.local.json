@@ -37,7 +37,8 @@
       "Bash(PLAN-hybrid-svg-generation.md )",
       "Bash(PLAN-smart-sample-selection.md)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []
