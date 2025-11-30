@@ -765,7 +765,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                 throw new Error("Could not extract vector path from generated SVG");
             }
 
-            console.log(`[Modal] Saving icon with combined path length: ${pathData.length}`);
+            console.log(`[Modal] Saving icon with path length: ${pathData.length}`);
 
             const newIcon = {
                 id: crypto.randomUUID(),
