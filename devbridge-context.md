@@ -1,9 +1,9 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.6.0 (Post-Sprint 06)
+> **Version:** 0.6.1 (Post-Sprint 06, Path Repair)
 > **Last Updated:** 2025-11-30
 > **Branch:** busy-cerf
-> **System Status:** STABLE - Generation Pipeline Operational
+> **System Status:** STABLE - Iron Dome 6-Stage Pipeline Operational
 
 ---
 
@@ -17,6 +17,9 @@ Symbol Garden is an **AI-powered icon library management system** that generates
 ### Two Generation Pipelines
 1. **Sprout Engine (Native SVG)** - LLM generates SVG code directly, guided by Style DNA and few-shot examples
 2. **Kitbash Engine (Component Assembly)** - Mechanical assembly of existing library components, refined by LLM
+
+### Key Architectural Achievement (Sprint 06)
+The **Iron Dome** - a unified SVG processing gateway that ALL icons pass through. This replaced scattered ad-hoc fixes with a centralized, 6-stage pipeline that catches and repairs common issues (including LLM path syntax errors).
 
 ---
 
@@ -65,7 +68,7 @@ Symbol Garden is an **AI-powered icon library management system** that generates
 │           ▼                                                                               │
 │  ┌─────────────────┐                                                                      │
 │  │   IRON DOME     │  SVGProcessor.process(svg, mode, profile)                            │
-│  │   "Guardian"    │  → Sanitize → Normalize → Enforce Style → Optimize → Validate        │
+│  │   "Guardian"    │  → 6-Stage Pipeline (see Section 4)                                  │
 │  │                 │  → Mode: 'ingest' (permissive) | 'generate' (strict)                 │
 │  └────────┬────────┘                                                                      │
 │           │                                                                               │
@@ -106,12 +109,14 @@ The `styleManifest` is the "Geometric Autopsy" - a text description of the libra
 | Stage | Primary File | Purpose |
 |-------|--------------|---------|
 | **Ingestion** | `ingestion-service.ts` | GitHub fetch, SVG parsing |
+| **Ingestion (Iconify)** | `/api/iconify/import/route.ts` | Iconify API streaming import |
 | **Autopsy** | `actions/analyze-library.ts` | Generate styleManifest via LLM |
 | **Enrichment** | `/api/enrich/route.ts` | AI metadata + component indexing |
 | **Sprout Core** | `hybrid-generator.ts` | Orchestrates native SVG generation |
 | **Kitbash Core** | `kitbash-engine.ts` | Component assembly engine |
-| **Iron Dome** | `svg-processor.ts` | Unified SVG processing gateway |
+| **Iron Dome** | `svg-processor.ts` | Unified SVG processing gateway (6 stages) |
 | **Style Enforcer** | `style-enforcer.ts` | Deterministic style compliance |
+| **Path Validator** | `svg-validator.ts` | Path syntax validation + repair |
 | **Path Utilities** | `svg-path-utils.ts` | Client-safe path extraction/normalization |
 
 ### Supporting Services
@@ -179,7 +184,7 @@ AIIconGeneratorModal
                     ├─► buildPrompt() [Few-shot construction]
                     ├─► Gemini 2.5 Flash → Raw SVG
                     └─► SVGProcessor.process(svg, 'generate')
-                            └─► Compliant SVG returned
+                            └─► 6-Stage Pipeline → Compliant SVG
 ```
 
 ### 3.4 Assembly Flow (Kitbash)
@@ -196,9 +201,19 @@ AIIconGeneratorModal
             └─► refineIcon() → LLM "code refactoring"
 ```
 
+### 3.5 Iconify Import Flow (NEW)
+```
+SettingsModal
+    └─► /api/iconify/import (POST)
+            └─► Stream icons in batches of 20
+                    └─► extractPathFromSvg() converts all elements to path
+                    └─► Client accumulates via "icons" events
+                            └─► Final "complete" event with metadata only
+```
+
 ---
 
-## 4. THE IRON DOME: UNIFIED SVG PROCESSING
+## 4. THE IRON DOME: UNIFIED SVG PROCESSING (6 STAGES)
 
 ### Philosophy
 > All SVGs entering or exiting the system pass through ONE gateway.
@@ -208,15 +223,38 @@ AIIconGeneratorModal
 | Mode | When Used | Behavior |
 |------|-----------|----------|
 | `'ingest'` | GitHub import, Iconify, uploads | Permissive: allow path merging, shape→path conversion |
-| `'generate'` | Sprout, Kitbash output | Strict: preserve separate paths, keep primitives editable |
+| `'generate'` | Sprout, Kitbash output | Strict: preserve separate paths, keep primitives editable, repair malformed paths |
 
-### Processing Stages
+### 6-Stage Processing Pipeline
+
 ```
-1. SANITIZE    → Remove scripts, event handlers
-2. NORMALIZE   → Convert style="" to native attributes
-3. ENFORCE     → Apply Style DNA rules (generate mode only)
-4. OPTIMIZE    → SVGO with mode-aware config
-5. VALIDATE    → Bounds check, attribute normalization
+┌─────────────────────────────────────────────────────────────────┐
+│                    IRON DOME 6-STAGE PIPELINE                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  STAGE 1: SANITIZE                                               │
+│  └─► Remove scripts, event handlers, malicious content           │
+│                                                                   │
+│  STAGE 2: PATH SYNTAX REPAIR (generate mode only)                │
+│  └─► Fix LLM path errors: "M6 6 12 12" → "M6 6 L12 12"          │
+│  └─► Convert implicit lineto to explicit commands                │
+│                                                                   │
+│  STAGE 3: NORMALIZE                                              │
+│  └─► Convert style="" attributes to native SVG attributes        │
+│                                                                   │
+│  STAGE 4: STYLE ENFORCEMENT (generate mode only)                 │
+│  └─► Apply Style DNA rules (stroke-width, linecap, linejoin)    │
+│  └─► Auto-fix non-compliant attributes                          │
+│                                                                   │
+│  STAGE 5: OPTIMIZATION                                           │
+│  └─► SVGO with mode-aware configuration                          │
+│  └─► Preserve path separation in generate mode                   │
+│                                                                   │
+│  STAGE 6: VALIDATION                                             │
+│  └─► Bounds check (coordinates within viewBox)                   │
+│  └─► Auto-fix out-of-bounds via transform                        │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Key Configuration
@@ -231,6 +269,17 @@ allowPathMerging: true,
 allowShapeToPath: true,
 ```
 
+### Path Syntax Repair (Stage 2)
+
+LLMs frequently generate malformed path data like `M6 6 12 12` (missing `L` command). The Iron Dome now automatically repairs these:
+
+```
+Input:  M6 6 12 12m0-12L6 18
+Output: M6 6 L12 12 m0-12 L6 18
+```
+
+This is handled by `validateAndRepairPaths()` in `svg-validator.ts`.
+
 ---
 
 ## 5. CURRENT STATE SNAPSHOT
@@ -239,10 +288,11 @@ allowShapeToPath: true,
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Build | Clean | No TypeScript errors |
-| Sprout Generation | Working | Style DNA injection operational |
+| Build | Clean | No TypeScript errors (1 pre-existing test issue) |
+| Sprout Generation | Working | Style DNA injection + path repair operational |
 | Kitbash Assembly | Working | Source icon identification improved |
 | Kitbash Refinery | Working | LLM-based "code refactoring" |
+| Iconify Import | Working | Streaming with incremental icon delivery |
 | Enrichment | Working | Component indexing integrated |
 | UI | Stable | Save flows verified |
 
@@ -258,6 +308,8 @@ allowShapeToPath: true,
 | Iron Dome | Complete | Sprint 06 |
 | Semantic Bridge | Complete | Sprint 06 |
 | Kitbash Refinery | Complete | Sprint 06 |
+| Path Syntax Repair | Complete | Sprint 06+ |
+| Iconify Streaming Import | Complete | Sprint 06+ |
 
 ### Storage Constraint
 
@@ -273,6 +325,29 @@ Icon.path: string  // Combined paths joined with space
 ---
 
 ## 6. RECENT CHANGES LOG
+
+### Session: 2025-11-30 (This Session)
+
+#### Iron Dome Path Syntax Repair
+- **Created:** `validatePathSyntax()`, `validateAndRepairPaths()` in `svg-validator.ts`
+- **Modified:** `svg-processor.ts` - Added Stage 2: PATH SYNTAX REPAIR
+- **Why:** LLMs generate malformed paths like `M6 6 12 12` (missing L command)
+- **Impact:** Automatic repair of implicit lineto commands in generated SVGs
+
+#### LLM Prompt Improvement
+- **Modified:** `svg-prompt-builder.ts` - Added explicit path syntax guidance
+- **Why:** Prevention is better than repair; teach LLM correct syntax
+- **Content:** WRONG/CORRECT examples for path commands
+
+#### Iconify Import Streaming
+- **Modified:** `/api/iconify/import/route.ts` - Incremental icon streaming
+- **Why:** Vercel response size limits truncated large payloads
+- **Impact:** Icons streamed in batches of 20 with "icons" events
+
+#### Iconify Element-to-Path Conversion
+- **Modified:** `/api/iconify/import/route.ts` - Full element conversion
+- **Why:** Only `<path>` elements were extracted; `<rect>`, `<circle>` lost
+- **Impact:** All SVG primitives now converted to path data
 
 ### Sprint 06 (2025-11-30) - Stability & Polish
 
@@ -313,7 +388,7 @@ Icon.path: string  // Combined paths joined with space
 
 ## 7. TECHNICAL DEBT
 
-### Resolved (Sprint 06)
+### Resolved (Sprint 06+)
 
 | Issue | Resolution |
 |-------|------------|
@@ -321,6 +396,9 @@ Icon.path: string  // Combined paths joined with space
 | Component vocabulary mismatch | Semantic Bridge with source indexing |
 | Kitbash output quality | Refinery with LLM topology repair |
 | Path combination bugs | `normalizePathStart()` in svg-path-utils |
+| LLM malformed paths | Stage 2 PATH SYNTAX REPAIR |
+| Iconify import truncation | Streaming with incremental delivery |
+| Iconify element loss | Full element-to-path conversion |
 
 ### Remaining
 
@@ -331,6 +409,7 @@ Icon.path: string  // Combined paths joined with space
 | Decomposition cache ephemeral | `decomposition-service.ts` | Low | Lost on server restart |
 | Legacy Imagen pipeline | `ai-icon-service.ts` | Low | Maintenance burden |
 | Kitbash planning slow | `kitbash-engine.ts` | Medium | 30-40s latency |
+| Pre-existing test failure | `vectorize/route.test.ts` | Low | `Map.append` doesn't exist |
 
 ---
 
@@ -340,18 +419,21 @@ Icon.path: string  // Combined paths joined with space
 
 #### 1. Compound SVG Support
 **Current:** `Icon.path: string` (single combined path)
-**Target:** `Icon.elements: SVGElement[]` or `Icon.svg: string` (full SVG)
-**Benefit:** Preserve original structure, enable round-tripping
+**Target:** `Icon.svg: string` (full SVG) or `Icon.elements: SVGElement[]`
+**Benefit:** Preserve original structure, enable round-tripping, better Kitbash source material
+**Complexity:** Medium - requires storage migration, rendering updates
 
 #### 2. Persistent Component Index
 **Current:** Components re-indexed during every enrichment
 **Target:** Store `Icon.components` in IndexedDB with icon data
 **Benefit:** Instant Kitbash planning, no re-enrichment
+**Complexity:** Low - just persist the enrichment result
 
 #### 3. Vectorization Constants to Project Schema
 **Current:** Hardcoded in `ai-icon-service.ts` (V10 physics)
 **Target:** `Project.vectorizationProfile` or `Library.vectorizationProfile`
 **Benefit:** Per-library optimization tuning
+**Complexity:** Low - schema change + UI for editing
 
 ### Medium-Term
 
@@ -359,16 +441,19 @@ Icon.path: string  // Combined paths joined with space
 **Current:** Only works with Imagen (raster) pipeline
 **Target:** Vision-based scoring of native SVG output
 **Benefit:** Quality gate for all generation methods
+**Complexity:** Medium - need to render SVG to image for vision API
 
 #### 5. Kitbash Performance
 **Current:** 30-40s planning time
 **Target:** Sub-10s via caching and parallelization
 **Approach:** Cache LLM responses, parallelize source identification
+**Complexity:** Medium - requires careful caching strategy
 
 #### 6. Complete Enrichment Coverage
 **Current:** ~62% of icons enriched
 **Target:** 100%
 **Benefit:** Trait-aware selection works best with full enrichment
+**Complexity:** Low - just run enrichment on remaining icons
 
 ---
 
@@ -431,6 +516,15 @@ interface Library {
   name: string;
   styleManifest?: string;          // The "Geometric Autopsy"
 }
+
+// Iron Dome Processing
+interface ProcessResult {
+  svg: string;
+  modified: boolean;
+  compliance: ComplianceResult | null;
+  warnings: string[];
+  metrics: { originalSize, processedSize, processingTimeMs };
+}
 ```
 
 ---
@@ -447,6 +541,7 @@ npx tsx scripts/spike-*.ts    # Feature experiments
 
 # Debugging
 # Server logs tagged: [API], [Kitbash], [IronDome], [HybridGenerator]
+# Path repair logs: [path-repair]
 ```
 
 ---
@@ -456,24 +551,70 @@ npx tsx scripts/spike-*.ts    # Feature experiments
 When starting a new context window, use this prompt:
 
 ```
-I'm continuing work on Symbol Garden 2.0, a TypeScript/Next.js 16 application.
+I'm continuing work on Symbol Garden 2.0, a TypeScript/Next.js application.
 Read devbridge-context.md for full architecture details.
 
 Current state:
-- Sprint 06 complete: Iron Dome, Semantic Bridge, Kitbash Refinery all operational
+- Sprint 06 complete + additional fixes: Iron Dome now has 6 stages including PATH SYNTAX REPAIR
 - Generation pipelines (Sprout + Kitbash) both functional
+- Iconify import working with streaming delivery
 - Key constraint: Icons stored as single path string (Icon.path)
 
 The codebase follows a Pipeline Pattern:
-  Ingestion → Autopsy (Style DNA) → Enrichment → Generation → Iron Dome → Storage
+  Ingestion → Autopsy (Style DNA) → Enrichment → Generation → Iron Dome (6 stages) → Storage
 
 Key files:
 - hybrid-generator.ts: Sprout SVG generation
 - kitbash-engine.ts: Component assembly
-- svg-processor.ts: Iron Dome (unified SVG gateway)
+- svg-processor.ts: Iron Dome (6-stage SVG gateway)
+- svg-validator.ts: Path syntax validation + repair
 - svg-path-utils.ts: Path extraction/normalization
 
+Iron Dome 6 Stages:
+1. SANITIZE - Remove malicious content
+2. PATH SYNTAX REPAIR - Fix LLM path errors (generate mode)
+3. NORMALIZE - style="" to native attributes
+4. STYLE ENFORCEMENT - Apply Style DNA (generate mode)
+5. OPTIMIZATION - SVGO
+6. VALIDATION - Bounds check
+
 What would you like me to work on?
+```
+
+---
+
+## 13. KNOWN CRITICAL PATTERNS
+
+### Defense in Depth for SVG Quality
+
+```
+LLM Output → Path Syntax Repair → Style Enforcement → SVGO → Validation → Storage
+   ↓              ↓                    ↓               ↓         ↓
+ May be        Fixes M6 6 12 12    Fixes stroke-   Optimizes  Fixes OOB
+ malformed     → M6 6 L12 12       linecap/join    paths      coords
+```
+
+### Single Path Storage Workaround
+
+When saving icons with multiple elements:
+```typescript
+// Client code (AIIconGeneratorModal)
+const { pathData, viewBox, fillRule } = extractCombinedPathData(svg);
+// pathData = "M... M... M..." (all paths joined with space)
+
+// Rendering (IconCard)
+<path d={icon.path} /> // Renders all sub-paths
+```
+
+### Semantic Bridge for Kitbash
+
+When looking up components:
+```typescript
+// 1. FIRST check source:iconName (exact match)
+componentIndex.get(`source:${iconName}`)
+
+// 2. THEN fall back to semantic tags
+componentIndex.get(semanticTag)
 ```
 
 ---
