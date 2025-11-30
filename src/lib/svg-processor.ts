@@ -18,7 +18,7 @@ import {
   ComplianceResult,
   FEATHER_RULES,
 } from './style-enforcer';
-import { validateSvg } from './svg-validator';
+import { validateSvg, validateAndRepairPaths } from './svg-validator';
 
 /**
  * Processing Mode:
@@ -139,13 +139,26 @@ export class SVGProcessor {
     processedSvg = this.sanitize(processedSvg);
 
     // =========================================================================
-    // STAGE 2: NORMALIZATION
+    // STAGE 2: PATH SYNTAX REPAIR (generate mode only)
+    // Fix common LLM path errors like "M6 6 12 12" -> "M6 6 L12 12"
+    // Run BEFORE SVGO since malformed paths may cause SVGO to fail
+    // =========================================================================
+    if (mode === 'generate') {
+      const pathRepair = validateAndRepairPaths(processedSvg, true);
+      if (pathRepair.fixedSvg) {
+        processedSvg = pathRepair.fixedSvg;
+        warnings.push(...pathRepair.errors.map(e => `[path-repair] ${e.message}`));
+      }
+    }
+
+    // =========================================================================
+    // STAGE 3: NORMALIZATION
     // Convert style="" attributes to native SVG attributes
     // =========================================================================
     processedSvg = this.normalizeStyleAttributes(processedSvg);
 
     // =========================================================================
-    // STAGE 3: STYLE ENFORCEMENT (generate mode only)
+    // STAGE 4: STYLE ENFORCEMENT (generate mode only)
     // Apply style DNA rules BEFORE optimization so SVGO knows the context
     // =========================================================================
     if (mode === 'generate' && this.hasEnforcementRules(activeProfile)) {
@@ -158,7 +171,7 @@ export class SVGProcessor {
     }
 
     // =========================================================================
-    // STAGE 4: OPTIMIZATION
+    // STAGE 5: OPTIMIZATION
     // Run SVGO with mode-aware configuration
     // =========================================================================
     const svgoConfig = this.buildSvgoConfig(activeProfile, mode);
@@ -173,7 +186,7 @@ export class SVGProcessor {
     }
 
     // =========================================================================
-    // STAGE 5: VALIDATION
+    // STAGE 6: VALIDATION
     // Final bounds check and cleanup
     // =========================================================================
     const validation = validateSvg(processedSvg, {

@@ -161,6 +161,14 @@ CRITICAL RULES:
 3. EVERY child element MUST include fill="none" explicitly (SVG attributes don't inherit!)
 4. For small dots/points, use a short line segment (e.g., M 12 20 L 12.01 20) NOT a filled circle
 5. Never use solid fills - this is a STROKE-ONLY icon system
+
+PATH SYNTAX - CRITICAL:
+- ALWAYS use explicit command letters: M (moveto), L (lineto), H (horizontal), V (vertical), etc.
+- WRONG: "M6 6 12 12" (missing L command)
+- CORRECT: "M6 6 L12 12" (explicit L command for line-to)
+- Every coordinate pair after M MUST have a command letter (L, H, V, C, S, Q, T, A)
+- Use spaces between coordinates: "M 6 6 L 12 12" not "M6,6L12,12"
+
 ${pathInstructions}
 `;
 }
