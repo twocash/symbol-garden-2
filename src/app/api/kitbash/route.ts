@@ -41,11 +41,20 @@ import { rulesFromStyleDNA, rulesFromManifest, FEATHER_RULES } from '@/lib/style
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { mode, concept, icons, layoutIndex = 0, plan: providedPlan, styleManifest } = body;
+    const { mode, concept, icons, layoutIndex = 0, plan: providedPlan, styleManifest, apiKey: clientApiKey } = body;
 
     if (!concept || typeof concept !== 'string') {
       return NextResponse.json(
         { error: 'Missing required field: concept' },
+        { status: 400 }
+      );
+    }
+
+    // Resolve API key: user's key from System Settings takes priority, then env var
+    const apiKey = clientApiKey || process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'API key not configured', details: 'Please set your Google API key in System Settings' },
         { status: 400 }
       );
     }
@@ -88,11 +97,8 @@ export async function POST(req: NextRequest) {
     // Get list of icon names for LLM guidance
     const availableIconNames = (icons as Icon[]).map(i => i.name);
 
-    // Get API key from environment
-    const apiKey = process.env.GOOGLE_API_KEY;
-
     console.log(`[API] Kitbash: ${mode} mode for "${concept}" with ${componentIndex.size} indexed components`);
-    console.log(`[API] Kitbash: API key ${apiKey ? 'available' : 'NOT available'}`);
+    console.log(`[API] Kitbash: API key source: ${clientApiKey ? 'user (System Settings)' : 'environment variable'}`);
 
     if (mode === 'plan' || !mode) {
       // Planning mode

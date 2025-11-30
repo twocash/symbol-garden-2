@@ -82,11 +82,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Validate required fields
-    const { concept, description, libraryId = 'feather', icons: clientIcons, options = {}, styleManifest } = body;
+    const { concept, description, libraryId = 'feather', icons: clientIcons, options = {}, styleManifest, apiKey: clientApiKey } = body;
 
     if (!concept || typeof concept !== 'string') {
       return NextResponse.json(
         { error: 'Missing required field: concept' },
+        { status: 400 }
+      );
+    }
+
+    // Resolve API key: user's key from System Settings takes priority, then env var
+    const apiKey = clientApiKey || process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'API key not configured', details: 'Please set your Google API key in System Settings' },
         { status: 400 }
       );
     }
@@ -111,9 +120,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GOOGLE_API_KEY;
     console.log(`[API] Generating "${concept}" in style of ${libraryId} (${library.length} icons available)`);
-    console.log(`[API] API key ${apiKey ? 'available' : 'NOT available'}`);
+    console.log(`[API] API key source: ${clientApiKey ? 'user (System Settings)' : 'environment variable'}`);
 
     // Build generation config
     const config: GenerationConfig = {

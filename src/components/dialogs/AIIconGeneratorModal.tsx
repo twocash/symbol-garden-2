@@ -354,6 +354,13 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             return;
         }
 
+        // Get API key from localStorage (user's System Settings)
+        const apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey) {
+            toast.error("Please set your Google API key in System Settings");
+            return;
+        }
+
         // Get icons for the effective library
         const libraryIcons = globalIcons.filter(icon =>
             icon.library === effectiveLibrary && icon.path
@@ -382,6 +389,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                     concept: prompt.trim(),
                     icons: libraryIcons.slice(0, 50), // Send icons with components
                     styleManifest,
+                    apiKey, // Pass user's API key from System Settings
                 }),
             });
 
@@ -418,6 +426,13 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             return;
         }
 
+        // Get API key from localStorage (user's System Settings)
+        const apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey) {
+            toast.error("Please set your Google API key in System Settings");
+            return;
+        }
+
         const libraryIcons = globalIcons.filter(icon =>
             icon.library === effectiveLibrary && icon.path
         );
@@ -439,6 +454,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                     plan: kitbashPlan,
                     layoutIndex: selectedLayoutIndex,
                     styleManifest,
+                    apiKey, // Pass user's API key from System Settings
                 }),
             });
 
@@ -512,6 +528,13 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             return;
         }
 
+        // Get API key from localStorage (user's System Settings)
+        const apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey) {
+            toast.error("Please set your Google API key in System Settings");
+            return;
+        }
+
         // Get icons for the effective library
         const libraryIcons = globalIcons.filter(icon =>
             icon.library === effectiveLibrary && icon.path
@@ -565,6 +588,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                     libraryId: effectiveLibrary,
                     icons: libraryIcons.slice(0, 100), // Send up to 100 icons for reference
                     styleManifest, // Pass Style DNA if available
+                    apiKey, // Pass user's API key from System Settings
                     options: {
                         variants: variantCount,
                         fewShotCount,

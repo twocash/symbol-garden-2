@@ -204,21 +204,7 @@ async function generateDynamicDecomposition(
 ): Promise<Decomposition> {
   const resolvedApiKey = apiKey || process.env.GOOGLE_API_KEY;
   if (!resolvedApiKey) {
-    console.warn('[Decomposition] No API key available, returning minimal decomposition');
-    // Return a minimal decomposition as fallback instead of throwing
-    return {
-      concept: normalizeConcept(concept),
-      components: [
-        {
-          name: 'main_shape',
-          description: `Primary shape for ${concept}`,
-          type: 'path',
-        },
-      ],
-      connectionRules: [],
-      patterns: [],
-      source: 'dynamic',
-    };
+    throw new Error('No API key available for dynamic decomposition. Please set your Google API key in System Settings.');
   }
 
   const genAI = new GoogleGenerativeAI(resolvedApiKey);
