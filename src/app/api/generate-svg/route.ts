@@ -134,6 +134,7 @@ export async function POST(req: NextRequest) {
       includePatternLibrary: options.includePatternLibrary !== false,
       temperature: Math.min(1, Math.max(0, options.temperature || 0.2)),
       styleManifest: styleManifest || undefined,  // Pass Style DNA if provided
+      apiKey,  // Pass resolved API key to generator
     };
 
     if (styleManifest) {
