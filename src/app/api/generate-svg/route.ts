@@ -111,7 +111,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const apiKey = process.env.GOOGLE_API_KEY;
     console.log(`[API] Generating "${concept}" in style of ${libraryId} (${library.length} icons available)`);
+    console.log(`[API] API key ${apiKey ? 'available' : 'NOT available'}`);
 
     // Build generation config
     const config: GenerationConfig = {

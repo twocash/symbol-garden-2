@@ -88,11 +88,15 @@ export async function POST(req: NextRequest) {
     // Get list of icon names for LLM guidance
     const availableIconNames = (icons as Icon[]).map(i => i.name);
 
+    // Get API key from environment
+    const apiKey = process.env.GOOGLE_API_KEY;
+
     console.log(`[API] Kitbash: ${mode} mode for "${concept}" with ${componentIndex.size} indexed components`);
+    console.log(`[API] Kitbash: API key ${apiKey ? 'available' : 'NOT available'}`);
 
     if (mode === 'plan' || !mode) {
       // Planning mode
-      const plan = await planKitbash(concept, componentIndex, undefined, availableIconNames);
+      const plan = await planKitbash(concept, componentIndex, apiKey, availableIconNames);
       const formatted = formatKitbashPlan(plan);
 
       return NextResponse.json({
@@ -101,7 +105,7 @@ export async function POST(req: NextRequest) {
       });
     } else if (mode === 'execute') {
       // Execution mode
-      const plan = providedPlan || await planKitbash(concept, componentIndex, undefined, availableIconNames);
+      const plan = providedPlan || await planKitbash(concept, componentIndex, apiKey, availableIconNames);
 
       // Get enforcement rules
       let rules = FEATHER_RULES;
