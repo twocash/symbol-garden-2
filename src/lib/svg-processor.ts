@@ -439,3 +439,7 @@ export function formatProcessResult(result: ProcessResult): string {
 
   return lines.join('\n');
 }
+
+// Re-export from svg-path-utils for backwards compatibility
+// The actual implementation is in svg-path-utils.ts which is client-safe
+export { extractCombinedPathData } from './svg-path-utils';

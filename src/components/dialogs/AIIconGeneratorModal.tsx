@@ -9,6 +9,7 @@ import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
 import { getRelatedSearchTerms } from "@/lib/iconify-service";
+import { extractCombinedPathData } from "@/lib/svg-path-utils";
 import { toast } from "sonner";
 import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle, Puzzle, Wand2, ChevronRight, RefreshCw } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -496,25 +497,23 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
         setIsSaving(true);
         try {
-            // Extract viewBox and path from SVG
-            const viewBoxMatch = kitbashSvg.match(/viewBox="([^"]+)"/);
-            const pathMatches = [...kitbashSvg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
+            // Use extractCombinedPathData to convert ALL SVG elements to path data
+            const { pathData, viewBox, fillRule } = extractCombinedPathData(kitbashSvg);
 
-            if (pathMatches.length === 0) {
+            if (!pathData) {
                 throw new Error("Could not extract path from kitbash SVG");
             }
-
-            const combinedPath = pathMatches.map(match => match[1]).join(' ');
 
             const newIcon = {
                 id: crypto.randomUUID(),
                 name: prompt || "Kitbashed Icon",
                 library: "custom",
-                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
-                path: combinedPath,
+                viewBox,
+                path: pathData,
                 tags: ["ai-generated", "kitbash", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
+                fillRule,
             };
 
             addIconToProject(newIcon, true);
@@ -595,25 +594,23 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
         setIsSaving(true);
         try {
-            // Extract viewBox and path from SVG
-            const viewBoxMatch = svgToSave.match(/viewBox="([^"]+)"/);
-            const pathMatches = [...svgToSave.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
+            // Use extractCombinedPathData to convert ALL SVG elements to path data
+            const { pathData, viewBox, fillRule } = extractCombinedPathData(svgToSave);
 
-            if (pathMatches.length === 0) {
+            if (!pathData) {
                 throw new Error("Could not extract path from refined SVG");
             }
-
-            const combinedPath = pathMatches.map(match => match[1]).join(' ');
 
             const newIcon = {
                 id: crypto.randomUUID(),
                 name: prompt || "Kitbashed Icon",
                 library: "custom",
-                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
-                path: combinedPath,
+                viewBox,
+                path: pathData,
                 tags: ["ai-generated", "kitbash", "refined", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
+                fillRule,
             };
 
             addIconToProject(newIcon, true);
@@ -760,34 +757,26 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         try {
             const svg = generatedSvgs[selectedSvgIndex];
 
-            // Extract viewBox from the SVG
-            const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
-            const fillRuleMatch = svg.match(/fill-rule="([^"]+)"/);
+            // Use extractCombinedPathData to convert ALL SVG elements to path data
+            // This handles paths, circles, rects, lines, polylines, polygons, ellipses
+            const { pathData, viewBox, fillRule } = extractCombinedPathData(svg);
 
-            // Extract ALL path elements and combine their d attributes
-            // Generated SVGs often have multiple <path> elements for complex icons
-            const pathMatches = [...svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
-
-            if (pathMatches.length === 0) {
+            if (!pathData) {
                 throw new Error("Could not extract vector path from generated SVG");
             }
 
-            // Combine all path d attributes into a single path string
-            // Each path becomes a separate move command in the combined path
-            const combinedPath = pathMatches.map(match => match[1]).join(' ');
-
-            console.log(`[Modal] Saving icon with ${pathMatches.length} path(s), combined length: ${combinedPath.length}`);
+            console.log(`[Modal] Saving icon with combined path length: ${pathData.length}`);
 
             const newIcon = {
                 id: crypto.randomUUID(),
                 name: prompt || "Generated Icon",
                 library: "custom",
-                viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
-                path: combinedPath,
+                viewBox,
+                path: pathData,
                 tags: ["ai-generated", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
-                fillRule: fillRuleMatch ? fillRuleMatch[1] : undefined,
+                fillRule,
             };
 
             addIconToProject(newIcon, true); // Auto-favorite
