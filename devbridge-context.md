@@ -1,9 +1,9 @@
 # Symbol Garden 2.0 - AI Agent Context Document
 
-> **Last Updated:** 2025-11-29
-> **Version:** 0.4.1 (Sprout Engine Complete)
-> **Branch:** feature/svg-native-generation
-> **System Status:** ✅ STABLE - All F1-F5 features operational
+> **Last Updated:** 2025-11-30
+> **Version:** 0.5.0 (Sprint 06: Iron Dome + Semantic Bridge + Kitbash Refinery)
+> **Branch:** busy-cerf
+> **System Status:** ✅ STABLE - All F1-F5 features + Iron Dome operational
 
 ---
 
@@ -207,9 +207,11 @@ data/
 |---------|--------------|---------|
 | **Generation UI** | `AIIconGeneratorModal.tsx` | User-facing generation interface |
 | **SVG Generation** | `hybrid-generator.ts` | Orchestrates prompt → SVG pipeline |
+| **SVG Processing** | `svg-processor.ts` | 🆕 Iron Dome - unified SVG gateway |
 | **Component Assembly** | `kitbash-engine.ts` | Plan and execute component assembly |
 | **Exemplar Selection** | `similar-icon-finder.ts` | Find best reference icons |
 | **Style Compliance** | `style-enforcer.ts` | Enforce stroke-width, linecap, etc. |
+| **Semantic Vocabulary** | `pattern-library.ts` | 🆕 Centralized icon/component names |
 | **Enrichment** | `/api/enrich/route.ts` | AI metadata + component indexing |
 | **Iconify** | `iconify-service.ts` | 275k+ icon search and import |
 | **Workspace State** | `project-context.tsx` | Favorites, custom icons, projects |
@@ -237,6 +239,16 @@ data/
 | F3: Component Indexer | ✅ Complete | Semantic tagging of icon parts |
 | F4: Kitbash Engine | ✅ Complete | Assembly from existing components |
 | F5: Skeleton-First UI | ✅ Complete | Plan → Layout → Execute workflow |
+
+### Sprint 06: Stability & Polish
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Iron Dome** | ✅ Complete | Unified SVG processing with dual-mode (`ingest`/`generate`) |
+| **Semantic Bridge** | ✅ Complete | Source icon indexing + centralized vocabulary |
+| **Kitbash Refinery** | ✅ Backend | Transform draft assemblies into cohesive icons |
+| **Refinery UI** | 🔄 Pending | "Refine" button in AIIconGeneratorModal |
+| **UI Polish** | 🔄 Pending | Fix missing heart/menu indicators |
 
 ### Generation Pipelines
 
@@ -358,6 +370,35 @@ Input: "secure user" concept
 
 ## 5. RECENT CHANGES & RATIONALE
 
+### Session Changes (2025-11-30) - Sprint 06
+
+#### Iron Dome: Unified SVG Processing Pipeline
+**Files:** `svg-processor.ts` (NEW), `hybrid-generator.ts`, `kitbash-engine.ts`
+**What:** Created centralized SVG processing gateway with dual-mode operation:
+- `'ingest'` mode: Permissive - accepts external icons as-is, allows path merging
+- `'generate'` mode: Strict - disables `mergePaths` and `convertShapeToPath` to preserve editability
+**Why:** Previously `svg-optimizer.ts`, `style-enforcer.ts`, and `svg-validator.ts` were called ad-hoc, leading to inconsistent processing and "destructive normalization" bugs.
+**Impact:** All SVG generation now flows through one gateway; style enforcement happens BEFORE optimization.
+
+#### Semantic Bridge: Indexer ↔ Kitbash Alignment
+**Files:** `component-indexer.ts`, `pattern-library.ts`, `kitbash-engine.ts`
+**What:**
+1. Added `source:iconName` indexing - all components from "user.svg" retrievable via `source:user`
+2. Centralized `SEMANTIC_ONTOLOGY` and `COMMON_ICON_NAMES` in pattern-library.ts
+3. `findComponentMatches()` now checks source key FIRST before semantic search
+**Why:** Kitbash planner asks for "user" but Indexer tagged parts as "person-torso" - vocabulary mismatch caused 0% coverage.
+**Before:** 0-10% Kitbash coverage for compound concepts
+**After:** 50%+ coverage when source icons exist in library
+
+#### Kitbash Refinery: Transform Assemblies into Cohesive Icons
+**Files:** `kitbash-engine.ts`, `hybrid-generator.ts`
+**What:**
+1. Added `KitbashRenderMode` type (`'draft'` | `'final'`)
+2. `executeKitbash()` accepts `renderMode` parameter
+3. Implemented `refineIcon()` function for "code refactoring" approach
+**Why:** Kitbash assemblies have overlapping paths and disjointed corners - they look like "Frankenstein" icons.
+**Strategy:** Frame refinement as SVG code refactoring, not image generation. Low temperature (0.1) for precise topology repair.
+
 ### Session Changes (2025-11-29)
 
 #### Kitbash Source Icon Identification
@@ -395,14 +436,14 @@ Input: "secure user" concept
 
 ## 6. TECHNICAL DEBT & KNOWN ISSUES
 
-### Critical Bugs (v0.4.1)
+### Critical Bugs (v0.5.0)
 
 | Bug | Location | Impact | Status |
 |-----|----------|--------|--------|
-| **Kitbash needs Jury refinement** | `kitbash-engine.ts` | Assembled icons are one-shots without quality gate | 🔴 Open |
+| **Kitbash needs Jury refinement** | `kitbash-engine.ts` | Assembled icons are one-shots without quality gate | ✅ Addressed - Refinery backend complete |
 | **UI indicators missing** | Icon tiles, workspace header | Heart (favorites) and "..." menu icons not rendering | 🔴 Open |
-| **Fragile SVG rendering** | Multiple locations | Ad-hoc "normalization" fixes break styling | 🔴 Open |
-| **Component mismatch** | Ingestion vs Kitbash | Assembly tagging doesn't match extraction (2/10 quality) | 🔴 Open |
+| **Fragile SVG rendering** | Multiple locations | Ad-hoc "normalization" fixes break styling | ✅ Addressed - Iron Dome |
+| **Component mismatch** | Ingestion vs Kitbash | Assembly tagging doesn't match extraction | ✅ Addressed - Semantic Bridge |
 
 ### High Priority
 
