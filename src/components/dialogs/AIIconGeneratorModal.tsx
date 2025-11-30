@@ -617,8 +617,17 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setMetadata(data.metadata);
 
             // F2: Capture compliance data
+            // Handle both single compliance object and array (variants mode)
             if (data.compliance) {
-                setCompliance(data.compliance);
+                // If it's an array (variants mode), use the first one; if single, use as-is
+                const complianceData = Array.isArray(data.compliance)
+                    ? data.compliance[0]
+                    : data.compliance;
+                // Ensure violations array exists (variants mode only has violationCount)
+                if (complianceData && !complianceData.violations) {
+                    complianceData.violations = [];
+                }
+                setCompliance(complianceData);
             }
 
             if (svgs.length > 0) {
@@ -1277,7 +1286,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                 </div>
 
                                 {/* Compliance details */}
-                                {compliance && compliance.violations.length > 0 && (
+                                {compliance && compliance.violations && compliance.violations.length > 0 && (
                                     <div className="mt-3 pt-2 border-t space-y-1">
                                         {compliance.violations.slice(0, 3).map((v, i) => (
                                             <div key={i} className="flex items-center gap-2 text-[10px]">
