@@ -38,7 +38,8 @@
       "Bash(PLAN-smart-sample-selection.md)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(wmic process where \"processid=40568\" get processid,commandline)"
     ],
     "deny": [],
     "ask": []

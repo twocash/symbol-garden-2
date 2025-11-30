@@ -68,6 +68,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log(`[API] Kitbash: ${mode} mode for "${concept}"`);
+    console.log(`[API] Kitbash: API key source: ${clientApiKey ? 'user (System Settings)' : 'environment variable'}`);
+
+    // Handle refine mode first - it doesn't need icons
+    if (mode === 'refine') {
+      const { draftSvg } = body;
+
+      if (!draftSvg || typeof draftSvg !== 'string') {
+        return NextResponse.json(
+          { error: 'Missing required field: draftSvg for refine mode' },
+          { status: 400 }
+        );
+      }
+
+      console.log(`[API] Kitbash Refinery: Refining "${concept}" (${draftSvg.length} chars)`);
+
+      const result = await refineIcon(draftSvg, {
+        concept,
+        styleManifest,
+        apiKey,
+        temperature: 0.1, // Low temperature for precise topology repair
+      });
+
+      console.log(`[API] Kitbash Refinery: ${result.success ? 'SUCCESS' : 'FAILED'} (${result.processingTimeMs.toFixed(0)}ms)`);
+
+      return NextResponse.json({
+        svg: result.svg,
+        success: result.success,
+        changes: result.changes,
+        processingTimeMs: result.processingTimeMs,
+      });
+    }
+
+    // For plan and execute modes, icons are required
     if (!icons || !Array.isArray(icons) || icons.length === 0) {
       return NextResponse.json(
         { error: 'No icons provided' },
@@ -106,8 +140,7 @@ export async function POST(req: NextRequest) {
     // Get list of icon names for LLM guidance
     const availableIconNames = (icons as Icon[]).map(i => i.name);
 
-    console.log(`[API] Kitbash: ${mode} mode for "${concept}" with ${componentIndex.size} indexed components`);
-    console.log(`[API] Kitbash: API key source: ${clientApiKey ? 'user (System Settings)' : 'environment variable'}`);
+    console.log(`[API] Kitbash: ${componentIndex.size} indexed components from ${icons.length} icons`);
 
     if (mode === 'plan' || !mode) {
       // Planning mode
@@ -141,34 +174,6 @@ export async function POST(req: NextRequest) {
         layout: result.layout,
         usedGeneration: result.usedGeneration,
         generatedParts: result.generatedParts,
-      });
-    } else if (mode === 'refine') {
-      // Refinery mode (Sprint 06) - Polish draft assembly into cohesive icon
-      const { draftSvg } = body;
-
-      if (!draftSvg || typeof draftSvg !== 'string') {
-        return NextResponse.json(
-          { error: 'Missing required field: draftSvg for refine mode' },
-          { status: 400 }
-        );
-      }
-
-      console.log(`[API] Kitbash Refinery: Refining "${concept}" (${draftSvg.length} chars)`);
-
-      const result = await refineIcon(draftSvg, {
-        concept,
-        styleManifest,
-        apiKey,
-        temperature: 0.1, // Low temperature for precise topology repair
-      });
-
-      console.log(`[API] Kitbash Refinery: ${result.success ? 'SUCCESS' : 'FAILED'} (${result.processingTimeMs.toFixed(0)}ms)`);
-
-      return NextResponse.json({
-        svg: result.svg,
-        success: result.success,
-        changes: result.changes,
-        processingTimeMs: result.processingTimeMs,
       });
     } else {
       return NextResponse.json(
