@@ -395,10 +395,22 @@ Input: "secure user" concept
 
 ## 6. TECHNICAL DEBT & KNOWN ISSUES
 
+### Critical Bugs (v0.4.1)
+
+| Bug | Location | Impact | Status |
+|-----|----------|--------|--------|
+| **Kitbash needs Jury refinement** | `kitbash-engine.ts` | Assembled icons are one-shots without quality gate | 🔴 Open |
+| **UI indicators missing** | Icon tiles, workspace header | Heart (favorites) and "..." menu icons not rendering | 🔴 Open |
+| **Fragile SVG rendering** | Multiple locations | Ad-hoc "normalization" fixes break styling | 🔴 Open |
+| **Component mismatch** | Ingestion vs Kitbash | Assembly tagging doesn't match extraction (2/10 quality) | 🔴 Open |
+
 ### High Priority
 
 | Issue | Location | Impact | Effort |
 |-------|----------|--------|--------|
+| **Kitbash→Jury integration** | `kitbash-engine.ts`, `style-jury-service.ts` | Assembled icons should go through refinement pool | High |
+| **System-wide SVG handler** | Needs new service | Prevent piecemeal SVG fixes breaking other flows | High |
+| **Component semantic alignment** | `component-indexer.ts`, `kitbash-engine.ts` | Parts extracted during ingestion don't map to assembly | High |
 | **Kitbash planning slow** | `kitbash-engine.ts` | 30-40s for planning step | Medium |
 | **Component indexing not persisted** | Enrichment happens each time | Re-indexes on every enrichment | Low |
 | **Decomposition cache not persisted** | `decomposition-service.ts` | Dynamic decompositions lost on restart | Low |
@@ -418,6 +430,37 @@ Input: "secure user" concept
 2. **No undo**: Generated icons save directly; no preview-before-save for Generate mode
 3. **Enrichment required for Kitbash**: Components only indexed after enrichment is run
 4. **No transforms support**: SVG `<g>` transforms not fully supported
+
+### Architecture Debt: SVG Handling
+
+**Problem:** SVG rendering is handled inconsistently across the app:
+- `renderSvgPreview()` in AIIconGeneratorModal
+- `dangerouslySetInnerHTML` with inline transforms
+- Path extraction/reconstruction in various places
+- Each "quick fix" risks breaking other flows
+
+**Impact:** Recent example - "normalize to stroke" fix broke filled SVGs (rocket only showed nose cone)
+
+**Solution Needed:** Create `SvgRenderer` service with:
+- Single source of truth for SVG→display
+- Render style detection (stroke vs fill vs mixed)
+- Theme-aware color handling
+- Used by ALL components that display SVGs
+
+### Architecture Debt: Component Semantic Model
+
+**Problem:** Kitbash assembly uses a different component model than ingestion:
+- **Ingestion** extracts: shapes, positions, basic geometry
+- **Kitbash** expects: semantic parts ("wing", "body", "tail")
+- **Mismatch:** No mapping between extracted shapes and semantic concepts
+
+**Current Quality:** 2/10 - Assembly rarely finds matching components
+
+**Solution Needed:** Unified component model:
+1. During ingestion: Extract shapes AND infer semantic labels
+2. Build shape similarity index (not just name matching)
+3. Kitbash queries by semantic role + shape similarity
+4. Component library with canonical examples per semantic type
 
 ---
 
