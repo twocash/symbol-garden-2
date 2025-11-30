@@ -79,10 +79,30 @@ function polygonToPath(points: string): string {
 }
 
 /**
+ * Normalize a path string to ensure it starts with an absolute 'M' command.
+ *
+ * CRITICAL: When multiple paths are concatenated into a single string,
+ * relative 'm' commands become relative to the END of the previous path,
+ * breaking the geometry. This function ensures each path segment starts
+ * with an absolute move command.
+ */
+function normalizePathStart(d: string): string {
+  const trimmed = d.trim();
+  if (trimmed.startsWith('m')) {
+    // Convert relative 'm' to absolute 'M'
+    return 'M' + trimmed.slice(1);
+  }
+  return trimmed;
+}
+
+/**
  * Extract all SVG elements and convert to combined path data
  * This is the key function for saving generated SVGs to the Icon schema
  *
  * Handles: path, circle, rect, line, polyline, polygon, ellipse
+ *
+ * IMPORTANT: All extracted paths are normalized to start with absolute 'M'
+ * to prevent geometry corruption when paths are concatenated.
  */
 export function extractCombinedPathData(svg: string): {
   pathData: string;
@@ -99,10 +119,10 @@ export function extractCombinedPathData(svg: string): {
   const fillRuleMatch = svg.match(/fill-rule="([^"]+)"/);
   const fillRule = fillRuleMatch ? fillRuleMatch[1] : undefined;
 
-  // Extract path elements
+  // Extract path elements and normalize to absolute 'M' start
   const pathMatches = svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g);
   for (const match of pathMatches) {
-    paths.push(match[1]);
+    paths.push(normalizePathStart(match[1]));
   }
 
   // Extract and convert circle elements
