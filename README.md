@@ -1,87 +1,88 @@
 # Symbol Garden 2.0
 
-A modern, AI-enhanced icon library manager with workspace organization, intelligent search, and context-first design.
+A modern, AI-enhanced icon library manager with native SVG generation, component-based assembly, and style-aware icon synthesis.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Version](https://img.shields.io/badge/version-0.3.1-green)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
+![Version](https://img.shields.io/badge/version-0.4.1-green)
 
 ## Overview
 
-Symbol Garden 2.0 is a Next.js application for managing and exploring icon libraries across multiple workspaces. Built with a context-first architecture, it features AI-powered semantic search, GitHub repository ingestion, and workspace-specific branding and export settings.
+Symbol Garden 2.0 is a Next.js application for managing icon libraries with AI-powered generation capabilities. Unlike generic AI art generators, Symbol Garden creates icons that **match your existing library's style** - same stroke weights, same linecaps, same visual DNA.
+
+### Core Value Proposition
+
+> "Generate icons that look like they belong in your design system, not generic AI art."
 
 ## Key Features
 
-### 🤖 **AI-Powered Enrichment**
-Enhance your icon library with Google Gemini AI:
-- **Semantic Descriptions**: Auto-generate business-context descriptions for icons
-- **Smart Tagging**: Automatically add relevant tags and keywords
-- **Batch Processing**: Enrich entire libraries or individual icons on-demand
-- **Persistent Storage**: AI-generated metadata saved locally for instant search
+### 🌱 **Sprout Engine: Native SVG Generation**
 
-### 🌱 **Sprout: AI Icon Generator**
-Generate custom SVG icons from text prompts using Google's Imagen 3:
-- **Text-to-Icon**: Describe what you need, get 4 unique variants
-- **Style Matching**: Icons generated to match your library's aesthetic
-- **Vector Pipeline**: Automatic PNG-to-SVG conversion with `potrace`
-- **Smart Management**: "Remix" and "Delete" generated icons
-- **Project Integration**: Generated icons are automatically saved to your project
+Generate production-ready SVG icons that match your library's style:
+
+- **Native SVG Output**: Direct SVG code generation (no PNG-to-vector conversion)
+- **Style DNA Analysis**: Automatically extracts stroke-width, linecap, linejoin, viewBox from your library
+- **Trait-Aware Selection**: Picks the best reference icons based on semantic similarity
+- **Reference Oracle**: Queries Iconify (275k+ icons) for structural consensus
+- **Style Enforcement**: Post-generation validation ensures 100% style compliance
+
+### 🧩 **Kitbash: Component Assembly**
+
+Assemble new icons from existing library components:
+
+- **Semantic Component Index**: Icons are analyzed and tagged by parts (body, head, modifier, container)
+- **Coverage Analysis**: Know exactly what percentage of your concept exists in the library
+- **Layout Options**: Choose from multiple composition arrangements
+- **Hybrid Generation**: AI fills in missing parts while preserving found components
+- **Strategies**: GRAFT (100% assembly), HYBRID (partial + AI), ADAPT (modify existing)
+
+### 🔍 **Iconify Integration**
+
+Access 275,000+ open-source icons:
+
+- **One-Click Import**: Import entire collections (Lucide, Tabler, Phosphor, Heroicons)
+- **Borrow & Adapt**: Import individual icons and adapt to your library's style
+- **Reference Oracle**: Cross-library structural consensus for better generation
+- **Smart Suggestions**: Related search terms and existing library matches
+
+### 🤖 **AI-Powered Enrichment**
+
+Enhance your icon library with Google Gemini AI:
+
+- **Semantic Categories**: object, action, ui, abstract
+- **Geometric Traits**: symmetry, containment, intersection, compound, etc.
+- **Complexity Scoring**: 1-5 scale for generation guidance
+- **Component Indexing**: Automatic part identification for Kitbash
 
 ### 🏢 **Multi-Workspace Management**
+
 Organize icons across separate workspaces:
+
 - **Independent Favorites**: Each workspace maintains its own favorited icons
 - **Brand Customization**: Set workspace-specific brand colors and export formats
 - **Quick Switching**: Seamless context switching between projects
-- **Workspace Actions**: Rename, duplicate, and soft-delete workspaces
 
-### 🔍 **Advanced Fuzzy Search**
-Fast client-side search powered by Fuse.js:
-- Search across icon names, tags, AI descriptions, and categories
-- Filter by library or workspace
-- Toggle between "All Icons" and "Favorites" views
-- Real-time results as you type
+### 🎨 **Export & Customization**
 
-### 📦 **GitHub Ingestion**
-Import icon libraries directly from GitHub repositories:
-- **Auto-Detection**: Smart SVG parsing with fill vs stroke detection
-- **Popular Libraries**: Bootstrap Icons, Lucide, Phosphor, Heroicons, and more
-- **Custom Repos**: Support for any SVG-based icon library on GitHub
-- **Conflict Handling**: Full path IDs prevent duplicates
+Flexible export options:
 
-### 🎨 **Workspace Branding**
-Context-aware customization per workspace:
-- **Primary Brand Color**: Visual color picker with hex input
-- **Secondary Color Palette**: Save up to 8 brand colors for quick access
-- **Quick-Select Swatches**: One-click color application in Icon Details
-- **Export Formats**: Default to SVG, PNG, or JSX per workspace
-- **Repository Links**: Connect workspaces to source repos
-- **Live Preview**: Icons render with workspace brand colors
-
-### 🎛️ **Powerful Export Tools**
-Flexible export options with instant preview:
-- **Size Control**: 16px to 1024px with smooth slider
+- **Multiple Formats**: SVG, PNG, JSX
+- **Size Control**: 16px to 1024px
 - **Color Override**: Per-icon color customization
-- **Multiple Formats**: Copy/Download as SVG or PNG
-- **Clipboard Integration**: One-click copy to clipboard
-
-### 🖥️ **Modern UI/UX**
-Clean, polished interface with:
-- **Unified Right Drawer**: Context-sensitive panel for icon details or workspace settings
-- **3-Column Layout**: Sidebar | Main Content | Drawer
-- **Keyboard Shortcuts**: `Esc` to close drawer
-- **Dark Mode**: Premium Graphite/Neon Sprout color scheme
+- **Clipboard Integration**: One-click copy
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router) + TypeScript
-- **AI**: Google Gemini API (gemini-2.5-flash) + Vertex AI (Imagen 3)
-- **Vectorization**: Potrace + Sharp
-- **Styling**: Tailwind CSS 4 + shadcn/ui
-- **Search**: Fuse.js for fuzzy matching
-- **State**: React Context API (UIContext, ProjectContext, SearchContext)
-- **Storage**: Browser localStorage (local-first, no backend)
-- **Icons**: Lucide React (UI components)
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Framework | Next.js 16 (App Router) | SSR, API routes, React 19 |
+| Language | TypeScript 5.9 | Type safety with Zod schemas |
+| Styling | Tailwind CSS 4 + shadcn/ui | Utility-first + Radix primitives |
+| AI - Analysis | Gemini 2.5 Flash | Enrichment, decomposition, planning |
+| AI - Generation | Gemini 2.5 Flash | Native SVG code generation |
+| Storage | IndexedDB | Offline-first browser storage |
+| Search | Fuse.js | Fuzzy client-side search |
 
 ## Getting Started
 
@@ -89,8 +90,7 @@ Clean, polished interface with:
 
 - Node.js 18+
 - npm or yarn
-- Google Gemini API key (optional, for AI enrichment)
-- Google Cloud Credentials (optional, for Sprout generation)
+- Google Gemini API key (required for generation features)
 
 ### Installation
 
@@ -110,150 +110,132 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Quick Start Guide
 
-1. **Import Icons**
-   - Navigate to the left sidebar
-   - Click the `+` button next to "Workspaces" to create a workspace
-   - Add a GitHub repository (e.g., `https://github.com/twbs/icons`)
-   - Icons will auto-ingest and appear in the grid
+1. **Import an Icon Library**
+   - Click Settings (gear icon) in the sidebar
+   - Go to "Library" tab
+   - Import from Iconify (recommended) or GitHub repo
 
-2. **Enable AI Features** (Optional)
-   - Open the workspace settings (kebab menu → "Workspace settings...")
-   - Scroll to "AI Enrichment" section
-   - Add your Gemini API key
+2. **Enrich Your Library**
+   - In Settings > System, add your Gemini API key
    - Click "Start Enrichment" to batch-process icons
+   - This enables trait-aware generation and Kitbash
 
-3. **Generate Icons with Sprout**
-   - Click the "Sprout" button in the sidebar
-   - Enter a prompt (e.g., "futuristic rocket ship")
-   - Select a variant and save it to your project
+3. **Generate Icons**
+   - Click "Sprout Custom Icon" button
+   - Enter a concept (e.g., "rocket", "secure user")
+   - Choose **Generate** (AI from scratch) or **Kitbash** (component assembly)
+   - Save to your workspace
 
-4. **Customize Your Workspace**
-   - Set brand color for icon previews
-   - Choose default export format (SVG/PNG/JSX)
-   - Add repository link for reference
+4. **Use Kitbash for Better Results**
+   - Switch to "Kitbash" tab in the generator
+   - Click "Plan Assembly" to see coverage
+   - Select a layout and click "Assemble Icon"
+   - Works best when library has similar concepts
 
-5. **Export Icons**
-   - Click any icon to open details
-   - Adjust size and color as needed
-   - Copy or download in your preferred format
+## Environment Variables
+
+| Variable | Required For | Description |
+|----------|--------------|-------------|
+| `GOOGLE_API_KEY` | All AI features | Gemini API key from [AI Studio](https://aistudio.google.com/apikey) |
+| `GOOGLE_CLOUD_PROJECT_ID` | Style Jury, Imagen (legacy) | GCP project ID |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Local dev | Path to service account JSON |
+
+### Minimal Setup
+
+For basic generation, you only need:
+
+```bash
+# .env.local
+GOOGLE_API_KEY=your-gemini-api-key
+```
+
+### Graceful Degradation
+
+- No `GOOGLE_API_KEY` → Generation disabled, enrichment disabled
+- No `GOOGLE_CLOUD_PROJECT_ID` → Style Jury disabled (optional feature)
+- No Iconify connectivity → Reference Oracle skipped, import unavailable
 
 ## Architecture
 
-### Context-First Design
+### Sprout Engine Pipeline
 
-Symbol Garden uses a **context-driven architecture** where the active workspace determines the entire UI state:
+```
+Concept ("rocket")
+       │
+       ├─► Reference Oracle (Iconify) → Structural consensus
+       │
+       ├─► Trait-Aware Selection → Best library exemplars
+       │
+       ├─► Decomposition → Component breakdown
+       │
+       ├─► Prompt Construction → Style DNA + few-shot examples
+       │
+       ├─► Gemini Generation → Raw SVG
+       │
+       └─► Style Enforcement → Final compliant SVG
+```
 
-- **UIContext**: Manages drawer state (Icon Details vs Workspace Settings)
-- **ProjectContext**: Handles workspace CRUD, favorites, and brand settings
-- **SearchContext**: Powers search, filtering, and icon selection
+### Kitbash Pipeline
 
-### Component Structure
+```
+Concept ("secure user")
+       │
+       ├─► Source Icon Identification → ["user", "shield", "lock"]
+       │
+       ├─► Component Index Search → Found/Missing parts
+       │
+       ├─► Coverage Calculation → Strategy selection
+       │   ├─ ≥90% → GRAFT (mechanical assembly)
+       │   ├─ ≥50% → HYBRID (AI fills gaps)
+       │   └─ <50% → GENERATE (full AI)
+       │
+       ├─► Layout Generation → 3 composition options
+       │
+       └─► Execution → Final assembled SVG
+```
+
+### Project Structure
 
 ```
 src/
-├── app/                          # Next.js App Router
-│   ├── page.tsx                 # Main grid view
-│   └── api/
-│       ├── enrich/              # AI enrichment endpoint
-│       └── vectorize/           # Image-to-SVG endpoint
+├── app/api/                    # API Routes
+│   ├── generate-svg/           # Native SVG generation
+│   ├── kitbash/                # Component assembly
+│   ├── enrich/                 # AI enrichment
+│   └── iconify/                # Iconify integration
+├── lib/                        # Core Services
+│   ├── hybrid-generator.ts     # SVG generation orchestrator
+│   ├── kitbash-engine.ts       # Component assembly
+│   ├── style-enforcer.ts       # Style compliance
+│   └── iconify-service.ts      # Iconify API
 ├── components/
-│   ├── icons/
-│   │   ├── IconDetailsPanel.tsx # Right drawer: Icon details
-│   │   ├── IconGrid.tsx         # Main icon grid
-│   │   └── LibraryHeader.tsx    # Search + filters
-│   ├── layout/
-│   │   ├── AppShell.tsx         # 3-column layout
-│   │   ├── Sidebar.tsx          # Workspace switcher
-│   │   ├── RightDrawer.tsx      # Unified right panel
-│   │   └── RightSidebarWorkspace.tsx # Workspace settings cards
-│   └── dialogs/                 # Modals for workspace actions
-├── lib/
-│   ├── ui-context.tsx           # Drawer + modal state
-│   ├── project-context.tsx      # Workspace management
-│   ├── search-context.tsx       # Search + filtering
-│   ├── ingestion-service.ts     # GitHub SVG parsing
-│   └── ai-icon-service.ts       # Sprout generation logic
+│   └── dialogs/
+│       └── AIIconGeneratorModal.tsx  # Generation UI
 └── types/
-    └── schema.ts                # TypeScript schemas
+    └── schema.ts               # Zod schemas
 ```
-
-## Development
-
-### Build
-
-```bash
-npm run build
-```
-
-### Lint
-
-```bash
-npm run lint
-```
-
-### Type Check
-
-```bash
-npm run type-check  # if configured
-```
-
-## Deployment
-
-### Vercel Deployment
-
-This project is optimized for deployment on Vercel. After connecting your repository:
-
-1. **Set Environment Variables** in Vercel Project Settings:
-
-```bash
-# Required for Sprout (AI Icon Generator)
-GOOGLE_CLOUD_PROJECT_ID=your-gcp-project-id
-GOOGLE_APPLICATION_CREDENTIALS_JSON={"type":"service_account",...}
-```
-
-> **Note:** For `GOOGLE_APPLICATION_CREDENTIALS_JSON`, paste the **entire contents** of your Google Cloud service account JSON file as the value.
-
-2. **Deploy**: Vercel will automatically deploy on push to `main`.
-
-3. **Verify**: Check Vercel Function Logs if you encounter issues with AI generation.
-
-### Local Development with AI Features
-
-To use AI features locally:
-
-1. Create a `.env.local` file:
-```bash
-GOOGLE_CLOUD_PROJECT_ID=your-gcp-project-id
-# For local development, you can use GOOGLE_APPLICATION_CREDENTIALS pointing to a file
-```
-
-2. Place your `service-account.json` in the project root (it's gitignored).
 
 ## Roadmap
 
-### ✅ Completed
-- [x] Core UI Components & Search
-- [x] GitHub Ingestion Pipeline
+### ✅ Completed (v0.4.1)
+
+- [x] Native SVG Generation (Sprout Engine)
+- [x] Component-based Assembly (Kitbash)
+- [x] Iconify Integration (275k+ icons)
+- [x] Style DNA Analysis & Enforcement
+- [x] Trait-Aware Exemplar Selection
+- [x] Reference Oracle (cross-library consensus)
+- [x] Ghost Preview (contextual validation)
 - [x] Multi-Workspace Management
-- [x] AI-Powered Enrichment (Gemini)
-- [x] Context-First Architecture
-- [x] Unified Right Drawer
-- [x] **Secondary Color Palettes**
-- [x] **AI Icon Generator (Sprout)**
+- [x] AI-Powered Enrichment
 
-### 🎯 Next Sprint (v0.4.0)
-- [ ] **Collections** (organize icons within workspaces)
-- [ ] Advanced filtering (by style, category, tags)
-- [ ] Export presets and templates
-- [ ] Keyboard navigation and shortcuts
-- [ ] Icon comparison tool enhancements
+### 🎯 Next (v0.5.0)
 
-### 📋 Backlog
-- [ ] **Collections** (organize icons within workspaces)
-- [ ] Advanced filtering (by style, category, tags)
-- [ ] Export presets and templates
-- [ ] Keyboard navigation and shortcuts
-- [ ] Icon comparison tool enhancements
+- [ ] Collections (organize icons within workspaces)
+- [ ] Persistent component index (faster Kitbash)
+- [ ] Decomposition caching
+- [ ] Variant diversity improvements
+- [ ] Style Jury for native SVG
 
 ## Contributing
 
@@ -267,10 +249,9 @@ MIT License - see LICENSE file for details.
 
 - Built with [Next.js](https://nextjs.org/)
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Search powered by [Fuse.js](https://fusejs.io/)
-- AI enrichment via [Google Gemini API](https://ai.google.dev/)
-- Icons from various open-source libraries
+- AI powered by [Google Gemini](https://ai.google.dev/)
+- Icons from [Iconify](https://iconify.design/) and open-source libraries
 
 ---
 
-**Status**: 🚀 v0.3.1 Released | ✨ Active Development
+**Status**: v0.4.1 Released | Sprout Engine Complete

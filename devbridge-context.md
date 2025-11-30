@@ -1,885 +1,522 @@
-# Symbol Garden 2.0 - Architecture & Context Document
+# Symbol Garden 2.0 - AI Agent Context Document
 
 > **Last Updated:** 2025-11-29
-> **Version:** 0.4.0-roadmap
+> **Version:** 0.4.1 (Sprout Engine Complete)
 > **Branch:** feature/svg-native-generation
-> **PRD:** See `PRD-iconify-integration.md` for detailed implementation plan
+> **System Status:** ✅ STABLE - All F1-F5 features operational
 
 ---
 
-## 1. High-Level Architecture
+## QUICK REFERENCE (For AI Agents)
+
+### What Is This Project?
+Symbol Garden is an **AI-enhanced icon library management system** that:
+1. Ingests icon libraries from GitHub repos (Feather, Lucide, etc.)
+2. Enriches icons with semantic metadata via Gemini AI
+3. Generates new icons that **match the ingested library's style**
+4. Assembles icons from existing library components (Kitbash)
+
+### Core Value Proposition
+> "Generate icons that look like they belong in your design system, not generic AI art."
+
+### Current Capabilities
+- **Ingest**: Import from GitHub repos or Iconify (275k+ icons)
+- **Enrich**: AI adds semantic categories, geometric traits, descriptions
+- **Generate**: Native SVG generation matching library style (Sprout Engine)
+- **Kitbash**: Assemble new icons from existing library components
+- **Export**: Multiple formats with workspace branding
+
+---
+
+## 1. ARCHITECTURE OVERVIEW
 
 ### Tech Stack
+
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| Framework | Next.js 16 (App Router) | SSR, API routes, React 19 |
-| Language | TypeScript 5.9 | Type safety |
+| Framework | Next.js 16.0.3 (App Router) | SSR, API routes, React 19 |
+| Language | TypeScript 5.9.3 | Type safety with Zod schemas |
 | Styling | Tailwind CSS 4 + shadcn/ui | Utility-first + Radix primitives |
-| State | React Context (3-layer) | Client-side state management |
-| Storage | IndexedDB (idb-keyval) | Persistent browser storage |
-| AI | Gemini 2.5 + Imagen 3 | Generation, analysis, enrichment |
+| State | React Context (3-layer) | Client-side state hierarchy |
+| Storage | IndexedDB (idb-keyval) | Offline-first browser storage |
+| AI - Analysis | Gemini 2.5 Flash | Enrichment, decomposition, planning |
+| AI - Generation | Gemini 2.5 Flash | Native SVG code generation |
+| AI - Images | Vertex AI Imagen 3 | PNG generation (legacy path) |
 | Vectorization | Sharp + Potrace | PNG-to-SVG conversion |
 
 ### Design Principles
-1. **Local-First:** All data persists in browser (IndexedDB), no backend database
-2. **Library-as-Truth:** Generated icons must match the user's ingested library style
-3. **Graceful Degradation:** Features work without all API keys configured
-4. **Context-First State:** Hierarchical React Context for predictable state flow
+1. **Local-First**: All data in browser (IndexedDB), no backend database
+2. **Library-as-Truth**: Generated icons must match user's ingested library style
+3. **Graceful Degradation**: Works without all API keys configured
+4. **Context-First State**: Hierarchical React Context for predictable flow
 
-### Core Data Flow
+### System Architecture Diagram
+
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           SYMBOL GARDEN 2.0                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                │
-│  │   INGESTION  │     │  ENRICHMENT  │     │  GENERATION  │                │
-│  │              │     │              │     │              │                │
-│  │ GitHub URL   │────▶│ Gemini 2.5   │────▶│ Hybrid SVG   │                │
-│  │ SVG Parsing  │     │ AiMetadata   │     │ or Imagen 3  │                │
-│  │ Style DNA    │     │ Descriptions │     │ + Vectorize  │                │
-│  └──────────────┘     └──────────────┘     └──────────────┘                │
-│         │                    │                    │                         │
-│         ▼                    ▼                    ▼                         │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                        IndexedDB                                     │   │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐               │   │
-│  │  │  Icons  │  │Projects │  │ Sources │  │Manifests│               │   │
-│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘               │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│         │                                                                   │
-│         ▼                                                                   │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                     React Context Layer                              │   │
-│  │  ProjectContext ──▶ SearchContext ──▶ UIContext                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│         │                                                                   │
-│         ▼                                                                   │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                         UI Layer                                     │   │
-│  │  AppShell: [ Sidebar | IconGrid | RightDrawer ]                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              SYMBOL GARDEN 2.0                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│   INGESTION LAYER                                                                │
+│   ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                      │
+│   │   GitHub     │    │   Iconify    │    │   Manual     │                      │
+│   │   Repos      │    │   API        │    │   Upload     │                      │
+│   └──────┬───────┘    └──────┬───────┘    └──────┬───────┘                      │
+│          └───────────────────┼───────────────────┘                              │
+│                              ▼                                                   │
+│   ENRICHMENT LAYER     ┌─────────────┐                                          │
+│                        │  Gemini AI  │                                          │
+│                        │ • Semantic  │                                          │
+│                        │ • Traits    │                                          │
+│                        │ • Component │                                          │
+│                        │   Indexing  │                                          │
+│                        └──────┬──────┘                                          │
+│                               ▼                                                  │
+│   STORAGE LAYER        ┌─────────────────────────────────────────────────────┐  │
+│                        │                  IndexedDB                          │  │
+│                        │  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────────┐   │  │
+│                        │  │ Icons  │ │Projects│ │Sources │ │Style DNA   │   │  │
+│                        │  │        │ │        │ │        │ │(Manifests) │   │  │
+│                        │  └────────┘ └────────┘ └────────┘ └────────────┘   │  │
+│                        └─────────────────────────────────────────────────────┘  │
+│                               │                                                  │
+│   CONTEXT LAYER              ▼                                                  │
+│                        ┌─────────────────────────────────────────────────────┐  │
+│                        │            React Context Hierarchy                   │  │
+│                        │  ProjectContext → SearchContext → UIContext         │  │
+│                        └─────────────────────────────────────────────────────┘  │
+│                               │                                                  │
+│   GENERATION LAYER           ▼                                                  │
+│   ┌────────────────────────────────────────────────────────────────────────┐   │
+│   │                      SPROUT ENGINE                                      │   │
+│   │  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐            │   │
+│   │  │  Style   │   │Component │   │ Kitbash  │   │  Hybrid  │            │   │
+│   │  │ Enforcer │   │ Indexer  │   │  Engine  │   │Generator │            │   │
+│   │  │   (F1)   │   │   (F3)   │   │   (F4)   │   │          │            │   │
+│   │  └──────────┘   └──────────┘   └──────────┘   └──────────┘            │   │
+│   └────────────────────────────────────────────────────────────────────────┘   │
+│                               │                                                  │
+│   UI LAYER                   ▼                                                  │
+│                        ┌─────────────────────────────────────────────────────┐  │
+│                        │   AppShell: [ Sidebar | IconGrid | RightDrawer ]    │  │
+│                        └─────────────────────────────────────────────────────┘  │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Project Map
+## 2. PROJECT MAP
 
 ### Directory Structure
+
 ```
 src/
-├── app/                      # Next.js App Router
-│   ├── api/                  # API Routes
-│   │   ├── generate/         # Imagen 3 generation (legacy)
-│   │   ├── generate-svg/     # Native SVG generation (new)
-│   │   ├── enrich/           # Semantic metadata extraction
-│   │   ├── vectorize/        # PNG-to-SVG conversion
-│   │   └── export-icons/     # Icon export
-│   ├── actions/              # Server actions
-│   └── page.tsx              # Home (IconGrid)
+├── app/                           # Next.js App Router
+│   ├── api/                       # API Routes (13 endpoints)
+│   │   ├── enrich/                # POST: AI metadata enrichment + component indexing
+│   │   ├── generate-svg/          # POST: Native SVG generation (Sprout Engine)
+│   │   ├── generate/              # POST: Imagen 3 PNG generation (legacy)
+│   │   ├── kitbash/               # POST: Component assembly (plan/execute)
+│   │   ├── index-components/      # POST: Semantic component tagging
+│   │   ├── vectorize/             # POST: PNG-to-SVG conversion
+│   │   ├── export-icons/          # POST: Icon export
+│   │   ├── iconify/               # Iconify integration
+│   │   │   ├── search/            # GET: Search Iconify API
+│   │   │   ├── collections/       # GET: List collections
+│   │   │   ├── import/            # POST: Stream import collection
+│   │   │   └── adapt/             # POST: Style adaptation
+│   │   └── list-models/           # GET: Available AI models
+│   ├── actions/                   # Server actions
+│   │   └── analyze-library.ts     # Library analysis orchestration
+│   ├── layout.tsx                 # Root layout with Providers
+│   └── page.tsx                   # Home page (IconGrid)
 │
-├── lib/                      # Core Services
-│   ├── [AI & Generation]
-│   │   ├── ai-icon-service.ts       # Imagen 3 pipeline (legacy)
-│   │   ├── hybrid-generator.ts      # Native SVG generation (new) ⭐
-│   │   ├── decomposition-service.ts # Icon structure breakdown ⭐
-│   │   ├── similar-icon-finder.ts   # Trait-aware exemplar selection ⭐
-│   │   ├── svg-prompt-builder.ts    # Prompt construction ⭐
-│   │   ├── style-analysis.ts        # Geometric Autopsy / Style DNA
-│   │   ├── style-jury-service.ts    # Vision-based candidate evaluation
-│   │   └── svg-validator.ts         # Coordinate validation & normalization
+├── lib/                           # Core Services (~9000 LOC, 27 files)
 │   │
-│   ├── [State Management]
-│   │   ├── project-context.tsx      # Workspaces, favorites, custom icons
-│   │   ├── search-context.tsx       # Search, filtering, icon selection
-│   │   ├── ui-context.tsx           # Modals, drawers, UI state
-│   │   └── Providers.tsx            # Context hierarchy wrapper
+│   ├── [SPROUT ENGINE - Generation Pipeline]
+│   │   ├── hybrid-generator.ts          # ⭐ Main SVG generation orchestrator
+│   │   ├── svg-prompt-builder.ts        # Prompt construction with few-shot
+│   │   ├── decomposition-service.ts     # Static/dynamic icon decomposition
+│   │   ├── similar-icon-finder.ts       # Trait-aware exemplar selection
+│   │   ├── kitbash-engine.ts            # ⭐ Component assembly engine
+│   │   ├── component-indexer.ts         # Semantic part tagging (F3)
+│   │   ├── style-enforcer.ts            # Deterministic style compliance (F1)
+│   │   └── svg-validator.ts             # SVG bounds/attribute validation
 │   │
-│   ├── [Data & Storage]
-│   │   ├── storage.ts               # IndexedDB operations
-│   │   ├── ingestion-service.ts     # GitHub repo ingestion
-│   │   └── github-api.ts            # GitHub API client
+│   ├── [LIBRARY ANALYSIS]
+│   │   ├── style-analysis.ts            # Style DNA extraction
+│   │   ├── library-analyzer.ts          # Pattern extraction from library
+│   │   ├── pattern-library.ts           # Reusable SVG patterns/idioms
+│   │   └── sample-selection.ts          # Smart sample selection
 │   │
-│   └── [Utilities]
-│       ├── pattern-library.ts       # Reusable SVG patterns
-│       ├── library-analyzer.ts      # Library-wide analysis
-│       └── sample-selection.ts      # Smart sample selection
+│   ├── [EXTERNAL INTEGRATIONS]
+│   │   ├── iconify-service.ts           # Iconify API (search, import, adapt)
+│   │   ├── ai-icon-service.ts           # Imagen 3 pipeline (legacy)
+│   │   ├── style-jury-service.ts        # Vision-based quality evaluation
+│   │   └── github-api.ts                # GitHub repo API
+│   │
+│   ├── [DATA & STATE]
+│   │   ├── project-context.tsx          # Workspace/project state
+│   │   ├── search-context.tsx           # Search/filter state
+│   │   ├── ui-context.tsx               # Modal/drawer UI state
+│   │   ├── storage.ts                   # IndexedDB operations
+│   │   └── ingestion-service.ts         # GitHub ingestion
+│   │
+│   └── [UTILITIES]
+│       ├── svg-optimizer.ts             # SVGO wrapper
+│       ├── image-converter.ts           # Sharp/potrace bridge
+│       ├── export-utils.ts              # Export helpers
+│       └── utils.ts                     # General utilities
 │
 ├── components/
-│   ├── layout/               # Page structure
-│   │   ├── AppShell.tsx      # 3-column layout
-│   │   ├── Sidebar.tsx       # Left navigation
-│   │   └── RightDrawer.tsx   # Context-sensitive panel
-│   ├── icons/                # Icon display components
-│   ├── dialogs/              # Modal dialogs
-│   └── ui/                   # shadcn/ui components
+│   ├── layout/                    # Page structure
+│   │   ├── AppShell.tsx           # 3-column layout orchestrator
+│   │   ├── Sidebar.tsx            # Left: workspace list, search
+│   │   ├── RightDrawer.tsx        # Right: context-sensitive panel
+│   │   ├── Header.tsx             # Top navigation
+│   │   └── SettingsModal.tsx      # System settings + enrichment
+│   │
+│   ├── icons/                     # Icon display components
+│   │   ├── IconGrid.tsx           # Main grid with pagination
+│   │   ├── IconCard.tsx           # Individual icon card
+│   │   ├── IconDetail.tsx         # Icon detail view
+│   │   ├── IconDetailsPanel.tsx   # Right panel details
+│   │   └── CompareModal.tsx       # Side-by-side comparison
+│   │
+│   ├── dialogs/                   # Modal dialogs
+│   │   └── AIIconGeneratorModal.tsx  # ⭐ Sprout/Kitbash UI (main generation interface)
+│   │
+│   └── ui/                        # shadcn/ui components (18 files)
 │
 ├── types/
-│   └── schema.ts             # Zod schemas (Icon, Project, AiMetadata)
+│   └── schema.ts                  # Zod schemas (Icon, Component, AiMetadata)
 │
-scripts/                      # Development & testing
-├── spike-*.ts                # Feature experiments
-└── test-*.ts                 # Integration tests
+scripts/                           # Development & testing
+├── spike-*.ts                     # Feature experiments
+└── test-*.ts                      # Integration tests
 
 data/
-├── feather-icons.json        # Feather icon library
-└── decompositions.json       # Static icon decompositions
+├── feather-icons.json             # Pre-loaded Feather library
+└── decompositions.json            # Static decomposition templates (74)
 ```
 
-### Key Files by Feature
+### Key Files by Concern
 
-| Feature | Primary File | Supporting Files |
-|---------|-------------|------------------|
-| **Native SVG Gen** | `hybrid-generator.ts` | `decomposition-service.ts`, `svg-prompt-builder.ts` |
-| **Trait Selection** | `similar-icon-finder.ts` | `schema.ts` (AiMetadata) |
-| **Style DNA** | `style-analysis.ts` | `library-analyzer.ts` |
-| **Imagen Pipeline** | `ai-icon-service.ts` | `style-jury-service.ts` |
-| **Workspaces** | `project-context.tsx` | `Sidebar.tsx`, storage.ts |
-| **Icon Grid** | `IconGrid.tsx` | `search-context.tsx`, `IconCard.tsx` |
+| Concern | Primary File | Purpose |
+|---------|--------------|---------|
+| **Generation UI** | `AIIconGeneratorModal.tsx` | User-facing generation interface |
+| **SVG Generation** | `hybrid-generator.ts` | Orchestrates prompt → SVG pipeline |
+| **Component Assembly** | `kitbash-engine.ts` | Plan and execute component assembly |
+| **Exemplar Selection** | `similar-icon-finder.ts` | Find best reference icons |
+| **Style Compliance** | `style-enforcer.ts` | Enforce stroke-width, linecap, etc. |
+| **Enrichment** | `/api/enrich/route.ts` | AI metadata + component indexing |
+| **Iconify** | `iconify-service.ts` | 275k+ icon search and import |
+| **Workspace State** | `project-context.tsx` | Favorites, custom icons, projects |
 
 ---
 
-## 3. Current State Snapshot
+## 3. CURRENT STATE SNAPSHOT
 
-### System Stability: **STABLE**
-- Build passes cleanly
-- All core features functional
-- No critical bugs in production path
+### System Stability: ✅ STABLE
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Build | ✅ Clean | No TypeScript errors |
+| Generation | ✅ Working | Both Generate and Kitbash modes functional |
+| Enrichment | ✅ Working | Component indexing integrated |
+| Iconify | ✅ Working | Search, import, adapt all functional |
+| UI | ✅ Stable | Modal enlarged, save button prominent |
+
+### Feature Completion (Sprout Engine)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| F1: Style Enforcer | ✅ Complete | Deterministic SVG mutation for compliance |
+| F2: Ghost Preview | ✅ Complete | Show candidate between library icons |
+| F3: Component Indexer | ✅ Complete | Semantic tagging of icon parts |
+| F4: Kitbash Engine | ✅ Complete | Assembly from existing components |
+| F5: Skeleton-First UI | ✅ Complete | Plan → Layout → Execute workflow |
 
 ### Generation Pipelines
 
-| Pipeline | Status | Quality | Notes |
-|----------|--------|---------|-------|
-| **Hybrid SVG (New)** | ✅ Active | 8-9/10 | Native SVG, trait-aware, Style Jury passing |
-| Imagen 3 + Vectorize | ✅ Working | 7/10 | Legacy pipeline, still available |
-
-### Recent Improvements (This Session)
-1. **Multi-path SVG Saving** - Fixed brain icon rendering as circle (combined all paths)
-2. **Trait-Aware Exemplar Selection** - 2-4x improvement in trait matching
-3. **Rich Context Few-Shot** - Icons now include `[category, complexity, traits]`
-4. **Semantic Decomposition Hints** - Concepts get structural guidance
-
-### Enrichment Status
-- 287 Feather icons loaded
-- 180 icons (62.7%) have `aiMetadata` enrichment
-- Enables trait-aware generation when enriched
+| Pipeline | Status | Quality | When to Use |
+|----------|--------|---------|-------------|
+| **Hybrid SVG** | ✅ Primary | 8-9/10 | Default for new icons |
+| **Kitbash** | ✅ Working | 7-8/10 | When components exist (>50% coverage) |
+| **Imagen 3** | ✅ Legacy | 7/10 | When visual creativity > precision |
 
 ---
 
-## 4. AI Pipeline Architecture
+## 4. GENERATION PIPELINE DEEP DIVE
 
-### Generation Methods Comparison
+### Hybrid SVG Generator (Primary Path)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        GENERATION PIPELINES                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────┐            │
-│  │  HYBRID SVG GENERATOR (Native) - RECOMMENDED                │            │
-│  │                                                              │            │
-│  │  Concept ──▶ Trait Analysis ──▶ Exemplar Selection          │            │
-│  │                   │                    │                     │            │
-│  │                   ▼                    ▼                     │            │
-│  │            getConceptHints()   findExemplarIconsWithTraits() │            │
-│  │                   │                    │                     │            │
-│  │                   ▼                    ▼                     │            │
-│  │         Decomposition ◀──────── Few-Shot Context             │            │
-│  │              │                                               │            │
-│  │              ▼                                               │            │
-│  │      Gemini 2.5-flash ──▶ SVG Output ──▶ normalizeSvg()     │            │
-│  │                                                              │            │
-│  │  Strengths: Fast, native SVG, no vectorization needed        │            │
-│  └─────────────────────────────────────────────────────────────┘            │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────┐            │
-│  │  IMAGEN 3 PIPELINE (Legacy)                                 │            │
-│  │                                                              │            │
-│  │  Prompt ──▶ Gemini Meta-Prompt ──▶ Imagen 3 (PNG)           │            │
-│  │                                          │                   │            │
-│  │                                          ▼                   │            │
-│  │                              Style Jury (Gemini Vision)      │            │
-│  │                                          │                   │            │
-│  │                                          ▼                   │            │
-│  │                              Vectorization (Sharp + Potrace) │            │
-│  │                                          │                   │            │
-│  │                                          ▼                   │            │
-│  │                                    SVG Output                │            │
-│  │                                                              │            │
-│  │  Strengths: Better visual creativity, higher fidelity        │            │
-│  └─────────────────────────────────────────────────────────────┘            │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+Input: "rocket" concept
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  1. REFERENCE ORACLE (Optional - Iconify)                        │
+│     Search Iconify → Get cross-library structural consensus      │
+│     Output: "rockets have pointed body, fins at base, flame"     │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  2. TRAIT-AWARE EXEMPLAR SELECTION                               │
+│     getConceptHints("rocket") → { traits: ['symmetry'] }         │
+│     findExemplarIconsWithTraits() → best matching library icons  │
+│     Output: [plane, arrow-up, triangle] with trait scores        │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  3. DECOMPOSITION                                                │
+│     Static: Check decompositions.json (74 concepts)              │
+│     Dynamic: LLM generates component breakdown                   │
+│     Output: components[], connectionRules[], patterns[]          │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  4. PROMPT CONSTRUCTION (svg-prompt-builder.ts)                  │
+│     • Style DNA (stroke-width, linecap, etc.)                   │
+│     • Few-shot examples with [category, complexity, traits]      │
+│     • Decomposition structure                                    │
+│     • Reference oracle consensus                                 │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  5. GEMINI GENERATION                                            │
+│     Gemini 2.5 Flash → Raw SVG code output                       │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  6. POST-PROCESSING                                              │
+│     • normalizeSvg() - bounds check, attribute normalization     │
+│     • enforceStyle() - deterministic style compliance (F1)       │
+│     Output: Final SVG matching library style                     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Trait-Aware Selection System
+### Kitbash Engine (Component Assembly)
 
-```typescript
-// Concept → Expected Traits Mapping
-CONCEPT_HINTS = {
-  rocket:   { category: 'object',   traits: ['symmetry'] },
-  scissors: { category: 'object',   traits: ['intersection', 'symmetry'] },
-  battery:  { category: 'object',   traits: ['containment', 'symmetry'] },
-  network:  { category: 'abstract', traits: ['intersection', 'compound'] },
-  ...
-}
-
-// Selection scores icons by:
-// 1. Matching traits (5x boost)
-// 2. Complexity 2-3 (ideal teaching range)
-// 3. Semantic category match
-// 4. High confidence enrichment
+```
+Input: "secure user" concept
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  1. SOURCE ICON IDENTIFICATION                                   │
+│     identifySourceIcons("secure user") via LLM                   │
+│     Output: ["user", "shield", "lock"] - library icon names      │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  2. COMPONENT INDEX SEARCH                                       │
+│     Search pre-indexed components by name and semantic tags      │
+│     Output: foundParts[], missingParts[]                        │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  3. COVERAGE CALCULATION & STRATEGY                              │
+│     coverage = foundParts.length / totalParts.length             │
+│     ≥90% → GRAFT (mechanical assembly)                          │
+│     ≥50% → HYBRID (AI fills gaps)                               │
+│     >0%  → ADAPT (modify single part)                           │
+│     0%   → GENERATE (full AI generation)                        │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  4. LAYOUT GENERATION                                            │
+│     LLM suggests 3 layout options with positions for ALL parts   │
+│     User selects preferred layout                                │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  5. EXECUTION                                                    │
+│     GRAFT: Pure SVG path combination                            │
+│     HYBRID: Combine found parts + generate missing via LLM       │
+│     ADAPT: Modify single source icon                            │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  6. STYLE ENFORCEMENT                                            │
+│     Apply style-enforcer.ts rules                               │
+│     Output: Final assembled SVG                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 5. Environment Configuration
+## 5. RECENT CHANGES & RATIONALE
 
-### Required Variables
-| Variable | Service | When Needed |
-|----------|---------|-------------|
-| `GOOGLE_CLOUD_PROJECT_ID` | Vertex AI | Imagen 3, Style Jury |
-| `GOOGLE_API_KEY` | Gemini API | Enrichment, Native SVG Gen |
+### Session Changes (2025-11-29)
 
-### Optional Variables
-| Variable | Service | Purpose |
-|----------|---------|---------|
-| `GOOGLE_APPLICATION_CREDENTIALS` | GCP Auth | Local development |
-| `GOOGLE_APPLICATION_CREDENTIALS_JSON` | GCP Auth | Vercel deployment |
+#### Kitbash Source Icon Identification
+**Files:** `kitbash-engine.ts`
+**What:** Added `identifySourceIcons()` function that asks LLM for library icon names instead of literal component names.
+**Why:** Previous decomposition was too literal ("case_body", "keyhole_circle") which never matched indexed components. Now it identifies actual library icons ("briefcase", "lock") that exist and can be searched.
+**Before:** 0% matches for compound concepts
+**After:** 50%+ matches for concepts with related library icons
 
-### Graceful Degradation
-- No `GOOGLE_CLOUD_PROJECT_ID` → Style Jury disabled (pass-through mode)
-- No `GOOGLE_API_KEY` → Enrichment disabled, generation fallbacks
+#### Layout Generation for All Parts
+**Files:** `kitbash-engine.ts`
+**What:** Modified `generateLayouts()` and `getDefaultLayouts()` to include positions for BOTH found AND missing parts.
+**Why:** Previously layouts only positioned found parts, causing incomplete icons when missing parts were AI-generated but had no placement instructions.
 
----
+#### Reference Oracle Caching
+**Files:** `hybrid-generator.ts`
+**What:** Added caching for Reference Oracle results in `generateIconVariants()`.
+**Why:** When generating 3 variants, the Reference Oracle was called 3 times with identical results. Now pre-fetches once and reuses.
 
-## 6. Changelog & Rationale
+#### Prominent Kitbash Save Button
+**Files:** `AIIconGeneratorModal.tsx`
+**What:** Added green success card with prominent "Save to Workspace" button directly in the Kitbash result preview.
+**Why:** User couldn't find save functionality - button was hidden in modal footer. Now it's immediately visible after assembly.
 
-### Recent Architectural Changes
+### Prior Session Changes
 
-#### 2025-11-29: Trait-Aware Exemplar Selection
-**What Changed:**
-- Added `findExemplarIconsWithTraits()` to `similar-icon-finder.ts`
-- Integrated with `hybrid-generator.ts` (auto-detects enrichment)
-- Added `formatSimilarIconsWithContext()` for rich few-shot prompts
-- Added semantic hints to `decomposition-service.ts`
-
-**Why:**
-- Previous selection used hardcoded name lists + path length heuristics
-- Ignored rich `aiMetadata` (semanticCategory, geometricTraits, complexity)
-- For "network" concept, old method: 4 trait matches → new method: 8 trait matches
-- Results in structurally more appropriate few-shot examples
-
-#### 2025-11-29: Multi-Path SVG Saving Fix
-**What Changed:**
-- `AIIconGeneratorModal.tsx` now extracts ALL `<path>` elements
-- Combined into single path string with `pathMatches.map().join(' ')`
-
-**Why:**
-- Complex icons like "brain" have multiple `<path>` elements
-- Previous regex only captured first path → rendered as circle
-- Now preserves full icon structure
-
-#### 2025-11-28: SVG Normalization (Stroke-Only)
-**What Changed:**
-- Added `ensureStrokeOnly()` and `normalizeSvg()` to `svg-validator.ts`
-- All generated SVGs now have explicit `fill="none"` on every element
-
-**Why:**
-- SVG `fill` attribute doesn't inherit from parent `<svg>` element
-- Child elements like `<circle>` defaulted to filled (black)
-- Style Jury was failing icons with "VIOLATION: Filled shapes"
-
-#### Earlier: Native SVG Generation (Hybrid Generator)
-**What Changed:**
-- New generation path bypassing Imagen 3 entirely
-- Uses Gemini to directly output SVG code
-- Decomposition service provides structural guidance
-
-**Why:**
-- Imagen 3 + vectorization introduced artifacts
-- Native SVG generation is faster (no image pipeline)
-- Better control over stroke/fill properties
-- Decomposition ensures correct structure
+| Change | Rationale |
+|--------|-----------|
+| **Multi-path SVG saving** | Complex icons (brain) rendered as circles because only first path was extracted |
+| **Trait-aware exemplar selection** | Previous selection ignored aiMetadata; 2-4x improvement in trait matching |
+| **Style enforcement (F1)** | Generated SVGs had wrong stroke-linecap/linejoin regardless of library style |
+| **Component indexing during enrichment** | Components needed for Kitbash must be indexed; added to enrichment pipeline |
 
 ---
 
-## 7. Future Exploration & Optimization
+## 6. TECHNICAL DEBT & KNOWN ISSUES
 
-### High Priority (Next Sprint)
+### High Priority
 
-#### 1. Complete Enrichment Coverage
-**Current:** 62.7% of icons enriched
-**Target:** 100%
-**Impact:** Trait-aware selection works best with full enrichment
-**Effort:** Low (run enrichment on remaining icons)
-
-#### 2. Expand CONCEPT_HINTS Coverage
-**Current:** ~20 concepts mapped
-**Need:** More concepts for better trait prediction
-**Approach:** Analyze decompositions.json patterns, add common icon concepts
-
-#### 3. Collections Feature (v0.4.0)
-**Purpose:** Organize icons within workspaces
-**Features:**
-- Create/name collections
-- Drag-and-drop assignment
-- Collection-specific export settings
+| Issue | Location | Impact | Effort |
+|-------|----------|--------|--------|
+| **Kitbash planning slow** | `kitbash-engine.ts` | 30-40s for planning step | Medium |
+| **Component indexing not persisted** | Enrichment happens each time | Re-indexes on every enrichment | Low |
+| **Decomposition cache not persisted** | `decomposition-service.ts` | Dynamic decompositions lost on restart | Low |
 
 ### Medium Priority
 
-#### 4. Hybrid Generator Variant Diversity
-**Issue:** Variants can be too similar despite different temperatures
+| Issue | Location | Impact | Effort |
+|-------|----------|--------|--------|
+| Legacy Imagen pipeline | `ai-icon-service.ts` | Maintenance burden, rarely used | Medium |
+| Duplicate hint mappings | `similar-icon-finder.ts`, `decomposition-service.ts` | Inconsistency risk | Low |
+| Spike scripts in repo | `scripts/` | Clutter, not production code | Low |
+| Multiple background dev servers | Process management | Port conflicts | Trivial |
+
+### Known Limitations
+
+1. **Single-path storage**: Icons stored as single `path` string; compound SVGs combined with space separator
+2. **No undo**: Generated icons save directly; no preview-before-save for Generate mode
+3. **Enrichment required for Kitbash**: Components only indexed after enrichment is run
+4. **No transforms support**: SVG `<g>` transforms not fully supported
+
+---
+
+## 7. FUTURE EXPLORATION & OPTIMIZATION
+
+### Immediate Opportunities (Next Sprint)
+
+#### 1. Persist Component Index
+**Current:** Components re-indexed during every enrichment
+**Solution:** Store component data in IndexedDB alongside icon data
+**Benefit:** Faster Kitbash planning, no re-enrichment needed
+
+#### 2. Batch Decomposition Caching
+**Current:** Dynamic decompositions lost on server restart
+**Solution:** Persist successful decompositions to `decompositions.json`
+**Benefit:** Build up static decomposition library over time
+
+#### 3. Kitbash Performance
+**Current:** 30-40s planning time
+**Solution:**
+- Cache LLM responses for common concepts
+- Parallelize source icon identification and layout generation
+**Benefit:** Sub-10s planning time
+
+### Medium-Term Improvements
+
+#### 4. Variant Diversity
+**Issue:** Generated variants often too similar
 **Ideas:**
 - Use different decomposition interpretations per variant
 - Inject explicit structural variation hints
 - Rotate semantic emphasis (geometric vs organic)
 
-#### 5. Style Jury Integration with Native SVG
+#### 5. Complete Enrichment Coverage
+**Current:** ~62% of icons enriched
+**Target:** 100%
+**Benefit:** Trait-aware selection works best with full enrichment
+
+#### 6. Collections Feature
+**Purpose:** Organize icons within workspaces
+**Features:** Create/name collections, drag-and-drop, collection-specific export
+
+### Architectural Improvements
+
+#### 7. Compound SVG Support
+**Current:** Single path string storage
+**Future:** `elements: SVGElement[]` for proper compound icon support
+**Benefit:** Better round-tripping, preserve original structure
+
+#### 8. Style Jury for Native SVG
 **Current:** Style Jury only works with Imagen pipeline
 **Opportunity:** Apply vision-based scoring to native SVG output
 **Benefit:** Quality gate for all generation methods
 
-#### 6. Decomposition Quality Improvement
-**Current:** Dynamic decomposition sometimes produces weak structures
-**Ideas:**
-- Cache successful decompositions
-- Use exemplar icons' actual paths as reference
-- Add decomposition validation step
+---
 
-### Technical Debt
+## 8. ENVIRONMENT & CONFIGURATION
 
-| Item | Location | Impact | Effort |
-|------|----------|--------|--------|
-| Legacy Imagen pipeline code | `ai-icon-service.ts` | Maintenance burden | Medium |
-| Duplicate hint mappings | `similar-icon-finder.ts`, `decomposition-service.ts` | Consistency | Low |
-| LocalStorage fallback | `storage.ts` | Migration debt | Low |
-| Spike scripts cleanup | `scripts/` | Repo cleanliness | Low |
+### Required Environment Variables
 
-### Optimization Opportunities
+| Variable | Service | When Needed |
+|----------|---------|-------------|
+| `GOOGLE_API_KEY` | Gemini API | Enrichment, SVG generation, decomposition |
 
-1. **Batch Enrichment:** Enrich icons during ingestion (not on-demand)
-2. **Decomposition Caching:** Persist dynamic decompositions to JSON
-3. **Library Analysis Caching:** Store analysis in IndexedDB
-4. **Prompt Token Optimization:** Reduce few-shot example verbosity
+### Optional Environment Variables
+
+| Variable | Service | Purpose |
+|----------|---------|---------|
+| `GOOGLE_CLOUD_PROJECT_ID` | Vertex AI | Imagen 3, Style Jury |
+| `GOOGLE_APPLICATION_CREDENTIALS` | GCP Auth | Local development |
+| `GOOGLE_APPLICATION_CREDENTIALS_JSON` | GCP Auth | Vercel deployment |
+
+### Graceful Degradation
+
+- No `GOOGLE_API_KEY` → Enrichment disabled, generation fails gracefully
+- No `GOOGLE_CLOUD_PROJECT_ID` → Style Jury disabled (pass-through), Imagen unavailable
+- No Iconify connectivity → Reference Oracle skipped, import unavailable
 
 ---
 
-## 8. Roadmap: Iconify Integration & Fidelity
-
-### Executive Summary
-
-Symbol Garden's next major evolution integrates **Iconify** (275k+ open-source icons) as a reference oracle and import source, plus fixes generation fidelity issues.
-
-### Architecture Evolution
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    SYMBOL GARDEN                        │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐ │
-│  │   USER'S    │    │  ICONIFY    │    │    LLM      │ │
-│  │  LIBRARIES  │    │   ORACLE    │    │  GENERATOR  │ │
-│  │             │    │             │    │             │ │
-│  │ • Feather   │    │ • Search    │    │ • Novel     │ │
-│  │ • Custom    │    │ • Import    │    │   concepts  │ │
-│  │             │    │ • Reference │    │ • Style     │ │
-│  │             │    │ • Adapt     │    │   transfer  │ │
-│  └─────────────┘    └─────────────┘    └─────────────┘ │
-│         │                  │                  │        │
-│         └──────────────────┴──────────────────┘        │
-│                           │                            │
-│                    ┌──────┴──────┐                     │
-│                    │  ICON NEED  │                     │
-│                    └─────────────┘                     │
-│                           │                            │
-│              ┌────────────┼────────────┐               │
-│              ▼            ▼            ▼               │
-│         [In Library]  [In Iconify]  [Generate]         │
-│            Use it    Import/Adapt   Create new         │
-│                                                        │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Phase Overview
-
-| Phase | Name | Priority | Effort | Status |
-|-------|------|----------|--------|--------|
-| **P0** | Style Enforcement | Critical | 2h | ✅ Complete |
-| **P1a** | Iconify Service Layer | High | 3h | ✅ Complete |
-| **P1b** | One-Click Library Import | High | 6h | ✅ Complete |
-| **P1c** | Reference Oracle for Generation | High | 4h | ✅ Complete |
-| **P2** | Borrow & Adapt | Medium | 4h | ✅ Complete |
-| **P3** | Discovery Features | Low | 6h | ✅ Complete (P3b, P3c) |
-
-### P0: Style Enforcement (Critical) ✅ COMPLETE
-
-**Problem:** Generated icons have wrong `stroke-linecap`/`stroke-linejoin` because few-shot examples are hardcoded to "round" regardless of library style.
-
-**Solution Implemented:**
-1. ✅ Parameterized `formatIconWithContext()` and `formatSimilarIconsForPrompt()` to accept `IconStyleSpec`
-2. ✅ Added `enforceStyleSpec()` to `svg-validator.ts` for post-generation enforcement
-3. ✅ Updated `normalizeSvg()` to optionally enforce style attributes
-4. ✅ Updated `svg-prompt-builder.ts` to pass styleSpec to formatters
-
-**Files Modified:** `similar-icon-finder.ts`, `svg-validator.ts`, `svg-prompt-builder.ts`, `hybrid-generator.ts`
-**Commit:** `99a001a`
-
-### P1a: Iconify Service Layer ✅ COMPLETE
-
-**File:** `src/lib/iconify-service.ts`
-
-**Implemented Functions:**
-```typescript
-searchIcons(query, options)           // Search across 275k+ icons
-searchStrokeBasedIcons(query)         // Filter to stroke-based collections
-getIconSvg(prefix, name)              // Fetch individual icon SVG
-getIconSvgById(iconId)                // Fetch by "prefix:name" format
-getCollection(prefix)                 // Collection metadata
-getCollections({ strokeBasedOnly })   // List all collections
-getCollectionIconNames(prefix)        // All icon names in collection
-searchAndGetSvgs(query)               // Convenience: search + fetch SVGs
-```
-
-**Features Implemented:**
-- In-memory cache with TTL (5min search, 24h SVGs, 7d metadata)
-- Fallback hosts (api.iconify.design, api.simplesvg.com, api.unisvg.com)
-- 10-second timeout per host with AbortController
-- Stroke-based collection filter (lucide, tabler, feather, phosphor, etc.)
-
-**Commit:** `5cb890a`
-
-### P1b: One-Click Library Import ✅ COMPLETE
-
-**UI:** Settings → Library → "Import from Iconify" card
-
-**API Routes:**
-- `GET /api/iconify/collections` - Browse/search collections
-- `POST /api/iconify/import` - Stream import with progress (NDJSON)
-
-**Flow Implemented:**
-1. User searches or browses popular collections
-2. Clicks "Import" on a collection
-3. Streaming progress: fetching → converting → analyzing (Style DNA)
-4. Icons saved to IndexedDB, library appears in sidebar
-5. Iconify imports show Globe icon vs GitHub icon for differentiation
-
-### P1c: Reference Oracle for Generation ✅ COMPLETE
-
-**Concept:** When generating "bike", search Iconify across multiple libraries to establish structural consensus (where wheels go, frame shape, etc.), then generate in user's library style.
-
-**Implementation:**
-
-1. **`getStructuralReference(concept, options)` in iconify-service.ts:**
-   - Searches Iconify for the concept across 10 stroke-based collections
-   - Limits to 1 icon per collection for diversity
-   - Uses Gemini to analyze SVGs and extract structural consensus
-   - Returns elements, spatial patterns, geometric traits, and example SVGs
-
-2. **`formatStructuralReference(ref)` in svg-prompt-builder.ts:**
-   - Formats consensus for prompt injection
-   - Lists common visual elements
-   - Describes spatial arrangement patterns
-   - Includes 2 reference SVGs (for structure, not style)
-
-3. **Integration in hybrid-generator.ts:**
-   - `useReferenceOracle` config option (default: true)
-   - Runs before prompt building to get cross-library consensus
-   - Gracefully fails if Iconify unavailable
-   - Logs consensus elements for debugging
-
-**Example Output (bike):**
-```
-Common Elements:
-  - two circles representing wheels
-  - a line connecting the wheels, representing the frame
-  - a seat or implied seat position
-  - handlebars at the front
-
-Spatial Pattern: Wheels at bottom, frame rises diagonally to seat, handlebars above front wheel
-Geometric Traits: circular elements, angular lines, geometric representation
-```
-
-**Commit:** `6c2ce32`
-
-### P2: Borrow & Adapt ✅ COMPLETE
-
-**Goal:** Import individual icons from Iconify and adapt to user's library style.
-
-**UI:** In AI Icon Generator modal, when user types a concept:
-
-1. **Debounced search** - After 500ms, searches Iconify for matching icons
-2. **"Found in other libraries"** section shows icons from various collections
-3. **Select icon** - Click to select, shows collection name on hover
-4. **"Import & Adapt"** button - One-click import with style adaptation
-
-**API Routes:**
-- `GET /api/iconify/search?query=bike&limit=6` - Search and return SVGs
-- `POST /api/iconify/adapt` - Apply style adaptation from Style DNA
-
-**Adaptation Pipeline:**
-1. Fetch icon SVG from Iconify (already in search results)
-2. Parse Style DNA from target library (if available)
-3. Apply stroke-width, stroke-linecap, stroke-linejoin
-4. Extract path data and save as custom icon
-
-**Files:**
-- `src/components/dialogs/AIIconGeneratorModal.tsx` - UI additions
-- `src/app/api/iconify/search/route.ts` - Search API
-- `src/app/api/iconify/adapt/route.ts` - Adaptation API
-
-**Commit:** `ca0bcf7`
-
-### P3: Discovery Features ✅ COMPLETE (P3b, P3c)
-
-**Goal:** Help users discover icons before generating.
-
-**P3b: Icon Exists Pre-Check ✅**
-- Search user's library when concept is entered
-- "Already in your library" section (green) shows existing matches
-- One-click to use existing icon (adds to favorites)
-- Prioritized above Iconify matches in UI flow
-
-**P3c: Related Icons Suggestions ✅**
-- Synonym map for ~75 common icon concepts
-- "Try:" suggestions appear below concept input
-- Click to search related term (e.g., "bike" → "bicycle", "cycling", "cycle")
-
-**P3a: Find Similar Libraries ⏸️ Deferred**
-- Compare library styles (viewBox, stroke style, complexity)
-- Lower priority - can be added as enhancement
-
-**Files:**
-- `src/components/dialogs/AIIconGeneratorModal.tsx` - P3b/P3c UI
-- `src/lib/iconify-service.ts` - Synonym map + `getRelatedSearchTerms()`
-
-### Key Iconify Collections (Stroke-Based)
-
-| Collection | Icons | Notes |
-|------------|-------|-------|
-| `lucide` | 1,653 | Feather fork, actively maintained |
-| `tabler` | 5,963 | Large, consistent set |
-| `phosphor` | 9,072 | Multiple weights |
-| `heroicons` | 876 | Tailwind ecosystem |
-
-### Success Metrics
-
-| Metric | Current | Target |
-|--------|---------|--------|
-| Stroke attribute accuracy | ~50% | 100% |
-| Spatial composition quality | ~60% | 85% |
-| Libraries available | ~1 | 200+ |
-
-**Full details:** See `PRD-iconify-integration.md`
-
----
-
-## 8b. Sprout Engine Roadmap (Next Phase)
-
-> **PRD:** See `PRD-sprout-engine.md` for detailed implementation plan
-
-### Vision
-
-Transform from "AI sketch artist" to "Vector Sprout Engine". The goal is **native-quality icons** - generated icons that are mathematically identical in style because they're grown from the library's actual DNA.
-
-### Core Insight
-
-> "Why generate paths from scratch when we can assemble from proven parts?"
-
-LLMs are bad at precise geometry but good at concepts. Instead of asking the AI to draw, ask it to identify components and mechanically assemble them.
-
-### Architecture
-
-```
-INPUT: "secure user"
-       │
-       ▼
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   SEMANTIC   │───▶│   KITBASH    │───▶│   DECISION   │
-│   INDEXER    │    │   MATCHER    │    │   GATE       │
-│              │    │              │    │              │
-│ What parts   │    │ Do we have   │    │ Coverage>70%?│
-│ exist?       │    │ these parts? │    │ GRAFT/HYBRID │
-└──────────────┘    └──────────────┘    └──────────────┘
-       │                                        │
-       ▼                                        ▼
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   STYLE      │◀───│   GHOST      │◀───│   SKELETON   │
-│   ENFORCER   │    │   PREVIEW    │    │   COMPOSER   │
-│              │    │              │    │              │
-│ Deterministic│    │ Context View │    │ Layout       │
-│ SVG mutation │    │ w/ neighbors │    │ options      │
-└──────────────┘    └──────────────┘    └──────────────┘
-```
-
-### Implementation Phases
-
-| Phase | Name | Effort | Status | Description |
-|-------|------|--------|--------|-------------|
-| **F1** | Style Enforcer | 3-4h | ✅ Complete | Deterministic SVG mutation for compliance |
-| **F2** | Ghost Preview | 2-3h | ✅ Complete | Show candidate between library icons |
-| **F3** | Component Indexer | 4-5h | ✅ Complete | Semantic tagging of icon parts |
-| **F4** | Kitbash Engine | 6-8h | ✅ Complete | Assembly from existing components |
-| **F5** | Skeleton-First UI | 4-5h | ✅ Complete | Composition approval before styling |
-
-### F1: Style Enforcer (Quick Win)
-
-**Goal:** Turn passive style analysis into active enforcement.
+## 9. TYPE REFERENCE (Key Types)
 
 ```typescript
-// After generation, enforce compliance
-const rules = rulesFromStyleDNA(styleSpec);
-const compliance = enforceStyle(svg, rules);
-// compliance.autoFixed has mathematically correct stroke-width, linecap, etc.
-```
-
-**Key Functions:**
-- `enforceStyle(svg, rules)` → Returns auto-fixed SVG
-- `rulesFromStyleDNA(styleSpec)` → Converts Style DNA to enforcement rules
-- Violations are logged with before/after values
-
-### F2: Ghost Preview
-
-**Goal:** Visual context for instant quality assessment.
-
-```
-┌─────────────────────────────────────────────────┐
-│     Home        CANDIDATE      Settings         │
-│   ┌─────┐       ┌─────┐       ┌─────┐          │
-│   │  🏠 │       │ 🛡👤│       │  ⚙️ │          │
-│   └─────┘       └─────┘       └─────┘          │
-│                                                 │
-│   Compliance: 94/100                            │
-│   ✅ Stroke Width  ✅ Linecap  ⚠️ Optical Weight│
-└─────────────────────────────────────────────────┘
-```
-
-### F3: Component Indexer ✅ COMPLETE
-
-**Goal:** Know **what** is in the library, not just **how** it's styled.
-
-**Implementation:**
-
-1. **New File: `src/lib/component-indexer.ts`**
-   - `IconComponent` interface with category, pathData, boundingBox, semanticTags
-   - `indexIconComponents(icon, apiKey)` - LLM-based semantic analysis
-   - `buildComponentIndex(icons)` - Build searchable index by name/tag/category
-   - `searchComponents(index, query)` - Find matching components
-   - Bounding box calculation from path commands
-
-2. **Updated Schema: `src/types/schema.ts`**
-   - Added `ComponentCategorySchema` (body, head, modifier, container, indicator, detail, connector)
-   - Added `BoundingBoxSchema` and `IconComponentSchema`
-   - Extended `IconSchema` with `components` and `componentSignature` fields
-
-3. **New API: `/api/index-components`**
-   - POST endpoint accepts icons array
-   - Returns component analysis with stats
-   - Enables batch component indexing
-
-**Component Categories:**
-```typescript
-type ComponentCategory =
-  | 'body'        // Main shape (user torso, document rectangle)
-  | 'head'        // Top element (user head, arrow point)
-  | 'modifier'    // Badge, indicator, status symbol
-  | 'container'   // Enclosing shape (circle, shield, square)
-  | 'indicator'   // Check, x, plus, minus, arrow
-  | 'detail'      // Internal lines, decorative elements
-  | 'connector';  // Lines joining other elements
-```
-
-**Test Output:**
-```
-user (simple) → user-figure [body] Tags: person, human, profile
-check (simple) → check-mark [indicator] Tags: validation, success
-shield (simple) → shield-body [container] Tags: protection, security
-arrow-right (simple) → arrow-right [indicator] Tags: directional, forward
-```
-
-### F4: Kitbash Engine ✅ COMPLETE
-
-**Goal:** Assemble icons from proven parts instead of generating from scratch.
-
-**Implementation:**
-
-1. **New File: `src/lib/kitbash-engine.ts`**
-   - `AssemblyStrategy` type: graft (100% parts), hybrid (some + AI), adapt (single part), generate (no parts)
-   - `KitbashPlan` interface with coverage calculation and suggested layouts
-   - `planKitbash(concept, componentIndex)` - Analyze concept and find matching parts
-   - `executeKitbash(plan, layoutIndex, rules)` - Assemble SVG from parts
-   - `isKitbashable(concept, componentIndex)` - Quick check for viability
-   - `kitbash(concept, componentIndex)` - Full pipeline in one call
-
-2. **New API: `/api/kitbash`**
-   - Two modes: `plan` and `execute`
-   - Plan mode returns coverage, strategy, found/missing parts, suggested layouts
-   - Execute mode returns assembled SVG with enforcement rules applied
-
-3. **Strategy Selection:**
-   - Coverage ≥ 90% → GRAFT (pure mechanical assembly)
-   - Coverage ≥ 50% → HYBRID (AI fills gaps)
-   - Coverage > 0% with single match → ADAPT (modify existing)
-   - Coverage = 0% → GENERATE (full AI generation needed)
-
-4. **Layout System:**
-   - LLM suggests 3 layout options per concept
-   - Each layout describes spatial arrangement (side-by-side, badge, overlay, etc.)
-   - User can select preferred layout before execution
-
-**Test Results:**
-```
-"secure user"    → HYBRID (50% coverage) - body found, head generated
-"verified check" → GENERATE (0% coverage) - not kitbashable
-"user shield"    → HYBRID (50% coverage) - body found, head generated
-"dragon"         → GENERATE (0% coverage) - 8 parts dynamically decomposed
-"lock check"     → HYBRID (50% coverage) - body found, shackle generated
-```
-
-**Process Flow:**
-1. Decompose concept: "secure user" → ["head", "body"] (from static/dynamic decomposition)
-2. Search component index for matches by name and semantic tags
-3. Calculate coverage (% of parts found)
-4. If coverage > 70%: GRAFT (mechanical assembly)
-5. If coverage < 70%: HYBRID (AI fills gaps)
-
-### F5: Skeleton-First UI ✅ COMPLETE
-
-**Goal:** Approve structure before committing to style.
-
-**Implementation:**
-
-1. **Mode Selection in AI Generator Modal:**
-   - New tabs: "Generate" (AI from scratch) vs "Kitbash" (component assembly)
-   - Mode affects the entire workflow - different buttons, different results
-   - Quick switch between modes while preserving concept input
-
-2. **Kitbash Planning UI:**
-   - "Plan Assembly" button calls `/api/kitbash?mode=plan`
-   - Displays strategy badge (GRAFT, HYBRID, ADAPT, GENERATE)
-   - Shows coverage percentage
-   - Lists found parts (✓ with confidence %) vs missing parts (⚠ AI will generate)
-
-3. **Layout Selection:**
-   - 3 layout options displayed as clickable cards
-   - Each shows layout name and description
-   - Selected layout highlighted with ring
-   - User chooses composition before executing
-
-4. **Execute & Preview:**
-   - "Assemble Icon" button executes with selected layout
-   - Assembled SVG shown in preview panel
-   - Save to Workspace works for kitbash results
-
-**UI Flow:**
-```
-┌─────────────────────────────────────────────────┐
-│  Creation Mode: [Generate] [Kitbash]            │
-│                                                 │
-│  Icon Concept: [secure user________]            │
-│                                                 │
-│  [Plan Assembly]                                │
-├─────────────────────────────────────────────────┤
-│  Assembly Plan              HYBRID 50%          │
-│                                                 │
-│  Found Parts      │  Missing Parts              │
-│  ✓ body (53%)     │  ⚠ head (AI)               │
-│                                                 │
-│  Select Layout:                                 │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
-│  │standard │  │ badge   │  │ dynamic │        │
-│  │ overlap │  │ overlay │  │  guard  │        │
-│  └─────────┘  └─────────┘  └─────────┘        │
-│      ●            ○            ○               │
-│                                                 │
-│  [Assemble Icon]                                │
-└─────────────────────────────────────────────────┘
-```
-
-**Files Modified:**
-- `src/components/dialogs/AIIconGeneratorModal.tsx` - Full Kitbash UI integration
-
-### Success Metrics
-
-| Metric | Current | Target |
-|--------|---------|--------|
-| Style compliance | ~70% | 100% (enforced) |
-| First-attempt acceptance | ~40% | 80% |
-| Composition accuracy | ~60% | 90% |
-| Kitbash generation time | N/A | <2s |
-
----
-
-## 9. Quick Reference
-
-### Hot Files (Most Modified)
-```
-src/lib/hybrid-generator.ts      # Native SVG generation
-src/lib/style-enforcer.ts        # Sprout Engine F1 - style compliance
-src/lib/component-indexer.ts     # Sprout Engine F3 - semantic component tagging
-src/lib/kitbash-engine.ts        # Sprout Engine F4 - component assembly
-src/lib/similar-icon-finder.ts   # Trait-aware selection
-src/lib/decomposition-service.ts # Icon structure
-src/lib/svg-prompt-builder.ts    # Prompt construction
-src/lib/iconify-service.ts       # Iconify API integration
-src/components/dialogs/AIIconGeneratorModal.tsx
-```
-
-### Common Commands
-```bash
-npm run dev          # Development server
-npm run build        # Production build
-npx tsx scripts/spike-smart-selection.ts  # Test trait selection
-```
-
-### Blockers & Solutions
-| Issue | Solution | File |
-|-------|----------|------|
-| "Circle only" rendering | Extract ALL paths with `matchAll()` | AIIconGeneratorModal.tsx |
-| Filled shape violations | `normalizeSvg()` adds `fill="none"` | svg-validator.ts |
-| Poor exemplar selection | Use `findExemplarIconsWithTraits()` | similar-icon-finder.ts |
-| Style Jury disabled | Set `GOOGLE_CLOUD_PROJECT_ID` | .env.local |
-| Wrong stroke-linecap | P0: Parameterize formatters | similar-icon-finder.ts |
-| Missing elements in import | Convert rect/circle/line/polyline to path | adapt/route.ts |
-
-### Backlog: Robust SVG Handling
-
-**Priority:** Medium | **Area:** Core Architecture
-
-The app currently stores icons as single `path` strings, which creates issues when importing/generating icons that use multiple SVG elements (rect, circle, line, polyline, polygon, ellipse, etc.).
-
-**Current workarounds:**
-- P2 adapt API converts elements to path commands on import
-- Generated SVGs may use multiple paths (combined with space separator)
-
-**Future improvements to consider:**
-1. Extend Icon schema to support `elements: SVGElement[]` for compound icons
-2. Create a centralized SVG normalization service
-3. Handle transforms, groups (`<g>`), and nested structures
-4. Support `<use>` references and symbol definitions
-5. Better preservation of original SVG structure for round-tripping
-
----
-
-## 10. Type Reference
-
-### Core Types (from schema.ts)
-```typescript
+// Core Icon Type
 interface Icon {
   id: string;
   name: string;
   library: string;
-  path: string;                    // SVG path d attribute
+  path: string;                    // SVG path d attribute(s)
   viewBox: string;                 // Default "0 0 24 24"
   renderStyle: "stroke" | "fill";
   tags: string[];
   aiDescription?: string;
   aiMetadata?: AiMetadata;
+  components?: IconComponent[];    // F3: Indexed components
+  componentSignature?: string;     // Sorted component names joined
 }
 
+// AI Enrichment Metadata
 interface AiMetadata {
   semanticCategory: 'object' | 'action' | 'ui' | 'abstract';
   complexity: 1 | 2 | 3 | 4 | 5;
@@ -896,11 +533,11 @@ type GeometricTrait =
   | 'open-path'     // Unclosed strokes
   | 'compound';     // Multiple disconnected shapes
 
-// F3: Component types for Kitbash Engine
+// F3: Component for Kitbash
 interface IconComponent {
   name: string;             // "arrow-head", "user-body"
   category: ComponentCategory;
-  pathData: string;         // 'd' attribute or element attributes
+  pathData: string;
   elementType: 'path' | 'circle' | 'rect' | 'line' | 'polyline' | 'ellipse';
   boundingBox: BoundingBox;
   semanticTags: string[];   // ["directional", "upward"]
@@ -916,7 +553,48 @@ type ComponentCategory =
   | 'indicator'   // Check, arrow
   | 'detail'      // Internal lines
   | 'connector';  // Joining lines
+
+// Kitbash Plan
+interface KitbashPlan {
+  concept: string;
+  requiredParts: string[];
+  foundParts: KitbashMatch[];
+  missingParts: string[];
+  coverage: number;          // 0-1
+  strategy: 'graft' | 'hybrid' | 'adapt' | 'generate';
+  suggestedLayouts: SkeletonLayout[];
+}
 ```
+
+---
+
+## 10. COMMON COMMANDS
+
+```bash
+# Development
+npm run dev                    # Start dev server (http://localhost:3000)
+npm run build                  # Production build
+
+# Testing
+npx tsx scripts/spike-*.ts    # Run spike experiments
+npx vitest                     # Run tests
+
+# Debugging
+# Check server logs in terminal for [API], [Kitbash], [Decomposition] tags
+```
+
+---
+
+## 11. TROUBLESHOOTING
+
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| "Circle only" rendering | Multi-path SVG only saved first path | Fixed: extract ALL paths with `matchAll()` |
+| 0% Kitbash coverage | Icons not enriched with components | Run enrichment in Settings |
+| Kitbash stuck planning | LLM layout generation timing out | Check API key, may need retry |
+| Wrong stroke-linecap | Style DNA not passed to generator | Ensure library has styleManifest |
+| Style Jury disabled | Missing `GOOGLE_CLOUD_PROJECT_ID` | Set env var or ignore (optional) |
+| Port 3000 in use | Multiple dev servers | Kill orphan processes |
 
 ---
 

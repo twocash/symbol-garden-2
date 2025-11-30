@@ -34,6 +34,26 @@ interface Source {
     styleManifest?: string;
 }
 
+// Fun status messages for enrichment process
+const ENRICHMENT_MESSAGES = [
+    "Measuring stroke widths...",
+    "Analyzing geometric complexity...",
+    "Cataloging visual symmetry...",
+    "Detecting containment patterns...",
+    "Classifying semantic intent...",
+    "Extracting corner radii...",
+    "Mapping path intersections...",
+    "Profiling visual weight...",
+    "Identifying compound shapes...",
+    "Indexing semantic tags...",
+    "Measuring negative space...",
+    "Calculating complexity scores...",
+    "Discovering visual patterns...",
+    "Labeling component anatomy...",
+    "Building kitbash inventory...",
+    "Cross-referencing traits...",
+];
+
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     const { icons, setIcons } = useSearch();
     const { currentProject } = useProject();
@@ -41,6 +61,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     const [enriching, setEnriching] = useState(false);
     const [enrichProgress, setEnrichProgress] = useState(0);
     const [enrichTarget, setEnrichTarget] = useState<"all" | "missing" | "favorites">("missing");
+    const [enrichStatusIndex, setEnrichStatusIndex] = useState(0);
 
     // Library ingestion state
     const [ingesting, setIngesting] = useState(false);
@@ -71,6 +92,15 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     const allCount = icons.length;
     const missingCount = icons.filter(i => !i.aiDescription).length;
     const favoritesCount = currentProject?.favorites.length || 0;
+
+    // Cycle through fun enrichment messages
+    useEffect(() => {
+        if (!enriching) return;
+        const interval = setInterval(() => {
+            setEnrichStatusIndex(prev => (prev + 1) % ENRICHMENT_MESSAGES.length);
+        }, 1800); // Change message every 1.8 seconds
+        return () => clearInterval(interval);
+    }, [enriching]);
 
     // Load API key and sources from localStorage
     // Load API key and sources from localStorage/IndexedDB
@@ -477,6 +507,9 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                 geometricTraits: enriched.geometricTraits || [],
                                 confidence: 0.8,
                             } : undefined,
+                            // F3: Component data for Kitbash
+                            components: enriched.components || undefined,
+                            componentSignature: enriched.componentSignature || undefined,
                         };
                     }
                     return icon;
@@ -500,6 +533,9 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                 geometricTraits: enriched.geometricTraits || [],
                                 confidence: 0.8,
                             } : undefined,
+                            // F3: Component data for Kitbash
+                            components: enriched.components || undefined,
+                            componentSignature: enriched.componentSignature || undefined,
                         };
                     }
                     return icon;
@@ -876,8 +912,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                         {enriching && (
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between text-sm">
-                                                    <span>Enriching...</span>
-                                                    <span>{Math.round(enrichProgress)}%</span>
+                                                    <span className="text-muted-foreground italic transition-opacity">
+                                                        {ENRICHMENT_MESSAGES[enrichStatusIndex]}
+                                                    </span>
+                                                    <span className="font-medium">{Math.round(enrichProgress)}%</span>
                                                 </div>
                                                 <Progress value={enrichProgress} />
                                             </div>
@@ -891,7 +929,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                             {enriching ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Enriching...
+                                                    Working...
                                                 </>
                                             ) : (
                                                 <>

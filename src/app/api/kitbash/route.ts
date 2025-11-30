@@ -85,11 +85,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Get list of icon names for LLM guidance
+    const availableIconNames = (icons as Icon[]).map(i => i.name);
+
     console.log(`[API] Kitbash: ${mode} mode for "${concept}" with ${componentIndex.size} indexed components`);
 
     if (mode === 'plan' || !mode) {
       // Planning mode
-      const plan = await planKitbash(concept, componentIndex);
+      const plan = await planKitbash(concept, componentIndex, undefined, availableIconNames);
       const formatted = formatKitbashPlan(plan);
 
       return NextResponse.json({
@@ -98,7 +101,7 @@ export async function POST(req: NextRequest) {
       });
     } else if (mode === 'execute') {
       // Execution mode
-      const plan = providedPlan || await planKitbash(concept, componentIndex);
+      const plan = providedPlan || await planKitbash(concept, componentIndex, undefined, availableIconNames);
 
       // Get enforcement rules
       let rules = FEATHER_RULES;

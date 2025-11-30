@@ -23,6 +23,36 @@ import { getDecomposition, Decomposition } from './decomposition-service';
 import { enforceStyle, EnforcementRules, FEATHER_RULES } from './style-enforcer';
 
 /**
+ * Common icon names found in libraries - used for LLM guidance
+ */
+const COMMON_ICON_PARTS = [
+  // Objects
+  'user', 'users', 'person', 'home', 'house', 'building', 'office',
+  'file', 'folder', 'document', 'book', 'notebook', 'clipboard',
+  'lock', 'unlock', 'key', 'shield', 'security',
+  'box', 'package', 'archive', 'briefcase', 'suitcase', 'bag',
+  'mail', 'envelope', 'message', 'chat', 'comment', 'inbox',
+  'phone', 'smartphone', 'tablet', 'laptop', 'monitor', 'desktop',
+  'camera', 'image', 'photo', 'video', 'film', 'music',
+  'clock', 'time', 'calendar', 'alarm', 'bell', 'notification',
+  'cart', 'shopping', 'basket', 'credit-card', 'wallet', 'money',
+  'heart', 'star', 'bookmark', 'flag', 'tag', 'label',
+  'settings', 'gear', 'cog', 'sliders', 'tool', 'wrench',
+  'search', 'zoom', 'filter', 'sort', 'eye', 'view',
+  'cloud', 'sun', 'moon', 'globe', 'map', 'location', 'pin',
+  'rocket', 'plane', 'car', 'truck', 'ship', 'train', 'bicycle',
+  'brain', 'lightbulb', 'idea', 'puzzle', 'target', 'award',
+  // Symbols
+  'check', 'checkmark', 'x', 'close', 'plus', 'minus', 'add', 'remove',
+  'arrow', 'chevron', 'caret', 'expand', 'collapse', 'refresh', 'sync',
+  'download', 'upload', 'share', 'send', 'external', 'link',
+  'edit', 'pencil', 'pen', 'trash', 'delete', 'copy', 'paste',
+  'play', 'pause', 'stop', 'skip', 'forward', 'backward',
+  // Containers
+  'circle', 'square', 'triangle', 'hexagon', 'badge', 'frame',
+];
+
+/**
  * Assembly strategy based on component coverage
  */
 export type AssemblyStrategy =
@@ -120,6 +150,76 @@ export interface KitbashResult {
 }
 
 /**
+ * Identify which library icons could be combined to create a new concept
+ * Returns searchable icon names like ["briefcase", "lock"] not literal parts like ["case_body", "keyhole"]
+ */
+async function identifySourceIcons(
+  concept: string,
+  availableIcons: string[],
+  apiKey?: string
+): Promise<string[]> {
+  const resolvedApiKey = apiKey || process.env.GOOGLE_API_KEY;
+  if (!resolvedApiKey) {
+    // Fallback: try to extract searchable terms from concept
+    return concept.toLowerCase().split(/[\s-_]+/).filter(p =>
+      p.length > 2 && COMMON_ICON_PARTS.includes(p)
+    );
+  }
+
+  const genAI = new GoogleGenerativeAI(resolvedApiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  // Show available icons to help LLM make realistic suggestions
+  const availableList = availableIcons.length > 0
+    ? `\n\nAVAILABLE ICONS IN LIBRARY:\n${availableIcons.slice(0, 100).join(', ')}`
+    : '';
+
+  const prompt = `You are an icon composition expert. Given the concept "${concept}", identify which EXISTING icons from a typical icon library could be combined to create it.
+
+IMPORTANT: Return common, generic icon names that would exist in most icon libraries. NOT literal part descriptions.
+
+Examples:
+- "secure user" → ["user", "shield"] or ["user", "lock"]
+- "download folder" → ["folder", "arrow-down"] or ["folder", "download"]
+- "video camera" → ["camera", "video"] or ["film", "camera"]
+- "email notification" → ["mail", "bell"] or ["envelope", "notification"]
+- "locked briefcase" → ["briefcase", "lock"]
+- "cloud storage" → ["cloud", "database"] or ["cloud", "server"]
+- "brain with lightbulb" → ["brain", "lightbulb"]
+${availableList}
+
+COMMON ICON NAMES TO USE:
+${COMMON_ICON_PARTS.join(', ')}
+
+For "${concept}", list 2-4 icon names that could be combined.
+Return ONLY a JSON array of strings, no explanation:
+["icon1", "icon2"]`;
+
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.2 },
+    });
+
+    const text = result.response.text().trim();
+    const arrayMatch = text.match(/\[[\s\S]*?\]/);
+    if (!arrayMatch) {
+      throw new Error('No JSON array in response');
+    }
+
+    const parsed = JSON.parse(arrayMatch[0]);
+    console.log(`[Kitbash] Identified source icons for "${concept}":`, parsed);
+    return parsed.filter((s: any) => typeof s === 'string');
+  } catch (error) {
+    console.error('[Kitbash] Error identifying source icons:', error);
+    // Fallback to simple word extraction
+    return concept.toLowerCase().split(/[\s-_]+/).filter(p =>
+      p.length > 2 && COMMON_ICON_PARTS.includes(p)
+    );
+  }
+}
+
+/**
  * Find component matches for a part name
  */
 function findComponentMatches(
@@ -211,27 +311,40 @@ function selectBestMatch(
 async function generateLayouts(
   concept: string,
   parts: KitbashMatch[],
+  missingParts: string[] = [],
   apiKey?: string
 ): Promise<SkeletonLayout[]> {
   const resolvedApiKey = apiKey || process.env.GOOGLE_API_KEY;
 
+  // All part names (found + missing) for layout generation
+  const allPartNames = [...parts.map(p => p.partName), ...missingParts];
+
   // Default layouts if no API key
   if (!resolvedApiKey) {
-    return getDefaultLayouts(parts);
+    return getDefaultLayouts(parts, missingParts);
   }
 
   const genAI = new GoogleGenerativeAI(resolvedApiKey);
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-  const partNames = parts.map(p => p.partName).join(', ');
   const partInfo = parts.map(p => {
     const bbox = p.component.boundingBox;
-    return `- ${p.partName}: ${bbox.width.toFixed(0)}×${bbox.height.toFixed(0)} at (${bbox.centerX.toFixed(0)}, ${bbox.centerY.toFixed(0)})`;
+    return `- ${p.partName} (found): ${bbox.width.toFixed(0)}×${bbox.height.toFixed(0)} at (${bbox.centerX.toFixed(0)}, ${bbox.centerY.toFixed(0)})`;
   }).join('\n');
 
-  const prompt = `You are an icon composition expert. Given these components for the concept "${concept}":
+  const missingInfo = missingParts.length > 0
+    ? `\n\nMissing parts (will be AI-generated, need positions):\n${missingParts.map(p => `- ${p}`).join('\n')}`
+    : '';
 
-${partInfo}
+  // Build list of all part names that need positions
+  const allPartsForPrompt = allPartNames.join(', ');
+
+  const prompt = `You are an icon composition expert. Create layouts for the concept "${concept}".
+
+Components available:
+${partInfo}${missingInfo}
+
+IMPORTANT: You must provide positions for ALL these parts: ${allPartsForPrompt}
 
 The canvas is 24×24 with 2px padding (usable area: 2-22).
 
@@ -243,7 +356,7 @@ Suggest 3 different spatial arrangements:
 For each layout, specify:
 - name: short identifier (e.g., "standard", "badge", "overlay")
 - description: one sentence explanation
-- positions: for each part, give x, y (center point), scale (0.3-1.0), zIndex (0=back, 1=front)
+- positions: for EVERY part (${allPartsForPrompt}), give x, y (center point), scale (0.3-1.0), zIndex (0=back, 1=front)
 
 Respond with valid JSON only:
 {
@@ -252,8 +365,8 @@ Respond with valid JSON only:
       "name": "standard",
       "description": "Parts arranged side by side",
       "positions": {
-        "user": { "x": 8, "y": 12, "scale": 0.7, "zIndex": 1 },
-        "shield": { "x": 16, "y": 12, "scale": 0.7, "zIndex": 0 }
+        "${allPartNames[0] || 'part1'}": { "x": 8, "y": 12, "scale": 0.7, "zIndex": 0 },
+        "${allPartNames[1] || 'part2'}": { "x": 16, "y": 12, "scale": 0.5, "zIndex": 1 }
       }
     }
   ]
@@ -279,42 +392,46 @@ Respond with valid JSON only:
     }));
   } catch (error) {
     console.error('[Kitbash] Error generating layouts:', error);
-    return getDefaultLayouts(parts);
+    return getDefaultLayouts(parts, missingParts);
   }
 }
 
 /**
  * Get default layouts when LLM is unavailable
  */
-function getDefaultLayouts(parts: KitbashMatch[]): SkeletonLayout[] {
+function getDefaultLayouts(parts: KitbashMatch[], missingParts: string[] = []): SkeletonLayout[] {
   const layouts: SkeletonLayout[] = [];
 
-  if (parts.length === 0) {
+  // Combine found and missing part names
+  const allPartNames = [...parts.map(p => p.partName), ...missingParts];
+  const totalParts = allPartNames.length;
+
+  if (totalParts === 0) {
     return layouts;
   }
 
-  if (parts.length === 1) {
+  if (totalParts === 1) {
     // Single part - center it
     layouts.push({
       name: 'centered',
       description: 'Component centered in canvas',
       positions: {
-        [parts[0].partName]: { x: 12, y: 12, scale: 0.9, zIndex: 0 },
+        [allPartNames[0]]: { x: 12, y: 12, scale: 0.9, zIndex: 0 },
       },
     });
     return layouts;
   }
 
-  if (parts.length === 2) {
-    const [p1, p2] = parts;
+  if (totalParts === 2) {
+    const [name1, name2] = allPartNames;
 
     // Standard: side by side
     layouts.push({
       name: 'side-by-side',
       description: 'Components arranged horizontally',
       positions: {
-        [p1.partName]: { x: 8, y: 12, scale: 0.6, zIndex: 0 },
-        [p2.partName]: { x: 16, y: 12, scale: 0.6, zIndex: 1 },
+        [name1]: { x: 8, y: 12, scale: 0.6, zIndex: 0 },
+        [name2]: { x: 16, y: 12, scale: 0.6, zIndex: 1 },
       },
     });
 
@@ -323,8 +440,8 @@ function getDefaultLayouts(parts: KitbashMatch[]): SkeletonLayout[] {
       name: 'badge',
       description: 'Second component as badge on first',
       positions: {
-        [p1.partName]: { x: 10, y: 12, scale: 0.8, zIndex: 0 },
-        [p2.partName]: { x: 17, y: 17, scale: 0.4, zIndex: 1 },
+        [name1]: { x: 10, y: 12, scale: 0.8, zIndex: 0 },
+        [name2]: { x: 17, y: 17, scale: 0.4, zIndex: 1 },
       },
     });
 
@@ -333,20 +450,20 @@ function getDefaultLayouts(parts: KitbashMatch[]): SkeletonLayout[] {
       name: 'overlay',
       description: 'Components overlapping in center',
       positions: {
-        [p1.partName]: { x: 12, y: 12, scale: 0.7, zIndex: 0 },
-        [p2.partName]: { x: 12, y: 12, scale: 0.5, zIndex: 1 },
+        [name1]: { x: 12, y: 12, scale: 0.7, zIndex: 0 },
+        [name2]: { x: 12, y: 12, scale: 0.5, zIndex: 1 },
       },
     });
   }
 
-  if (parts.length >= 3) {
+  if (totalParts >= 3) {
     const positions: Record<string, Position> = {};
-    const angle = (2 * Math.PI) / parts.length;
+    const angle = (2 * Math.PI) / totalParts;
 
-    parts.forEach((p, i) => {
+    allPartNames.forEach((name, i) => {
       const x = 12 + Math.cos(angle * i - Math.PI / 2) * 6;
       const y = 12 + Math.sin(angle * i - Math.PI / 2) * 6;
-      positions[p.partName] = { x, y, scale: 0.5, zIndex: i };
+      positions[name] = { x, y, scale: 0.5, zIndex: i };
     });
 
     layouts.push({
@@ -519,22 +636,24 @@ Example: <path d="M12 2v4" />`;
 export async function planKitbash(
   concept: string,
   componentIndex: Map<string, IconComponent[]>,
-  apiKey?: string
+  apiKey?: string,
+  availableIconNames?: string[]
 ): Promise<KitbashPlan> {
-  // 1. Decompose concept into required parts
+  // 1. Use LLM to identify which library icons could be combined
+  // This returns searchable icon names like ["briefcase", "lock"]
+  // NOT literal parts like ["case_body", "keyhole"]
+  const requiredParts = await identifySourceIcons(
+    concept,
+    availableIconNames || [],
+    apiKey
+  );
+
+  console.log(`[Kitbash] Planning "${concept}" - looking for icons:`, requiredParts);
+
+  // Also get decomposition for the generation prompt (if needed later)
   const decomposition = await getDecomposition(concept, 'auto', [], apiKey);
 
-  let requiredParts: string[] = [];
-  if (decomposition && decomposition.components.length > 0) {
-    requiredParts = decomposition.components.map(c => c.name);
-  } else {
-    // Fallback: try to extract parts from concept
-    requiredParts = concept.toLowerCase().split(/[\s-_]+/).filter(p => p.length > 2);
-  }
-
-  console.log(`[Kitbash] Planning "${concept}" with required parts:`, requiredParts);
-
-  // 2. Search library for each part
+  // 2. Search library for each icon
   const foundParts: KitbashMatch[] = [];
   const missingParts: string[] = [];
 
@@ -566,8 +685,14 @@ export async function planKitbash(
 
   console.log(`[Kitbash] Coverage: ${(coverage * 100).toFixed(0)}%, Strategy: ${strategy}`);
 
-  // 5. Generate layout suggestions
-  const suggestedLayouts = await generateLayouts(concept, foundParts, apiKey);
+  // 5. Generate layout suggestions (skip LLM call if no parts found)
+  // Pass both found and missing parts so layouts include positions for everything
+  let suggestedLayouts: SkeletonLayout[] = [];
+  if (foundParts.length > 0 || missingParts.length > 0) {
+    suggestedLayouts = await generateLayouts(concept, foundParts, missingParts, apiKey);
+  } else {
+    console.log('[Kitbash] Skipping layout generation - no parts at all');
+  }
 
   return {
     concept,

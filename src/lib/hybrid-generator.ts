@@ -459,11 +459,33 @@ const VARIATION_HINTS = [
 /**
  * Generate multiple icon variants with meaningful differences
  */
+// Cache for Reference Oracle results to avoid repeated calls during variant generation
+const referenceOracleCache = new Map<string, StructuralReference | null>();
+
 export async function generateIconVariants(
   config: GenerationConfig,
   count: number = 3
 ): Promise<GenerationResult[]> {
   const results: GenerationResult[] = [];
+
+  // Pre-fetch structural reference once for all variants (P1c optimization)
+  // This avoids making 3 separate Reference Oracle calls
+  const cacheKey = config.concept.toLowerCase().trim();
+  if (config.useReferenceOracle !== false && !referenceOracleCache.has(cacheKey)) {
+    try {
+      const apiKey = config.apiKey || process.env.GOOGLE_API_KEY;
+      const ref = await getStructuralReference(config.concept, {
+        maxIcons: 6,
+        maxPerCollection: 1,
+        apiKey,
+      });
+      referenceOracleCache.set(cacheKey, ref);
+      console.log(`[HybridGenerator] Pre-cached Reference Oracle for "${config.concept}"`);
+    } catch (error) {
+      console.warn(`[HybridGenerator] Reference Oracle pre-fetch failed:`, error);
+      referenceOracleCache.set(cacheKey, null);
+    }
+  }
 
   for (let i = 0; i < count; i++) {
     // Add variation hint to description
@@ -474,12 +496,14 @@ export async function generateIconVariants(
 
     // Vary temperature and create config for this variant
     // Enable creative interpretation for variants after the first
+    // Disable Reference Oracle per-variant since we pre-fetched
     const variantConfig: GenerationConfig = {
       ...config,
       description: variedDescription || undefined,
       temperature: Math.min(0.9, (config.temperature || 0.2) + i * 0.2),
       variantIndex: i, // Pass variant index to rotate few-shot examples
       allowCreativeInterpretation: i > 0, // First variant follows exact paths, others are creative
+      useReferenceOracle: false, // Already pre-fetched
     };
 
     console.log(`[HybridGenerator] Generating variant ${i + 1}/${count} (temp=${(variantConfig.temperature || 0.2).toFixed(1)}, hint="${hint || 'none'}")`);

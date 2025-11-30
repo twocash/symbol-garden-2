@@ -670,7 +670,7 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[800px] h-[600px] flex flex-col">
+            <DialogContent className="sm:max-w-[1200px] w-[90vw] h-[80vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-primary" />
@@ -681,9 +681,9 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 flex gap-6 min-h-0 py-4">
+                <div className="flex-1 flex gap-6 min-h-0 py-4 overflow-hidden">
                     {/* Left Column: Controls */}
-                    <div className="w-1/3 flex flex-col gap-4">
+                    <div className="w-72 shrink-0 flex flex-col gap-4 overflow-y-auto">
                         <div className="space-y-2">
                             <Label>Icon Concept</Label>
                             <Input
@@ -1140,19 +1140,42 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
                         {/* F5: Kitbash Result Preview */}
                         {generationMode === 'kitbash' && kitbashSvg && (
-                            <div className="mb-4 p-3 rounded-lg border bg-muted/30">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                    <span className="text-sm font-medium">Assembled Icon</span>
+                            <div className="mb-4 p-4 rounded-lg border-2 border-green-500/50 bg-green-50/50 dark:bg-green-900/10">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                        <span className="text-sm font-medium text-green-700 dark:text-green-400">Icon Assembled!</span>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        onClick={handleSaveKitbash}
+                                        disabled={isSaving}
+                                        className="bg-green-600 hover:bg-green-700"
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Download className="w-3 h-3 mr-1.5" />
+                                                Save to Workspace
+                                            </>
+                                        )}
+                                    </Button>
                                 </div>
                                 <div className="flex justify-center">
-                                    <div className="w-24 h-24 p-3 rounded-lg border-2 border-primary bg-background">
+                                    <div className="w-28 h-28 p-3 rounded-lg border-2 border-green-500 bg-background shadow-sm">
                                         <div
                                             className="w-full h-full text-foreground"
                                             dangerouslySetInnerHTML={{ __html: renderSvgPreview(kitbashSvg) }}
                                         />
                                     </div>
                                 </div>
+                                <p className="text-xs text-center text-muted-foreground mt-2">
+                                    &quot;{prompt}&quot; ready to add to your workspace
+                                </p>
                             </div>
                         )}
 
