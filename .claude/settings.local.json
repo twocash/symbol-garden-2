@@ -39,7 +39,10 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(npm install)",
-      "Bash(wmic process where \"processid=40568\" get processid,commandline)"
+      "Bash(wmic process where \"processid=40568\" get processid,commandline)",
+      "Bash(wmic:*)",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(powershell -Command \"Stop-Process -Id 17040 -Force\")"
     ],
     "deny": [],
     "ask": []

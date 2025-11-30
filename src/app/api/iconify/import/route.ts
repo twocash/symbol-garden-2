@@ -194,8 +194,8 @@ export async function POST(request: NextRequest) {
 
         sendEvent({ status: "fetching", progress: 0, total });
 
-        // Fetch icons in batches
-        const icons: Icon[] = [];
+        // Fetch icons in batches and stream them incrementally
+        const allIcons: Icon[] = [];
         const BATCH_SIZE = 20;
 
         for (let i = 0; i < iconNames.length; i += BATCH_SIZE) {
@@ -221,20 +221,31 @@ export async function POST(request: NextRequest) {
             })
           );
 
-          icons.push(...batchResults.filter((i): i is Icon => i !== null));
+          const validIcons = batchResults.filter((i): i is Icon => i !== null);
+          allIcons.push(...validIcons);
 
-          sendEvent({ status: "fetching", progress: Math.min(i + BATCH_SIZE, total), total });
+          // Stream icons incrementally as they're fetched
+          if (validIcons.length > 0) {
+            sendEvent({
+              status: "icons",
+              icons: validIcons,
+              progress: Math.min(i + BATCH_SIZE, total),
+              total
+            });
+          } else {
+            sendEvent({ status: "fetching", progress: Math.min(i + BATCH_SIZE, total), total });
+          }
         }
 
         sendEvent({ status: "converting" });
 
         // Generate Style DNA if API key provided
         let manifest = "";
-        if (apiKey && icons.length > 0) {
+        if (apiKey && allIcons.length > 0) {
           sendEvent({ status: "analyzing" });
           try {
             // Use a sample of icons for analysis (first 20)
-            const sampleIcons = icons.slice(0, 20);
+            const sampleIcons = allIcons.slice(0, 20);
             manifest = await analyzeLibrary(sampleIcons, apiKey) || "";
           } catch (error) {
             console.error("Style DNA generation failed:", error);
@@ -242,9 +253,10 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        // Final event - just metadata, icons already streamed
         sendEvent({
           status: "complete",
-          icons,
+          iconCount: allIcons.length,
           manifest,
           name: collection.name || prefix,
         });

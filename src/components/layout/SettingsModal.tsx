@@ -373,31 +373,63 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             let importedIcons: Icon[] = [];
             let manifest = "";
             let collectionName = prefix;
+            let buffer = ""; // Buffer for incomplete JSON lines
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split("\n").filter(Boolean);
+                // Append new data to buffer
+                buffer += decoder.decode(value, { stream: true });
+
+                // Split on newlines and process complete lines
+                const lines = buffer.split("\n");
+                // Keep the last potentially incomplete line in the buffer
+                buffer = lines.pop() || "";
 
                 for (const line of lines) {
+                    if (!line.trim()) continue;
                     try {
                         const event = JSON.parse(line);
                         if (event.status === "fetching") {
                             setIconifyImportProgress(`Fetching icons... (${event.progress}/${event.total})`);
+                        } else if (event.status === "icons") {
+                            // Accumulate icons from incremental batches
+                            if (event.icons && Array.isArray(event.icons)) {
+                                importedIcons.push(...event.icons);
+                            }
+                            setIconifyImportProgress(`Fetching icons... (${event.progress}/${event.total}) - ${importedIcons.length} loaded`);
                         } else if (event.status === "converting") {
                             setIconifyImportProgress(`Converting to Symbol Garden format...`);
                         } else if (event.status === "analyzing") {
                             setIconifyImportProgress(`Generating Style DNA...`);
                         } else if (event.status === "complete") {
-                            importedIcons = event.icons || [];
+                            // Final event - icons already accumulated, just get metadata
                             manifest = event.manifest || "";
                             collectionName = event.name || prefix;
+                            console.log(`[Iconify Import] Complete: ${event.iconCount} icons, manifest: ${manifest ? "yes" : "no"}`);
+                        } else if (event.error) {
+                            throw new Error(event.error);
                         }
-                    } catch {
-                        // Ignore parse errors for incomplete chunks
+                    } catch (parseError) {
+                        // Log parse errors for debugging
+                        console.warn("[Iconify Import] Parse error for line:", line.substring(0, 100), parseError);
                     }
+                }
+            }
+
+            // Process any remaining buffer content
+            if (buffer.trim()) {
+                try {
+                    const event = JSON.parse(buffer);
+                    if (event.status === "icons" && event.icons) {
+                        importedIcons.push(...event.icons);
+                    } else if (event.status === "complete") {
+                        manifest = event.manifest || "";
+                        collectionName = event.name || prefix;
+                    }
+                } catch {
+                    console.warn("[Iconify Import] Could not parse final buffer:", buffer.substring(0, 100));
                 }
             }
 
