@@ -692,13 +692,13 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     };
 
     // Helper to render SVG preview
+    // Generated SVGs already have proper styling from the Style Enforcer
+    // We only need to add sizing class and ensure currentColor for theming
     const renderSvgPreview = (svg: string) => {
-        // Add stroke styling for preview
-        const styledSvg = svg
+        return svg
             .replace(/<svg/, '<svg class="w-full h-full"')
-            .replace(/stroke="[^"]*"/, 'stroke="currentColor"')
-            .replace(/fill="[^"]*"/, 'fill="none"');
-        return styledSvg;
+            // Replace stroke="..." with currentColor for theme support, but preserve fill styling
+            .replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"');
     };
 
     return (
