@@ -1,9 +1,9 @@
 # Symbol Garden 2.0 - AI Agent Context Document
 
 > **Last Updated:** 2025-11-30
-> **Version:** 0.5.0 (Sprint 06: Iron Dome + Semantic Bridge + Kitbash Refinery)
+> **Version:** 0.5.1 (Sprint 06 Complete: All Critical Bugs Resolved)
 > **Branch:** busy-cerf
-> **System Status:** ✅ STABLE - All F1-F5 features + Iron Dome operational
+> **System Status:** ✅ STABLE - All F1-F5 features + Sprint 06 enhancements operational
 
 ---
 
@@ -240,15 +240,15 @@ data/
 | F4: Kitbash Engine | ✅ Complete | Assembly from existing components |
 | F5: Skeleton-First UI | ✅ Complete | Plan → Layout → Execute workflow |
 
-### Sprint 06: Stability & Polish
+### Sprint 06: Stability & Polish (✅ COMPLETE)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
 | **Iron Dome** | ✅ Complete | Unified SVG processing with dual-mode (`ingest`/`generate`) |
 | **Semantic Bridge** | ✅ Complete | Source icon indexing + centralized vocabulary |
-| **Kitbash Refinery** | ✅ Backend | Transform draft assemblies into cohesive icons |
-| **Refinery UI** | 🔄 Pending | "Refine" button in AIIconGeneratorModal |
-| **UI Polish** | 🔄 Pending | Fix missing heart/menu indicators |
+| **Kitbash Refinery** | ✅ Complete | Transform draft assemblies into cohesive icons |
+| **Refinery UI** | ✅ Complete | "Refine" button with Draft/Refined toggle |
+| **UI Polish** | ✅ Complete | Persistent favorite heart + context menu |
 
 ### Generation Pipelines
 
@@ -436,12 +436,12 @@ Input: "secure user" concept
 
 ## 6. TECHNICAL DEBT & KNOWN ISSUES
 
-### Critical Bugs (v0.5.0)
+### Critical Bugs (v0.5.0) - ✅ ALL RESOLVED
 
 | Bug | Location | Impact | Status |
 |-----|----------|--------|--------|
-| **Kitbash needs Jury refinement** | `kitbash-engine.ts` | Assembled icons are one-shots without quality gate | ✅ Addressed - Refinery backend complete |
-| **UI indicators missing** | Icon tiles, workspace header | Heart (favorites) and "..." menu icons not rendering | 🔴 Open |
+| **Kitbash needs Jury refinement** | `kitbash-engine.ts` | Assembled icons are one-shots without quality gate | ✅ Refinery backend + UI complete |
+| **UI indicators missing** | Icon tiles, workspace header | Heart (favorites) and "..." menu icons not rendering | ✅ Fixed - IconCard updated |
 | **Fragile SVG rendering** | Multiple locations | Ad-hoc "normalization" fixes break styling | ✅ Addressed - Iron Dome |
 | **Component mismatch** | Ingestion vs Kitbash | Assembly tagging doesn't match extraction | ✅ Addressed - Semantic Bridge |
 
@@ -449,9 +449,9 @@ Input: "secure user" concept
 
 | Issue | Location | Impact | Effort |
 |-------|----------|--------|--------|
-| **Kitbash→Jury integration** | `kitbash-engine.ts`, `style-jury-service.ts` | Assembled icons should go through refinement pool | High |
-| **System-wide SVG handler** | Needs new service | Prevent piecemeal SVG fixes breaking other flows | High |
-| **Component semantic alignment** | `component-indexer.ts`, `kitbash-engine.ts` | Parts extracted during ingestion don't map to assembly | High |
+| **Kitbash→Jury integration** | `kitbash-engine.ts`, `style-jury-service.ts` | Assembled icons should go through refinement pool | ✅ Resolved via Refinery |
+| **System-wide SVG handler** | Needs new service | Prevent piecemeal SVG fixes breaking other flows | ✅ Resolved via Iron Dome |
+| **Component semantic alignment** | `component-indexer.ts`, `kitbash-engine.ts` | Parts extracted during ingestion don't map to assembly | ✅ Resolved via Semantic Bridge |
 | **Kitbash planning slow** | `kitbash-engine.ts` | 30-40s for planning step | Medium |
 | **Component indexing not persisted** | Enrichment happens each time | Re-indexes on every enrichment | Low |
 | **Decomposition cache not persisted** | `decomposition-service.ts` | Dynamic decompositions lost on restart | Low |
