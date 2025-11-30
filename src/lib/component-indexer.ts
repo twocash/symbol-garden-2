@@ -542,6 +542,16 @@ export async function buildComponentIndex(
         const catExisting = index.get(catKey) || [];
         catExisting.push(component);
         index.set(catKey, catExisting);
+
+        // =====================================================================
+        // SEMANTIC BRIDGE: Index by Source Icon Name
+        // This is the PRIMARY lookup method for Kitbash
+        // If icon is "user", all its parts are retrievable via "source:user"
+        // =====================================================================
+        const sourceKey = `source:${icon.name.toLowerCase()}`;
+        const sourceExisting = index.get(sourceKey) || [];
+        sourceExisting.push(component);
+        index.set(sourceKey, sourceExisting);
       }
     } catch (error) {
       console.error(`[ComponentIndexer] Error indexing ${icon.name}:`, error);

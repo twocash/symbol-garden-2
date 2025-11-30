@@ -199,3 +199,128 @@ export function getSuggestedPatterns(concept: string, tags?: string[]): Pattern[
 export function getPattern(type: PatternType): Pattern | undefined {
   return PATTERNS.find(p => p.type === type);
 }
+
+// =============================================================================
+// SEMANTIC ONTOLOGY - Shared vocabulary for Indexer and Kitbash Planner
+// =============================================================================
+
+/**
+ * Semantic groupings of related icon concepts
+ * Used to help both Indexer and Kitbash speak the same language
+ */
+export const SEMANTIC_ONTOLOGY = {
+  // People & Users
+  people: ['user', 'users', 'person', 'avatar', 'profile', 'account', 'contact'],
+
+  // Security
+  security: ['lock', 'unlock', 'shield', 'key', 'secure', 'password', 'authentication'],
+
+  // Files & Documents
+  documents: ['file', 'folder', 'document', 'page', 'text', 'paper', 'clipboard'],
+
+  // Communication
+  communication: ['mail', 'envelope', 'message', 'chat', 'comment', 'inbox', 'send'],
+
+  // Actions
+  actions: ['edit', 'delete', 'add', 'remove', 'save', 'cancel', 'copy', 'paste', 'trash'],
+
+  // Directions
+  directions: ['arrow', 'chevron', 'caret', 'pointer', 'up', 'down', 'left', 'right'],
+
+  // UI Elements
+  ui: ['menu', 'settings', 'gear', 'cog', 'slider', 'toggle', 'button', 'checkbox'],
+
+  // Media
+  media: ['camera', 'image', 'photo', 'video', 'film', 'music', 'audio', 'play', 'pause'],
+
+  // Time
+  time: ['clock', 'calendar', 'alarm', 'timer', 'schedule', 'date'],
+
+  // Commerce
+  commerce: ['cart', 'shopping', 'basket', 'credit-card', 'wallet', 'money', 'payment'],
+
+  // Social
+  social: ['heart', 'star', 'bookmark', 'flag', 'tag', 'like', 'share'],
+
+  // Nature & Weather
+  nature: ['cloud', 'sun', 'moon', 'weather', 'rain', 'snow', 'wind'],
+
+  // Location
+  location: ['globe', 'map', 'pin', 'location', 'marker', 'compass', 'navigation'],
+
+  // Devices
+  devices: ['phone', 'smartphone', 'tablet', 'laptop', 'monitor', 'desktop', 'computer'],
+
+  // Objects
+  objects: ['box', 'package', 'archive', 'briefcase', 'suitcase', 'bag', 'home', 'building'],
+} as const;
+
+/**
+ * Common component/part names used in icon anatomy
+ * Injected into Indexer prompts for consistent naming
+ */
+export const COMMON_COMPONENT_NAMES = [
+  // Body parts (for human icons)
+  'head', 'body', 'torso', 'arm', 'hand', 'leg', 'foot',
+
+  // Geometric descriptors
+  'circle', 'rectangle', 'square', 'triangle', 'arc', 'line', 'curve',
+
+  // Semantic roles
+  'container', 'indicator', 'modifier', 'badge', 'handle', 'frame',
+
+  // Positional descriptors
+  'top', 'bottom', 'left', 'right', 'center', 'inner', 'outer',
+
+  // Action indicators
+  'arrow', 'check', 'cross', 'plus', 'minus', 'dot',
+
+  // Common icon parts
+  'outline', 'fill', 'stroke', 'border', 'background',
+] as const;
+
+/**
+ * Common icon names found in most libraries
+ * Used by Kitbash Planner to identify source icons
+ */
+export const COMMON_ICON_NAMES = [
+  // Objects
+  'user', 'users', 'person', 'home', 'house', 'building', 'office',
+  'file', 'folder', 'document', 'book', 'notebook', 'clipboard',
+  'lock', 'unlock', 'key', 'shield', 'security',
+  'box', 'package', 'archive', 'briefcase', 'suitcase', 'bag',
+  'mail', 'envelope', 'message', 'chat', 'comment', 'inbox',
+  'phone', 'smartphone', 'tablet', 'laptop', 'monitor', 'desktop',
+  'camera', 'image', 'photo', 'video', 'film', 'music',
+  'clock', 'time', 'calendar', 'alarm', 'bell', 'notification',
+  'cart', 'shopping', 'basket', 'credit-card', 'wallet', 'money',
+  'heart', 'star', 'bookmark', 'flag', 'tag', 'label',
+  'settings', 'gear', 'cog', 'sliders', 'tool', 'wrench',
+  'search', 'zoom', 'filter', 'sort', 'eye', 'view',
+  'cloud', 'sun', 'moon', 'globe', 'map', 'location', 'pin',
+  'rocket', 'plane', 'car', 'truck', 'ship', 'train', 'bicycle',
+  'brain', 'lightbulb', 'idea', 'puzzle', 'target', 'award',
+  // Symbols
+  'check', 'checkmark', 'x', 'close', 'plus', 'minus', 'add', 'remove',
+  'arrow', 'chevron', 'caret', 'expand', 'collapse', 'refresh', 'sync',
+  'download', 'upload', 'share', 'send', 'external', 'link',
+  'edit', 'pencil', 'pen', 'trash', 'delete', 'copy', 'paste',
+  'play', 'pause', 'stop', 'skip', 'forward', 'backward',
+  // Containers
+  'circle', 'square', 'triangle', 'hexagon', 'badge', 'frame',
+] as const;
+
+/**
+ * Format vocabulary for injection into prompts
+ */
+export function formatVocabularyForPrompt(): string {
+  return `## STANDARD VOCABULARY
+
+### Component Names
+Use these standard names for icon parts when applicable:
+${COMMON_COMPONENT_NAMES.join(', ')}
+
+### Common Icon Names
+When identifying source icons, prefer these common names:
+${COMMON_ICON_NAMES.slice(0, 50).join(', ')}...`;
+}

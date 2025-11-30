@@ -20,6 +20,7 @@ import { analyzeLibrary, LibraryAnalysis, quickAnalyzeLibrary } from './library-
 import { validateSvg, ValidationResult, formatValidationResult, normalizeSvg } from './svg-validator';
 import { getStructuralReference, StructuralReference } from './iconify-service';
 import { enforceStyle, rulesFromStyleDNA, ComplianceResult, formatComplianceResult, EnforcementRules, FEATHER_RULES } from './style-enforcer';
+import { SVGProcessor, createProfileFromRules, ProcessResult, formatProcessResult } from './svg-processor';
 
 /**
  * Configuration for icon generation
@@ -392,43 +393,49 @@ export async function generateIcon(config: GenerationConfig): Promise<Generation
     }
   }
 
-  // Log any warnings
+  // Log any warnings from pre-processing validation
   if (validation?.warnings.length) {
     for (const warning of validation.warnings) {
       console.log(`  [Validation] WARNING: ${warning.message}`);
     }
   }
 
-  // F1: Style Enforcer - Deterministic style compliance
-  // This is the core of the Sprout Engine - guarantee style match
-  let compliance: ComplianceResult | undefined;
+  // =========================================================================
+  // IRON DOME: Unified SVG Processing
+  // This replaces separate validation + enforcement + optimization steps
+  // with a single, consolidated pipeline that guarantees style compliance
+  // =========================================================================
 
   // Build enforcement rules from style spec or use defaults
   const rules: EnforcementRules = styleSpec
     ? rulesFromStyleDNA(styleSpec)
     : FEATHER_RULES; // Default to Feather-style rules
 
-  // Run the enforcer
-  compliance = enforceStyle(svg, rules);
+  // Create style profile for the processor
+  const profile = createProfileFromRules(rules, 'generate');
 
-  // Log compliance result
-  console.log(`[StyleEnforcer] ${compliance.passed ? 'PASS' : 'FAIL'} (Score: ${compliance.score}/100)`);
-  if (compliance.changes.length > 0) {
-    console.log(`[StyleEnforcer] Auto-fixed: ${compliance.changes.map(c => c.attribute).join(', ')}`);
-  }
-  if (compliance.violations.length > 0) {
-    const errors = compliance.violations.filter(v => v.severity === 'error');
-    const warnings = compliance.violations.filter(v => v.severity === 'warning');
-    if (errors.length > 0) {
-      console.log(`[StyleEnforcer] Errors fixed: ${errors.map(e => e.rule).join(', ')}`);
-    }
-    if (warnings.length > 0) {
-      console.log(`[StyleEnforcer] Warnings: ${warnings.map(w => `${w.rule}(${w.actual})`).join(', ')}`);
+  // Process through the Iron Dome
+  const processResult = SVGProcessor.process(svg, 'generate', profile);
+
+  // Log processing result
+  console.log(`[IronDome] Processed SVG: ${processResult.modified ? 'MODIFIED' : 'UNCHANGED'}`);
+  if (processResult.compliance) {
+    console.log(`[IronDome] Style compliance: ${processResult.compliance.passed ? 'PASS' : 'FAIL'} (Score: ${processResult.compliance.score}/100)`);
+    if (processResult.compliance.changes.length > 0) {
+      console.log(`[IronDome] Auto-fixed: ${processResult.compliance.changes.map(c => c.attribute).join(', ')}`);
     }
   }
+  if (processResult.warnings.length > 0) {
+    for (const w of processResult.warnings) {
+      console.log(`[IronDome] Warning: ${w}`);
+    }
+  }
 
-  // Always use the auto-fixed version
-  svg = compliance.autoFixed;
+  // Use the processed SVG
+  svg = processResult.svg;
+
+  // Extract compliance for return value (for backward compatibility)
+  const compliance = processResult.compliance || undefined;
 
   return {
     svg,
@@ -565,4 +572,163 @@ export function clearLibraryAnalysis(libraryId?: string): void {
   } else {
     libraryAnalysisCache.clear();
   }
+}
+
+// =============================================================================
+// KITBASH REFINERY - Transform draft assemblies into cohesive icons
+// =============================================================================
+
+/**
+ * Configuration for icon refinement
+ */
+export interface RefinementConfig {
+  /** The original concept (for context) */
+  concept: string;
+
+  /** Style DNA/manifest to enforce */
+  styleManifest?: string;
+
+  /** API key for Gemini */
+  apiKey?: string;
+
+  /** Temperature for generation (default: 0.1 for precise tracing) */
+  temperature?: number;
+}
+
+/**
+ * Result of icon refinement
+ */
+export interface RefinementResult {
+  /** The refined SVG */
+  svg: string;
+
+  /** Was refinement successful? */
+  success: boolean;
+
+  /** What changes were made */
+  changes: string[];
+
+  /** Processing time in ms */
+  processingTimeMs: number;
+}
+
+/**
+ * Refine a draft Kitbash assembly into a cohesive, production-ready icon
+ *
+ * This is the "Refinery" step that transforms mechanically-assembled Kitbash
+ * output (which may have overlapping paths, disjointed corners) into a unified
+ * vector that looks "drawn by a single hand."
+ *
+ * Strategy: Frame this as SVG CODE REFACTORING, not image generation.
+ * Gemini is better at code manipulation than precise geometry generation.
+ */
+export async function refineIcon(
+  draftSvg: string,
+  config: RefinementConfig
+): Promise<RefinementResult> {
+  const startTime = performance.now();
+
+  const resolvedApiKey = config.apiKey || process.env.GOOGLE_API_KEY;
+  if (!resolvedApiKey) {
+    return {
+      svg: draftSvg,
+      success: false,
+      changes: ['No API key available'],
+      processingTimeMs: performance.now() - startTime,
+    };
+  }
+
+  console.log(`[Refinery] Starting refinement for "${config.concept}"`);
+
+  // Build the refinement prompt
+  const prompt = buildRefinementPrompt(draftSvg, config);
+
+  const genAI = new GoogleGenerativeAI(resolvedApiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: config.temperature ?? 0.1, // Low temp for precise work
+      },
+    });
+
+    const responseText = result.response.text();
+    const refinedSvg = extractSvg(responseText);
+
+    // Validate the refined SVG
+    if (!isValidSvg(refinedSvg)) {
+      console.warn('[Refinery] Refined SVG is invalid, returning draft');
+      return {
+        svg: draftSvg,
+        success: false,
+        changes: ['Refinement produced invalid SVG'],
+        processingTimeMs: performance.now() - startTime,
+      };
+    }
+
+    // Process through Iron Dome for final polish
+    const rules = config.styleManifest
+      ? rulesFromStyleDNA(parseStyleDNA(config.styleManifest))
+      : FEATHER_RULES;
+
+    const profile = createProfileFromRules(rules, 'generate');
+    const processResult = SVGProcessor.process(refinedSvg, 'generate', profile);
+
+    console.log(`[Refinery] Refinement complete: ${processResult.modified ? 'MODIFIED' : 'UNCHANGED'}`);
+
+    return {
+      svg: processResult.svg,
+      success: true,
+      changes: [
+        'Merged overlapping paths',
+        'Fixed disjointed corners',
+        'Applied style enforcement',
+        ...(processResult.compliance?.changes.map(c => `Fixed ${c.attribute}`) || []),
+      ],
+      processingTimeMs: performance.now() - startTime,
+    };
+  } catch (error) {
+    console.error('[Refinery] Error during refinement:', error);
+    return {
+      svg: draftSvg,
+      success: false,
+      changes: [`Error: ${error}`],
+      processingTimeMs: performance.now() - startTime,
+    };
+  }
+}
+
+/**
+ * Build the prompt for the Refinery
+ */
+function buildRefinementPrompt(draftSvg: string, config: RefinementConfig): string {
+  const styleInfo = config.styleManifest
+    ? `\n\nSTYLE DNA TO PRESERVE:\n${config.styleManifest.slice(0, 500)}`
+    : '\n\nSTYLE: Feather-style (stroke-width="2", stroke-linecap="round", stroke-linejoin="round")';
+
+  return `You are an SVG code refactoring expert. I have a valid SVG that was mechanically
+assembled from multiple icon components. It may contain visual artifacts:
+- Overlapping stroke paths that should be merged
+- Disjointed corners where paths should connect smoothly
+- Redundant path segments that can be simplified
+
+CONCEPT: "${config.concept}"
+${styleInfo}
+
+TASK: Refactor the SVG code to fix these artifacts while preserving the visual design.
+
+RULES:
+1. PRESERVE the exact visual geometry - do not add or remove shapes
+2. MERGE overlapping paths into clean single strokes where appropriate
+3. CONNECT disjointed path endpoints that are within 1-2px of each other
+4. MAINTAIN all existing style attributes (stroke-width, stroke-linecap, etc.)
+5. KEEP the viewBox and all root SVG attributes
+6. Output valid SVG only - no explanation
+
+INPUT SVG:
+${draftSvg}
+
+OUTPUT: The refactored SVG code only.`;
 }
