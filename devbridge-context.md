@@ -1,9 +1,9 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.7.0 (Sprint 07 - Geometric Intelligence + Iron Dome)
+> **Version:** 0.8.0 (Sprint 09-A - Tracer Spike Complete)
 > **Last Updated:** 2025-12-01
-> **Branch:** main
-> **System Status:** ✅ STABLE - Sprint 07 Geometric Intelligence + Iron Dome 6-Stage merged
+> **Branch:** unruffled-banzai
+> **System Status:** ✅ STABLE - Tracer Spike validated Code Transpilation approach
 
 ---
 
@@ -201,7 +201,7 @@ AIIconGeneratorModal
             └─► refineIcon() → LLM "code refactoring"
 ```
 
-### 3.5 Iconify Import Flow (NEW)
+### 3.5 Iconify Import Flow
 ```
 SettingsModal
     └─► /api/iconify/import (POST)
@@ -210,6 +210,20 @@ SettingsModal
                     └─► Client accumulates via "icons" events
                             └─► Final "complete" event with metadata only
 ```
+
+### 3.6 Tracer Transpilation Flow (NEW - Sprint 09-A)
+```
+AIIconGeneratorModal (Reference Search Rail)
+    └─► User selects reference icon from Iconify
+            └─► Extract path d="" and viewBox from SVG
+                    └─► /api/generate-tracer (POST JSON)
+                            ├─► buildTranspilerPrompt() with scale factors
+                            ├─► Gemini 2.5 Flash (text-only, no vision)
+                            └─► SVGProcessor.process(svg, 'generate')
+                                    └─► Style-compliant transpiled SVG
+```
+
+**Key Insight:** Code Transpilation (path as source code) succeeds where Vision tracing fails.
 
 ---
 
@@ -310,6 +324,7 @@ This is handled by `validateAndRepairPaths()` in `svg-validator.ts`.
 | Kitbash Refinery | Complete | Sprint 06 |
 | Path Syntax Repair | Complete | Sprint 06+ |
 | Iconify Streaming Import | Complete | Sprint 06+ |
+| **Tracer (Code Transpilation)** | **Complete** | **Sprint 09-A** |
 
 ### Storage Constraint
 
@@ -325,6 +340,79 @@ Icon.path: string  // Combined paths joined with space
 ---
 
 ## 6. RECENT CHANGES LOG
+
+### Sprint 09-A (2025-12-01) - Tracer Spike (Code Transpilation)
+
+#### Decision: GO ✅
+
+The spike validated that **Code Transpilation** works where Vision-based tracing failed.
+
+#### Key Finding: LLMs as Code Refactorers > Image Tracers
+
+**Original Hypothesis (Failed):**
+> Provide a PNG image of a reference icon → AI "traces" the shape
+
+**Reality:** Gemini ignored the reference image and generated generic icons from memory.
+
+**Pivot (Success):**
+> Provide the raw SVG path `d` attribute → AI "refactors" the coordinates
+
+Treating path data as "source code to be refactored" aligns with LLM strengths.
+
+#### Implementation
+
+- **New Endpoint:** `/api/generate-tracer` - accepts JSON with `structurePath`, `structureViewBox`
+- **New UI Flow:** Reference search rail → Select icon → "Transpile Reference" button
+- **Prompt Strategy:** Explicit coordinate math with scale factors and centering offset
+
+```typescript
+// Transpiler prompt structure
+`Convert this SVG path to fit CENTERED in a 24x24 icon grid.
+
+INPUT PATH (from ${sourceWidth}x${sourceHeight} viewBox):
+d="${structurePath}"
+
+CONVERSION STEPS:
+1. Scale all coordinates to fit in 20x20 area
+2. Add 2 to ALL coordinates to center in grid (2-22 usable range)
+3. Do NOT use transform/translate - recalculate d="" values directly
+...`
+```
+
+#### Test Results
+
+| Icon | Source | Result |
+|------|--------|--------|
+| Brain | Tabler (24x24) | ✅ Clean path, proper coordinates, no transforms |
+| Rocket | Iconoir (24x24) | ✅ Good geometry, stroke weights match target style |
+
+#### Technical Fixes During Spike
+
+1. **MAX_TOKENS Issue:** Gemini 2.5's "thinking tokens" consume output budget
+   - Solution: Increased `maxOutputTokens` from 2048 → 16384
+
+2. **Transform Wrappers:** Model wrapped output in `<g transform="...">`
+   - Solution: Explicit prompt instruction "Do NOT use transform/translate"
+
+3. **Off-Frame Coordinates:** Icons shifted outside viewBox
+   - Solution: Scale to 20x20 then add 2 offset for centering
+
+#### Files Created/Modified
+
+| File | Change |
+|------|--------|
+| `src/app/api/generate-tracer/route.ts` | Rewritten from Vision to Code Transpilation |
+| `src/components/dialogs/AIIconGeneratorModal.tsx` | Path extraction, JSON body, UI text updates |
+| `src/lib/image-utils.ts` | Created (Vision approach), now unused but retained |
+
+#### What's Next
+
+The transpiler approach enables:
+1. **Cross-Library Style Transfer:** Convert FontAwesome/Tabler/Material icons to target library style
+2. **Concept Expansion:** Find reference for "rocket" in any library, transpile to match your library
+3. **Geometric Fidelity:** Preserves exact proportions while adapting stroke weights
+
+---
 
 ### Sprint 07 (2025-12-01) - Geometric Intelligence
 
@@ -581,8 +669,8 @@ I'm continuing work on Symbol Garden 2.0, a TypeScript/Next.js application.
 Read devbridge-context.md for full architecture details.
 
 Current state:
-- Sprint 06 complete + additional fixes: Iron Dome now has 6 stages including PATH SYNTAX REPAIR
-- Generation pipelines (Sprout + Kitbash) both functional
+- Sprint 09-A (Tracer Spike) complete: Code Transpilation approach validated
+- Generation pipelines: Sprout + Kitbash + **Tracer** (new!)
 - Iconify import working with streaming delivery
 - Key constraint: Icons stored as single path string (Icon.path)
 
@@ -592,17 +680,18 @@ The codebase follows a Pipeline Pattern:
 Key files:
 - hybrid-generator.ts: Sprout SVG generation
 - kitbash-engine.ts: Component assembly
+- /api/generate-tracer/route.ts: Code Transpilation (path→path style transfer)
 - svg-processor.ts: Iron Dome (6-stage SVG gateway)
 - svg-validator.ts: Path syntax validation + repair
 - svg-path-utils.ts: Path extraction/normalization
 
-Iron Dome 6 Stages:
-1. SANITIZE - Remove malicious content
-2. PATH SYNTAX REPAIR - Fix LLM path errors (generate mode)
-3. NORMALIZE - style="" to native attributes
-4. STYLE ENFORCEMENT - Apply Style DNA (generate mode)
-5. OPTIMIZATION - SVGO
-6. VALIDATION - Bounds check
+Generation Methods:
+1. **Sprout** - LLM generates SVG from scratch, guided by Style DNA
+2. **Kitbash** - Assemble existing components, optionally refine
+3. **Tracer** - Transpile reference icon paths to target style (NEW)
+
+Key Insight from Sprint 09-A: LLMs are better at "refactoring code" than "tracing images".
+Vision-based tracing failed; Code Transpilation (treating SVG paths as source code) works.
 
 What would you like me to work on?
 ```

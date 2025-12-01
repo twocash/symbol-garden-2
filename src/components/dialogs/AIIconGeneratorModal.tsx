@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,10 @@ import { useProject } from "@/lib/project-context";
 import { useSearch } from "@/lib/search-context";
 import { getIconSources } from "@/lib/storage";
 import { getRelatedSearchTerms } from "@/lib/iconify-service";
+// svgToPng no longer needed - pivoted from Vision to Code Transpilation approach
 import { toast } from "sonner";
-import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle, Puzzle, Wand2, ChevronRight } from "lucide-react";
+import { Loader2, Sparkles, Check, Download, Settings2, Globe, Import, Library, CheckCircle2, AlertCircle, AlertTriangle, Puzzle, Wand2, ChevronRight, Image, X } from "lucide-react";
+import { Icon } from "@/types/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -140,6 +142,12 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
     const [kitbashSvg, setKitbashSvg] = useState<string | null>(null);
     const [isExecutingKitbash, setIsExecutingKitbash] = useState(false);
 
+    // Sprint 09-A: Tracer spike - Structure Reference state
+    // Use IconifyMatch directly instead of converting to Icon - preserves the full SVG
+    const [structureReference, setStructureReference] = useState<IconifyMatch | null>(null);
+    const [referenceSearchResults, setReferenceSearchResults] = useState<IconifyMatch[]>([]);
+    const [isSearchingReferences, setIsSearchingReferences] = useState(false);
+
     // Determine available libraries from ingested icons
     const availableLibraries = libraries.filter(lib => lib !== "custom");
 
@@ -195,6 +203,10 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             setKitbashPlan(null);
             setSelectedLayoutIndex(0);
             setKitbashSvg(null);
+
+            // Sprint 09-A: Reset tracer state
+            setStructureReference(null);
+            setReferenceSearchResults([]);
 
             // Load icon sources to access styleManifest
             getIconSources().then(sources => {
@@ -256,6 +268,41 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
         }, 500); // 500ms debounce
 
         return () => clearTimeout(timeoutId);
+    }, [prompt]);
+
+    // Sprint 09-A: Search Iconify for reference icons when concept changes (debounced)
+    // This uses Iconify API to find structural references from other icon libraries
+    // Keep the IconifyMatch format (with full SVG) instead of converting to Icon
+    useEffect(() => {
+        if (!prompt.trim() || prompt.length < 2) {
+            setReferenceSearchResults([]);
+            return;
+        }
+
+        const timeoutId = setTimeout(async () => {
+            setIsSearchingReferences(true);
+            try {
+                // Use the Iconify search API to find reference icons
+                const response = await fetch(`/api/iconify/search?query=${encodeURIComponent(prompt.trim())}&limit=12`);
+                if (response.ok) {
+                    const data = await response.json();
+                    // Keep as IconifyMatch - don't convert to Icon
+                    // This preserves the full SVG string for proper rendering
+                    setReferenceSearchResults(data.results || []);
+                }
+            } catch (error) {
+                console.error("[Tracer] Iconify reference search failed:", error);
+            } finally {
+                setIsSearchingReferences(false);
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [prompt]);
+
+    // Clear structure reference when prompt changes significantly
+    useEffect(() => {
+        setStructureReference(null);
     }, [prompt]);
 
     // P3b: Use an existing icon from user's library
@@ -588,62 +635,133 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             const librarySource = iconSources.find(s => s.name === effectiveLibrary);
             const styleManifest = librarySource?.styleManifest;
 
-            console.log(`[Modal] Generating "${prompt}" in style of ${effectiveLibrary} (${libraryIcons.length} icons)${styleManifest ? ' with Style DNA' : ''}`);
+            // Sprint 09-A: Check if we have a structure reference for transpiler flow
+            if (structureReference) {
+                // TRANSPILER FLOW: Extract path data and send as code (not image)
+                const refName = structureReference.iconId.split(':')[1] || structureReference.iconId;
+                console.log(`[Modal/Transpiler] Transpiling "${prompt}" from ${structureReference.collection}:${refName}`);
 
-            const response = await fetch("/api/generate-svg", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    concept: prompt.trim(),
-                    libraryId: effectiveLibrary,
-                    icons: libraryIcons.slice(0, 100), // Send up to 100 icons for reference
-                    styleManifest, // Pass Style DNA if available
-                    apiKey, // Pass user's API key from System Settings
-                    options: {
-                        variants: variantCount,
-                        fewShotCount,
-                        temperature,
-                        decompositionMode: "auto",
-                        includePatternLibrary: true,
-                    },
-                }),
-            });
+                // Extract path data and viewBox from the reference SVG
+                const svgString = structureReference.svg;
+                console.log(`[Modal/Transpiler] Reference SVG:`, svgString.substring(0, 300));
 
-            if (!response.ok) {
-                const errorData = await response.json();
+                // Extract viewBox
+                const viewBoxMatch = svgString.match(/viewBox="([^"]+)"/);
+                const structureViewBox = viewBoxMatch ? viewBoxMatch[1] : '0 0 24 24';
+                console.log(`[Modal/Transpiler] Extracted viewBox: ${structureViewBox}`);
 
-                if (response.status === 429) {
-                    throw new Error("API Quota Exceeded. Please wait a moment and try again.");
+                // Extract all path d attributes (some icons have multiple paths)
+                const pathMatches = svgString.matchAll(/<path[^>]*\sd="([^"]+)"[^>]*\/?>/g);
+                const paths: string[] = [];
+                for (const match of pathMatches) {
+                    paths.push(match[1]);
                 }
 
-                throw new Error(errorData.details || errorData.error || "Generation failed");
-            }
+                // Also check for circle, rect, line elements and note them
+                const hasCircle = svgString.includes('<circle');
+                const hasRect = svgString.includes('<rect');
+                const hasLine = svgString.includes('<line');
 
-            const data = await response.json();
-
-            // Handle single or multiple SVGs
-            const svgs = data.svgs || (data.svg ? [data.svg] : []);
-            setGeneratedSvgs(svgs);
-            setMetadata(data.metadata);
-
-            // F2: Capture compliance data
-            // Handle both single compliance object and array (variants mode)
-            if (data.compliance) {
-                // If it's an array (variants mode), use the first one; if single, use as-is
-                const complianceData = Array.isArray(data.compliance)
-                    ? data.compliance[0]
-                    : data.compliance;
-                // Ensure violations array exists (variants mode only has violationCount)
-                if (complianceData && !complianceData.violations) {
-                    complianceData.violations = [];
+                if (paths.length === 0 && !hasCircle && !hasRect && !hasLine) {
+                    throw new Error("Could not extract path data from reference icon");
                 }
-                setCompliance(complianceData);
-            }
 
-            if (svgs.length > 0) {
-                toast.success(`Generated ${svgs.length} icon variant${svgs.length > 1 ? 's' : ''}!`);
+                // Combine multiple paths with a space (most icons have 1-3 paths)
+                const structurePath = paths.join(' ');
+                console.log(`[Modal/Transpiler] Extracted ${paths.length} path(s), total length: ${structurePath.length} chars`);
+                console.log(`[Modal/Transpiler] Path preview: ${structurePath.substring(0, 100)}...`);
+
+                // Send JSON to transpiler endpoint (no image, just code!)
+                const response = await fetch("/api/generate-tracer", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        structurePath,
+                        structureViewBox,
+                        structureSource: `${structureReference.collection}:${refName}`,
+                        styleManifest: styleManifest || '',
+                        apiKey,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    if (response.status === 429) {
+                        throw new Error("API Quota Exceeded. Please wait a moment and try again.");
+                    }
+                    throw new Error(errorData.details || errorData.error || "Transpilation failed");
+                }
+
+                const data = await response.json();
+
+                // Transpiler returns single SVG
+                setGeneratedSvgs([data.svg]);
+                setMetadata({
+                    fewShotExamples: [],
+                    decompositionSource: 'transpiler',
+                    attempts: 1,
+                });
+
+                toast.success(`Transpiled icon from ${structureReference.collection}!`);
             } else {
-                toast.error("No icons were generated");
+                // STANDARD FLOW: Use existing generate-svg endpoint
+                console.log(`[Modal] Generating "${prompt}" in style of ${effectiveLibrary} (${libraryIcons.length} icons)${styleManifest ? ' with Style DNA' : ''}`);
+
+                const response = await fetch("/api/generate-svg", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        concept: prompt.trim(),
+                        libraryId: effectiveLibrary,
+                        icons: libraryIcons.slice(0, 100), // Send up to 100 icons for reference
+                        styleManifest, // Pass Style DNA if available
+                        apiKey, // Pass user's API key from System Settings
+                        options: {
+                            variants: variantCount,
+                            fewShotCount,
+                            temperature,
+                            decompositionMode: "auto",
+                            includePatternLibrary: true,
+                        },
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+
+                    if (response.status === 429) {
+                        throw new Error("API Quota Exceeded. Please wait a moment and try again.");
+                    }
+
+                    throw new Error(errorData.details || errorData.error || "Generation failed");
+                }
+
+                const data = await response.json();
+
+                // Handle single or multiple SVGs
+                const svgs = data.svgs || (data.svg ? [data.svg] : []);
+                setGeneratedSvgs(svgs);
+                setMetadata(data.metadata);
+
+                // F2: Capture compliance data
+                // Handle both single compliance object and array (variants mode)
+                if (data.compliance) {
+                    // If it's an array (variants mode), use the first one; if single, use as-is
+                    const complianceData = Array.isArray(data.compliance)
+                        ? data.compliance[0]
+                        : data.compliance;
+                    // Ensure violations array exists (variants mode only has violationCount)
+                    if (complianceData && !complianceData.violations) {
+                        complianceData.violations = [];
+                    }
+                    setCompliance(complianceData);
+                }
+
+                if (svgs.length > 0) {
+                    toast.success(`Generated ${svgs.length} icon variant${svgs.length > 1 ? 's' : ''}!`);
+                } else {
+                    toast.error("No icons were generated");
+                }
             }
         } catch (error) {
             console.error(error);
@@ -834,7 +952,11 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                         {generationMode === 'generate' && (
                             <div className="space-y-2">
                                 <Label>Variants</Label>
-                                <Select value={variantCount.toString()} onValueChange={(v) => setVariantCount(parseInt(v))}>
+                                <Select
+                                    value={variantCount.toString()}
+                                    onValueChange={(v) => setVariantCount(parseInt(v))}
+                                    disabled={!!structureReference} // Tracer mode only generates 1 variant
+                                >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
@@ -846,6 +968,95 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                         <SelectItem value="5">5 variants</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                {structureReference && (
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Tracer mode generates 1 variant
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Sprint 09-A: Structure Reference selection (Generate mode only) */}
+                        {generationMode === 'generate' && (
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex items-center gap-1.5">
+                                        <Image className="w-3.5 h-3.5" />
+                                        Structure Reference
+                                        {isSearchingReferences && (
+                                            <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                                        )}
+                                    </Label>
+                                    {structureReference && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-5 w-5 p-0"
+                                            onClick={() => setStructureReference(null)}
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </Button>
+                                    )}
+                                </div>
+                                {structureReference ? (
+                                    <div className="p-2 rounded-md border-2 border-primary bg-primary/5">
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="w-10 h-10 flex-shrink-0 rounded border bg-background p-1 text-foreground"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: structureReference.svg
+                                                        .replace(/<svg/, '<svg class="w-full h-full"')
+                                                        .replace(/stroke="[^"]*"/, 'stroke="currentColor"')
+                                                }}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-xs font-medium truncate">
+                                                    {structureReference.iconId.split(':')[1] || structureReference.iconId}
+                                                </div>
+                                                <div className="text-[10px] text-muted-foreground">{structureReference.collection}</div>
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-primary mt-1.5">
+                                            AI will transpile this path to your style
+                                        </p>
+                                    </div>
+                                ) : referenceSearchResults.length > 0 ? (
+                                    <div className="space-y-1.5">
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Select a reference from other libraries:
+                                        </p>
+                                        <div className="grid grid-cols-4 gap-1.5">
+                                            {referenceSearchResults.slice(0, 8).filter(m => m.iconId && m.svg).map((match) => (
+                                                <button
+                                                    key={match.iconId}
+                                                    className="relative w-full aspect-square rounded border bg-background p-1.5 hover:border-primary/50 transition-colors group"
+                                                    onClick={() => setStructureReference(match)}
+                                                    title={`${match.collection}: ${match.iconId.split(':')[1] || match.iconId}`}
+                                                >
+                                                    <div
+                                                        className="w-full h-full text-muted-foreground group-hover:text-foreground transition-colors"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: match.svg
+                                                                .replace(/<svg/, '<svg class="w-full h-full"')
+                                                                .replace(/stroke="[^"]*"/, 'stroke="currentColor"')
+                                                        }}
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className="text-[9px] text-muted-foreground/70">
+                                            From: {[...new Set(referenceSearchResults.slice(0, 8).filter(m => m.collection).map(m => m.collection))].join(', ')}
+                                        </p>
+                                    </div>
+                                ) : prompt.trim().length >= 2 ? (
+                                    <p className="text-[10px] text-muted-foreground">
+                                        {isSearchingReferences ? 'Searching...' : 'No references found. Try a different concept.'}
+                                    </p>
+                                ) : (
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Type a concept to search for visual references from Iconify
+                                    </p>
+                                )}
                             </div>
                         )}
 
@@ -908,7 +1119,12 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                     {isGenerating ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Generating...
+                                            {structureReference ? 'Transpiling...' : 'Generating...'}
+                                        </>
+                                    ) : structureReference ? (
+                                        <>
+                                            <Wand2 className="w-4 h-4 mr-2" />
+                                            Transpile Reference
                                         </>
                                     ) : (
                                         <>
