@@ -1,737 +1,335 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.8.0 (Sprint 09-A - Tracer Spike Complete)
+> **Version:** 0.9.0 (Sprint 10-A - Sprout Engine Complete)
 > **Last Updated:** 2025-12-01
-> **Branch:** unruffled-banzai
-> **System Status:** ✅ STABLE - Tracer Spike validated Code Transpilation approach
+> **Branch:** main (merged from unruffled-banzai)
+> **System Status:** ✅ STABLE - Sprout Backend Complete, Ready for UI (Sprint 10-B)
+
+---
+
+> ⚠️ **WARNING FOR NEW SESSIONS**
+>
+> Sprint 10-A work was done in worktree `unruffled-banzai` and merged to `main`.
+> If you don't see `src/app/api/sprout/`, pull from main:
+> ```bash
+> git pull origin main
+> ```
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-Symbol Garden is an **AI-powered icon library management system** that generates new icons matching an ingested library's "Style DNA". The core innovation is replacing **runtime style guessing** with **ingestion-time style definition**.
+Symbol Garden is a **Semantic Icon Style Transpiler** that transforms icons from any open-source library to match your design system's visual DNA.
 
-### Core Philosophy
-> "The library defines the rules. The generator follows them. No guessing."
+### Core Philosophy (Post-Sprint 10-A Pivot)
 
-### Two Generation Pipelines
-1. **Sprout Engine (Native SVG)** - LLM generates SVG code directly, guided by Style DNA and few-shot examples
-2. **Kitbash Engine (Component Assembly)** - Mechanical assembly of existing library components, refined by LLM
+> "LLMs are better at refactoring code than tracing images."
 
-### Key Architectural Achievement (Sprint 06)
-The **Iron Dome** - a unified SVG processing gateway that ALL icons pass through. This replaced scattered ad-hoc fixes with a centralized, 6-stage pipeline that catches and repairs common issues (including LLM path syntax errors).
+**OLD APPROACH (Failed):**
+```
+Text prompt → AI generates from scratch → Inconsistent results
+Image → AI traces shape → AI ignores image, hallucinates
+```
+
+**NEW APPROACH (Sprout Engine):**
+```
+Iconify search → User selects icon → Sprout API refactors SVG code → Perfect match
+```
+
+The Sprout Engine treats SVG path data as "source code to be refactored". This leverages LLM strengths (code transformation) instead of fighting weaknesses (image generation).
 
 ---
 
-## 1. MASTER ARCHITECTURE: THE PIPELINE PATTERN
+## 1. THE SPROUT CORE LOOP
+
+This is the primary user flow as of Sprint 10-A:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                           SYMBOL GARDEN GENERATION PIPELINE                               │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                           │
-│  ┌─────────────────┐                                                                      │
-│  │   INGESTION     │  GitHub / Iconify / Manual Upload                                    │
-│  │   "Mouth"       │  → Raw SVG files into system                                         │
-│  └────────┬────────┘                                                                      │
-│           │                                                                               │
-│           ▼                                                                               │
-│  ┌─────────────────┐                                                                      │
-│  │   AUTOPSY       │  analyzeLibrary() → styleManifest                                    │
-│  │   "Brain"       │  → Extract Style DNA: stroke-width, linecap, grid, patterns          │
-│  │                 │  → Store in LibrarySchema.styleManifest                              │
-│  └────────┬────────┘                                                                      │
-│           │                                                                               │
-│           ▼                                                                               │
-│  ┌─────────────────┐                                                                      │
-│  │   ENRICHMENT    │  /api/enrich → AI metadata + component indexing                      │
-│  │   "Memory"      │  → semanticCategory, geometricTraits, complexity                     │
-│  │                 │  → IconComponent[] for Kitbash assembly                              │
-│  └────────┬────────┘                                                                      │
-│           │                                                                               │
-│           ▼                                                                               │
-│  ┌─────────────────────────────────────────────────────────────────────────────────┐     │
-│  │                        GENERATION LAYER                                          │     │
-│  │  ┌─────────────────────────────┐    ┌─────────────────────────────┐            │     │
-│  │  │   SPROUT ENGINE             │    │   KITBASH ENGINE            │            │     │
-│  │  │   (Native SVG Generation)   │    │   (Component Assembly)      │            │     │
-│  │  │                             │    │                             │            │     │
-│  │  │   1. Reference Oracle       │    │   1. Source Identification  │            │     │
-│  │  │   2. Exemplar Selection     │    │   2. Component Lookup       │            │     │
-│  │  │   3. Decomposition          │    │   3. Strategy Selection     │            │     │
-│  │  │   4. Prompt Construction    │    │   4. Layout Generation      │            │     │
-│  │  │   5. Gemini Generation      │    │   5. Execution              │            │     │
-│  │  │   6. Iron Dome Processing   │    │   6. Refinery (Optional)    │            │     │
-│  │  └─────────────────────────────┘    └─────────────────────────────┘            │     │
-│  └─────────────────────────────────────────────────────────────────────────────────┘     │
-│           │                                                                               │
-│           ▼                                                                               │
-│  ┌─────────────────┐                                                                      │
-│  │   IRON DOME     │  SVGProcessor.process(svg, mode, profile)                            │
-│  │   "Guardian"    │  → 6-Stage Pipeline (see Section 4)                                  │
-│  │                 │  → Mode: 'ingest' (permissive) | 'generate' (strict)                 │
-│  └────────┬────────┘                                                                      │
-│           │                                                                               │
-│           ▼                                                                               │
-│  ┌─────────────────┐                                                                      │
-│  │   STORAGE       │  extractCombinedPathData() → single path string                      │
-│  │   "Vault"       │  → Icon.path = combined paths                                        │
-│  │                 │  → IndexedDB persistence                                             │
-│  └─────────────────┘                                                                      │
-│                                                                                           │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SPROUT PIPELINE                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────┐                                                         │
+│  │   USER SEARCH   │  "rocket"                                               │
+│  │                 │  → Iconify API (275K+ icons)                           │
+│  └────────┬────────┘                                                         │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌─────────────────┐                                                         │
+│  │   SELECTION     │  User picks reference icon                              │
+│  │                 │  (Material, Tabler, Lucide, FontAwesome, etc.)         │
+│  └────────┬────────┘                                                         │
+│           │                                                                  │
+│           ├──────────────────────────┐                                       │
+│           │                          │                                       │
+│           ▼                          ▼                                       │
+│  ┌─────────────────┐        ┌─────────────────┐                             │
+│  │   ADOPT         │        │   SPROUT        │                             │
+│  │   (Free)        │        │   (AI)          │                             │
+│  │                 │        │                 │                             │
+│  │   Import raw    │        │   Token Opt     │                             │
+│  │   SVG as-is     │        │   → Gemini 2.5  │                             │
+│  │                 │        │   → Iron Dome   │                             │
+│  └────────┬────────┘        └────────┬────────┘                             │
+│           │                          │                                       │
+│           └──────────────────────────┘                                       │
+│                          │                                                   │
+│                          ▼                                                   │
+│  ┌─────────────────┐                                                         │
+│  │   WORKSPACE     │  Icon saved to user's project                          │
+│  │                 │  In library's style                                     │
+│  └─────────────────┘                                                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
-
-### Key Insight: Ingestion-Time Definition
-
-**OLD (Runtime Guesswork):**
-```
-Generate → Hope it matches → Manual comparison → Retry
-```
-
-**NEW (Ingestion-Time Definition):**
-```
-Ingest → Autopsy extracts DNA → DNA injected into prompts → Generation constrained by DNA
-```
-
-The `styleManifest` is the "Geometric Autopsy" - a text description of the library's:
-- Stroke architecture (width, linecap, linejoin)
-- Grid system (24x24, 2px edge padding)
-- Corner treatment (rounded vs sharp, radius values)
-- Visual patterns (how circles are used, arrow conventions)
 
 ---
 
-## 2. FILE MAP BY CONCERN
+## 2. FILE MAP (Sprout-Centric)
 
-### Generation Pipeline Files
+### Primary Files (Sprint 10-A)
 
-| Stage | Primary File | Purpose |
-|-------|--------------|---------|
-| **Ingestion** | `ingestion-service.ts` | GitHub fetch, SVG parsing |
-| **Ingestion (Iconify)** | `/api/iconify/import/route.ts` | Iconify API streaming import |
-| **Autopsy** | `actions/analyze-library.ts` | Generate styleManifest via LLM |
-| **Enrichment** | `/api/enrich/route.ts` | AI metadata + component indexing |
-| **Sprout Core** | `hybrid-generator.ts` | Orchestrates native SVG generation |
-| **Kitbash Core** | `kitbash-engine.ts` | Component assembly engine |
-| **Iron Dome** | `svg-processor.ts` | Unified SVG processing gateway (6 stages) |
-| **Style Enforcer** | `style-enforcer.ts` | Deterministic style compliance |
-| **Path Validator** | `svg-validator.ts` | Path syntax validation + repair |
-| **Path Utilities** | `svg-path-utils.ts` | Client-safe path extraction/normalization |
+| File | Purpose |
+|------|---------|
+| `src/app/api/sprout/route.ts` | **Core API** - Style transfer endpoint |
+| `src/lib/sprout-service.ts` | **Core Service** - Transpilation logic |
+| `src/lib/svg-optimizer.ts` | **Token Optimizer** - Reduce SVG before LLM |
+| `src/lib/svg-processor.ts` | **Iron Dome** - 6-stage SVG gateway |
+| `src/lib/style-enforcer.ts` | **Style DNA** - Compliance checking |
 
-### Supporting Services
+### Supporting Files
 
-| Concern | File | Purpose |
-|---------|------|---------|
-| **Exemplar Selection** | `similar-icon-finder.ts` | Find best reference icons with traits |
-| **Decomposition** | `decomposition-service.ts` | Static + dynamic concept breakdown |
-| **Prompt Building** | `svg-prompt-builder.ts` | Construct few-shot LLM prompts |
-| **Component Indexing** | `component-indexer.ts` | Semantic tagging of icon parts |
-| **Semantic Vocabulary** | `pattern-library.ts` | Centralized names/ontology |
-| **Cross-Library Reference** | `iconify-service.ts` | Reference Oracle (Iconify API) |
+| File | Purpose |
+|------|---------|
+| `src/lib/iconify-service.ts` | Iconify API integration |
+| `src/app/api/iconify/search/route.ts` | Icon search endpoint |
+| `src/app/api/iconify/import/route.ts` | Batch import endpoint |
+| `src/components/dialogs/AIIconGeneratorModal.tsx` | Current UI (to be replaced in 10-B) |
 
-### State & Storage
-
-| Layer | File | Data |
-|-------|------|------|
-| **Project State** | `project-context.tsx` | Projects, favorites, custom icons |
-| **Search State** | `search-context.tsx` | Filters, pagination |
-| **UI State** | `ui-context.tsx` | Modals, drawers |
-| **Persistence** | `storage.ts` | IndexedDB operations |
-
-### Legacy (Imagen Pipeline)
+### Legacy Files (Deprecated but Present)
 
 | File | Status | Notes |
 |------|--------|-------|
-| `ai-icon-service.ts` | Maintenance Only | V10/V11 "Ink First" prompting |
-| `style-jury-service.ts` | Optional | Vision-based quality evaluation |
-| `/api/generate/route.ts` | Legacy | PNG generation via Imagen 3 |
-| `/api/vectorize/route.ts` | Legacy | Potrace PNG→SVG conversion |
+| `src/lib/hybrid-generator.ts` | Legacy | Old "generate from scratch" flow |
+| `src/lib/kitbash-engine.ts` | Legacy | Component assembly (keep for "Compose" mode) |
+| `src/app/api/generate-svg/route.ts` | Legacy | Text-to-SVG generation |
+| `src/app/api/generate-tracer/route.ts` | Spike | 09-A tracer (superseded by /api/sprout) |
 
 ---
 
-## 3. CRITICAL DATA FLOWS
+## 3. THE SPROUT API
 
-### 3.1 Style DNA Flow
-```
-Ingestion
-    └─► analyzeLibrary(icons)
-            └─► Gemini analyzes visual patterns
-                    └─► styleManifest: string (Geometric Autopsy)
-                            └─► LibrarySchema.styleManifest
-                                    └─► Injected into generation prompts
-```
+### POST /api/sprout
 
-### 3.2 Component Flow (for Kitbash)
-```
-Enrichment
-    └─► /api/enrich
-            └─► indexIconComponents(icon)
-                    └─► LLM labels paths semantically
-                            └─► Icon.components: IconComponent[]
-                                    └─► componentSignature: "body+head+modifier"
-                                            └─► Kitbash lookups via source: key
+**Request:**
+```typescript
+{
+  sourceSvg: string;        // Complete SVG from Iconify
+  styleManifest?: string;   // Target library's Style DNA
+  concept?: string;         // What the icon represents (for logging)
+  libraryId?: string;       // Lookup manifest from storage
+  apiKey?: string;          // Optional user API key
+}
 ```
 
-### 3.3 Generation Flow (Sprout)
-```
-AIIconGeneratorModal
-    └─► /api/generate-svg
-            └─► generateIcon(config)
-                    ├─► getStructuralReference() [Reference Oracle]
-                    ├─► findExemplarIconsWithTraits() [Smart Selection]
-                    ├─► getDecomposition() [Static/Dynamic]
-                    ├─► buildPrompt() [Few-shot construction]
-                    ├─► Gemini 2.5 Flash → Raw SVG
-                    └─► SVGProcessor.process(svg, 'generate')
-                            └─► 6-Stage Pipeline → Compliant SVG
-```
-
-### 3.4 Assembly Flow (Kitbash)
-```
-AIIconGeneratorModal
-    └─► /api/kitbash (mode: 'plan')
-            └─► identifySourceIcons() → ["user", "shield"]
-            └─► findComponentMatches() → foundParts[], missingParts[]
-            └─► calculateCoverage() → strategy: graft|hybrid|adapt|generate
-            └─► generateLayouts() → 3 layout options
-    └─► /api/kitbash (mode: 'execute')
-            └─► executeKitbash() → Assemble SVG
-    └─► /api/kitbash (mode: 'refine') [Optional]
-            └─► refineIcon() → LLM "code refactoring"
+**Response:**
+```typescript
+{
+  svg: string;              // Transpiled SVG
+  success: boolean;
+  metadata: {
+    tokensSaved: number;    // Optimizer savings
+    processingTimeMs: number;
+    ironDomeModified: boolean;
+    complianceScore: number | null;
+  };
+  error?: string;           // If success=false
+}
 ```
 
-### 3.5 Iconify Import Flow
-```
-SettingsModal
-    └─► /api/iconify/import (POST)
-            └─► Stream icons in batches of 20
-                    └─► extractPathFromSvg() converts all elements to path
-                    └─► Client accumulates via "icons" events
-                            └─► Final "complete" event with metadata only
-```
-
-### 3.6 Tracer Transpilation Flow (NEW - Sprint 09-A)
-```
-AIIconGeneratorModal (Reference Search Rail)
-    └─► User selects reference icon from Iconify
-            └─► Extract path d="" and viewBox from SVG
-                    └─► /api/generate-tracer (POST JSON)
-                            ├─► buildTranspilerPrompt() with scale factors
-                            ├─► Gemini 2.5 Flash (text-only, no vision)
-                            └─► SVGProcessor.process(svg, 'generate')
-                                    └─► Style-compliant transpiled SVG
-```
-
-**Key Insight:** Code Transpilation (path as source code) succeeds where Vision tracing fails.
-
----
-
-## 4. THE IRON DOME: UNIFIED SVG PROCESSING (6 STAGES)
-
-### Philosophy
-> All SVGs entering or exiting the system pass through ONE gateway.
-
-### Two Modes
-
-| Mode | When Used | Behavior |
-|------|-----------|----------|
-| `'ingest'` | GitHub import, Iconify, uploads | Permissive: allow path merging, shape→path conversion |
-| `'generate'` | Sprout, Kitbash output | Strict: preserve separate paths, keep primitives editable, repair malformed paths |
-
-### 6-Stage Processing Pipeline
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    IRON DOME 6-STAGE PIPELINE                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  STAGE 1: SANITIZE                                               │
-│  └─► Remove scripts, event handlers, malicious content           │
-│                                                                   │
-│  STAGE 2: PATH SYNTAX REPAIR (generate mode only)                │
-│  └─► Fix LLM path errors: "M6 6 12 12" → "M6 6 L12 12"          │
-│  └─► Convert implicit lineto to explicit commands                │
-│                                                                   │
-│  STAGE 3: NORMALIZE                                              │
-│  └─► Convert style="" attributes to native SVG attributes        │
-│                                                                   │
-│  STAGE 4: STYLE ENFORCEMENT (generate mode only)                 │
-│  └─► Apply Style DNA rules (stroke-width, linecap, linejoin)    │
-│  └─► Auto-fix non-compliant attributes                          │
-│                                                                   │
-│  STAGE 5: OPTIMIZATION                                           │
-│  └─► SVGO with mode-aware configuration                          │
-│  └─► Preserve path separation in generate mode                   │
-│                                                                   │
-│  STAGE 6: VALIDATION                                             │
-│  └─► Bounds check (coordinates within viewBox)                   │
-│  └─► Auto-fix out-of-bounds via transform                        │
-│                                                                   │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Key Configuration
+### Sprout Service Internal Flow
 
 ```typescript
-// 'generate' mode: CRITICAL for Kitbash
-allowPathMerging: false,    // Keep components separate!
-allowShapeToPath: false,    // Keep <circle>, <rect> editable!
+// 1. Token Optimization
+const { optimized, viewBox } = optimizeSvgForLlm(sourceSvg);
+// Rounds coordinates, removes metadata, strips classes
 
-// 'ingest' mode: Standard optimization
-allowPathMerging: true,
-allowShapeToPath: true,
+// 2. Build Prompt
+const prompt = buildSproutPrompt(optimized, viewBox, styleManifest);
+// LLM reads manifest, extracts rules, refactors geometry
+
+// 3. Gemini Call
+const result = await model.generateContent({ ... });
+// text-only, no vision, temperature=0.1
+
+// 4. Extract & Validate
+const svg = extractSvgFromResponse(result.text());
+if (!isValidSvg(svg)) throw new Error('Invalid SVG');
+
+// 5. Iron Dome Processing
+const final = SVGProcessor.process(svg, 'generate', profile);
+// 6 stages: sanitize, repair, normalize, enforce, optimize, validate
 ```
-
-### Path Syntax Repair (Stage 2)
-
-LLMs frequently generate malformed path data like `M6 6 12 12` (missing `L` command). The Iron Dome now automatically repairs these:
-
-```
-Input:  M6 6 12 12m0-12L6 18
-Output: M6 6 L12 12 m0-12 L6 18
-```
-
-This is handled by `validateAndRepairPaths()` in `svg-validator.ts`.
 
 ---
 
-## 5. CURRENT STATE SNAPSHOT
+## 4. IRON DOME (Unchanged)
 
-### System Health: STABLE
+All SVGs pass through the 6-stage pipeline:
 
-| Area | Status | Notes |
-|------|--------|-------|
-| Build | Clean | No TypeScript errors (1 pre-existing test issue) |
-| Sprout Generation | Working | Style DNA injection + path repair operational |
-| Kitbash Assembly | Working | Source icon identification improved |
-| Kitbash Refinery | Working | LLM-based "code refactoring" |
-| Iconify Import | Working | Streaming with incremental icon delivery |
-| Enrichment | Working | Component indexing integrated |
-| UI | Stable | Save flows verified |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 IRON DOME 6-STAGE PIPELINE                   │
+├─────────────────────────────────────────────────────────────┤
+│  STAGE 1: SANITIZE                                           │
+│  └─► Remove scripts, event handlers, malicious content       │
+│                                                              │
+│  STAGE 2: PATH SYNTAX REPAIR (generate mode)                 │
+│  └─► Fix LLM errors: "M6 6 12 12" → "M6 6 L12 12"           │
+│                                                              │
+│  STAGE 3: NORMALIZE                                          │
+│  └─► style="" attributes → native SVG attributes             │
+│                                                              │
+│  STAGE 4: STYLE ENFORCEMENT (generate mode)                  │
+│  └─► Apply Style DNA rules                                   │
+│                                                              │
+│  STAGE 5: OPTIMIZATION                                       │
+│  └─► SVGO with mode-aware config                             │
+│                                                              │
+│  STAGE 6: VALIDATION                                         │
+│  └─► Bounds check, auto-fix out-of-bounds                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. CURRENT STATE
 
 ### Feature Matrix
 
 | Feature | Status | Sprint |
 |---------|--------|--------|
-| F1: Style Enforcer | Complete | Sprint 05 |
-| F2: Ghost Preview | Complete | Sprint 05 |
-| F3: Component Indexer | Complete | Sprint 05 |
-| F4: Kitbash Engine | Complete | Sprint 05 |
-| F5: Skeleton-First UI | Complete | Sprint 05 |
-| Iron Dome | Complete | Sprint 06 |
-| Semantic Bridge | Complete | Sprint 06 |
-| Kitbash Refinery | Complete | Sprint 06 |
-| Path Syntax Repair | Complete | Sprint 06+ |
-| Iconify Streaming Import | Complete | Sprint 06+ |
-| **Tracer (Code Transpilation)** | **Complete** | **Sprint 09-A** |
+| Sprout API (`/api/sprout`) | **Complete** | **10-A** |
+| Sprout Service | **Complete** | **10-A** |
+| Token Optimizer | **Complete** | **10-A** |
+| Iron Dome 6-Stage | Complete | 06 |
+| Iconify Integration | Complete | 06+ |
+| Style DNA Analysis | Complete | 05 |
+| Tracer Spike | Complete (superseded) | 09-A |
+| Kitbash Engine | Complete (legacy) | 05 |
 
-### Storage Constraint
+### What's Missing (Sprint 10-B)
 
-**Known Limitation:** Icons stored as single `path` string.
-```typescript
-Icon.path: string  // Combined paths joined with space
-```
-
-**Implication:** Multi-element SVGs (circle + path + line) must be converted to path data during save. This is handled by `extractCombinedPathData()` in `svg-path-utils.ts`.
-
-**Path Normalization:** When combining paths, all must start with absolute `M` command. Lowercase `m` is converted to `M` to prevent geometry corruption.
+- [ ] **Sprout Modal UI** - Replace current AIIconGeneratorModal
+- [ ] **Adopt Button** - Import raw icon (free, no AI)
+- [ ] **Sprout Button** - Transpile to library style (AI)
+- [ ] **Search → Select → Action** workflow
+- [ ] Deprecate old Generate/Kitbash tabs
 
 ---
 
-## 6. RECENT CHANGES LOG
+## 6. SPRINT HISTORY
 
-### Sprint 09-A (2025-12-01) - Tracer Spike (Code Transpilation)
+### Sprint 10-A (2025-12-01) - Sprout Engine Backend
 
-#### Decision: GO ✅
+**Completed:**
+- Token Optimizer (`optimizeSvgForLlm`) - 8-17% size reduction
+- Sprout Service (`sproutIcon`) - Core transpilation
+- Sprout API (`/api/sprout`) - REST endpoint
+- Test script (`scripts/test-sprout-10a.ts`)
 
-The spike validated that **Code Transpilation** works where Vision-based tracing failed.
+**Key Insight:** Send full SVG content (not just paths) to preserve multi-path semantics.
 
-#### Key Finding: LLMs as Code Refactorers > Image Tracers
+### Sprint 09-A (2025-12-01) - Tracer Spike
 
-**Original Hypothesis (Failed):**
-> Provide a PNG image of a reference icon → AI "traces" the shape
+**Validated:** Code Transpilation works where Vision tracing fails.
 
-**Reality:** Gemini ignored the reference image and generated generic icons from memory.
+**Failed Approach:** PNG image → Gemini Vision → AI ignores image
 
-**Pivot (Success):**
-> Provide the raw SVG path `d` attribute → AI "refactors" the coordinates
-
-Treating path data as "source code to be refactored" aligns with LLM strengths.
-
-#### Implementation
-
-- **New Endpoint:** `/api/generate-tracer` - accepts JSON with `structurePath`, `structureViewBox`
-- **New UI Flow:** Reference search rail → Select icon → "Transpile Reference" button
-- **Prompt Strategy:** Explicit coordinate math with scale factors and centering offset
-
-```typescript
-// Transpiler prompt structure
-`Convert this SVG path to fit CENTERED in a 24x24 icon grid.
-
-INPUT PATH (from ${sourceWidth}x${sourceHeight} viewBox):
-d="${structurePath}"
-
-CONVERSION STEPS:
-1. Scale all coordinates to fit in 20x20 area
-2. Add 2 to ALL coordinates to center in grid (2-22 usable range)
-3. Do NOT use transform/translate - recalculate d="" values directly
-...`
-```
-
-#### Test Results
-
-| Icon | Source | Result |
-|------|--------|--------|
-| Brain | Tabler (24x24) | ✅ Clean path, proper coordinates, no transforms |
-| Rocket | Iconoir (24x24) | ✅ Good geometry, stroke weights match target style |
-
-#### Technical Fixes During Spike
-
-1. **MAX_TOKENS Issue:** Gemini 2.5's "thinking tokens" consume output budget
-   - Solution: Increased `maxOutputTokens` from 2048 → 16384
-
-2. **Transform Wrappers:** Model wrapped output in `<g transform="...">`
-   - Solution: Explicit prompt instruction "Do NOT use transform/translate"
-
-3. **Off-Frame Coordinates:** Icons shifted outside viewBox
-   - Solution: Scale to 20x20 then add 2 offset for centering
-
-#### Files Created/Modified
-
-| File | Change |
-|------|--------|
-| `src/app/api/generate-tracer/route.ts` | Rewritten from Vision to Code Transpilation |
-| `src/components/dialogs/AIIconGeneratorModal.tsx` | Path extraction, JSON body, UI text updates |
-| `src/lib/image-utils.ts` | Created (Vision approach), now unused but retained |
-
-#### What's Next
-
-The transpiler approach enables:
-1. **Cross-Library Style Transfer:** Convert FontAwesome/Tabler/Material icons to target library style
-2. **Concept Expansion:** Find reference for "rocket" in any library, transpile to match your library
-3. **Geometric Fidelity:** Preserves exact proportions while adapting stroke weights
+**Successful Approach:** SVG path data → Gemini text → AI refactors coordinates
 
 ---
 
-### Sprint 07 (2025-12-01) - Geometric Intelligence
-
-#### Blueprint Protocol for Kitbash
-- **Files:** `decomposition-service.ts`, `kitbash-engine.ts`
-- **What:** Kitbash now decomposes concepts into geometric primitives (capsule, triangle, circle, rect)
-- **Why:** Semantic decomposition ("fuselage", "nose-cone") rarely matched library parts
-- **Result:** "rocket" → [capsule body + triangle nose + triangle fins] → Finds battery body, play icon
-
-#### Geometric Component Index
-- **Files:** `component-indexer.ts`, `schema.ts`
-- **What:** Components now indexed by geometric type (`geometric:capsule`, `geometric:triangle`)
-- **Why:** Enables shape-based queries instead of semantic name matching
-- **Result:** Coverage improved from ~0% to 50%+ for compound concepts
-
-#### Deterministic Layouts
-- **Files:** `kitbash-engine.ts`
-- **What:** Hardcoded layouts for known structures (rocket, tower, device)
-- **Why:** LLM-generated layouts were unreliable (inverted scale hierarchy)
-- **Result:** Proper positioning: body→center, nose→top, fins→bottom with correct scales
-
-#### Transform Preservation (svgContent)
-- **Files:** `schema.ts`, `AIIconGeneratorModal.tsx`, `export-utils.ts`, `IconCard.tsx`, `IconDetailsPanel.tsx`
-- **What:** New `svgContent` field stores full SVG inner content with `<g transform>` groups
-- **Why:** Kitbashed icons lost transforms when saved (extracted only path d attributes)
-- **Result:** Assembled icons preserve exact positioning through save/export
-
-### Session: 2025-11-30 (Iron Dome)
-
-#### Iron Dome Path Syntax Repair
-- **Created:** `validatePathSyntax()`, `validateAndRepairPaths()` in `svg-validator.ts`
-- **Modified:** `svg-processor.ts` - Added Stage 2: PATH SYNTAX REPAIR
-- **Why:** LLMs generate malformed paths like `M6 6 12 12` (missing L command)
-- **Impact:** Automatic repair of implicit lineto commands in generated SVGs
-
-#### LLM Prompt Improvement
-- **Modified:** `svg-prompt-builder.ts` - Added explicit path syntax guidance
-- **Why:** Prevention is better than repair; teach LLM correct syntax
-- **Content:** WRONG/CORRECT examples for path commands
-
-#### Iconify Import Streaming
-- **Modified:** `/api/iconify/import/route.ts` - Incremental icon streaming
-- **Why:** Vercel response size limits truncated large payloads
-- **Impact:** Icons streamed in batches of 20 with "icons" events
-
-#### Iconify Element-to-Path Conversion
-- **Modified:** `/api/iconify/import/route.ts` - Full element conversion
-- **Why:** Only `<path>` elements were extracted; `<rect>`, `<circle>` lost
-- **Impact:** All SVG primitives now converted to path data
-
-### Sprint 06 (2025-11-30) - Stability & Polish
-
-#### Iron Dome Implementation
-- **Created:** `svg-processor.ts` - Unified SVG processing gateway
-- **Modified:** `hybrid-generator.ts`, `kitbash-engine.ts` - Route through Iron Dome
-- **Why:** Ad-hoc SVG fixes in multiple locations caused cascading bugs
-
-#### Semantic Bridge
-- **Modified:** `component-indexer.ts` - Added `source:iconName` indexing
-- **Modified:** `pattern-library.ts` - Centralized `SEMANTIC_ONTOLOGY`
-- **Modified:** `kitbash-engine.ts` - Check source key FIRST in lookups
-- **Why:** Vocabulary mismatch: Indexer tagged "person-torso", Kitbash asked for "user"
-- **Impact:** Kitbash coverage improved from ~0% to 50%+ for compound concepts
-
-#### Kitbash Refinery
-- **Created:** `refineIcon()` in `hybrid-generator.ts`
-- **Modified:** `/api/kitbash/route.ts` - Added `mode: 'refine'`
-- **Why:** Assembled icons had overlapping paths, disjointed corners
-- **Strategy:** Frame as "SVG code refactoring" with low temperature (0.1)
-
-#### Path Handling Fix
-- **Created:** `svg-path-utils.ts` - Client-safe path extraction
-- **Added:** `normalizePathStart()` - Convert `m` → `M` for path concatenation
-- **Why:** Relative `m` commands broke geometry when paths combined
-
-### Prior Key Changes
-
-| Change | Reason | Impact |
-|--------|--------|--------|
-| Multi-path SVG saving | Complex icons lost content | All paths now extracted |
-| Trait-aware exemplar selection | Generic examples produced generic output | 2-4x trait matching improvement |
-| Style enforcement (F1) | Wrong stroke-linecap/linejoin | Deterministic compliance |
-| Component indexing in enrichment | Kitbash had 0% coverage | Assembly now functional |
-| Reference Oracle caching | 3x duplicate API calls per variant | Single call, cached |
-
----
-
-## 7. TECHNICAL DEBT
-
-### Resolved (Sprint 06+)
-
-| Issue | Resolution |
-|-------|------------|
-| Fragile SVG rendering | Iron Dome centralized processing |
-| Component vocabulary mismatch | Semantic Bridge with source indexing |
-| Kitbash output quality | Refinery with LLM topology repair |
-| Path combination bugs | `normalizePathStart()` in svg-path-utils |
-| LLM malformed paths | Stage 2 PATH SYNTAX REPAIR |
-| Iconify import truncation | Streaming with incremental delivery |
-| Iconify element loss | Full element-to-path conversion |
-
-### Remaining
-
-| Issue | Location | Priority | Notes |
-|-------|----------|----------|-------|
-| Single-path storage model | `schema.ts` | Medium | Blocks proper compound SVG support |
-| Component indexing not persisted | Enrichment | Medium | Re-indexes on every enrichment |
-| Decomposition cache ephemeral | `decomposition-service.ts` | Low | Lost on server restart |
-| Legacy Imagen pipeline | `ai-icon-service.ts` | Low | Maintenance burden |
-| Kitbash planning slow | `kitbash-engine.ts` | Medium | 30-40s latency |
-| Pre-existing test failure | `vectorize/route.test.ts` | Low | `Map.append` doesn't exist |
-
----
-
-## 8. FUTURE ROADMAP
-
-### Immediate Leverage Points
-
-#### 1. Compound SVG Support
-**Current:** `Icon.path: string` (single combined path)
-**Target:** `Icon.svg: string` (full SVG) or `Icon.elements: SVGElement[]`
-**Benefit:** Preserve original structure, enable round-tripping, better Kitbash source material
-**Complexity:** Medium - requires storage migration, rendering updates
-
-#### 2. Persistent Component Index
-**Current:** Components re-indexed during every enrichment
-**Target:** Store `Icon.components` in IndexedDB with icon data
-**Benefit:** Instant Kitbash planning, no re-enrichment
-**Complexity:** Low - just persist the enrichment result
-
-#### 3. Vectorization Constants to Project Schema
-**Current:** Hardcoded in `ai-icon-service.ts` (V10 physics)
-**Target:** `Project.vectorizationProfile` or `Library.vectorizationProfile`
-**Benefit:** Per-library optimization tuning
-**Complexity:** Low - schema change + UI for editing
-
-### Medium-Term
-
-#### 4. Style Jury for Native SVG
-**Current:** Only works with Imagen (raster) pipeline
-**Target:** Vision-based scoring of native SVG output
-**Benefit:** Quality gate for all generation methods
-**Complexity:** Medium - need to render SVG to image for vision API
-
-#### 5. Kitbash Performance
-**Current:** 30-40s planning time
-**Target:** Sub-10s via caching and parallelization
-**Approach:** Cache LLM responses, parallelize source identification
-**Complexity:** Medium - requires careful caching strategy
-
-#### 6. Complete Enrichment Coverage
-**Current:** ~62% of icons enriched
-**Target:** 100%
-**Benefit:** Trait-aware selection works best with full enrichment
-**Complexity:** Low - just run enrichment on remaining icons
-
----
-
-## 9. ENVIRONMENT CONFIGURATION
-
-### Required
-```env
-GOOGLE_API_KEY=        # Gemini API (enrichment, generation)
-```
-
-### Optional
-```env
-GOOGLE_CLOUD_PROJECT_ID=           # Vertex AI (Imagen, Style Jury)
-GOOGLE_APPLICATION_CREDENTIALS=    # GCP Auth (local dev)
-```
-
-### Graceful Degradation
-- No API key → Enrichment disabled, generation fails gracefully
-- No Project ID → Style Jury skipped, Imagen unavailable
-- No network → Reference Oracle skipped, import unavailable
-
----
-
-## 10. KEY TYPES REFERENCE
-
-```typescript
-// Core Icon Type
-interface Icon {
-  id: string;
-  name: string;
-  library: string;
-  path: string;                    // Combined path data
-  viewBox: string;                 // Default "0 0 24 24"
-  renderStyle: "stroke" | "fill";
-  tags: string[];
-  aiMetadata?: AiMetadata;         // Enriched metadata
-  components?: IconComponent[];    // Indexed parts for Kitbash
-}
-
-// Enrichment Metadata
-interface AiMetadata {
-  semanticCategory: 'object' | 'action' | 'ui' | 'abstract';
-  complexity: 1-5;
-  geometricTraits: GeometricTrait[];
-  confidence: number;
-}
-
-// Kitbash Component
-interface IconComponent {
-  name: string;                    // "arrow-head", "user-body"
-  category: ComponentCategory;
-  pathData: string;
-  semanticTags: string[];
-  sourceIcon: string;              // Icon this came from
-}
-
-// Library with Style DNA
-interface Library {
-  id: string;
-  name: string;
-  styleManifest?: string;          // The "Geometric Autopsy"
-}
-
-// Iron Dome Processing
-interface ProcessResult {
-  svg: string;
-  modified: boolean;
-  compliance: ComplianceResult | null;
-  warnings: string[];
-  metrics: { originalSize, processedSize, processingTimeMs };
-}
-```
-
----
-
-## 11. COMMANDS QUICK REFERENCE
+## 7. ENVIRONMENT
 
 ```bash
-# Development
-npm run dev                    # http://localhost:3000
-npm run build                  # Production build
+# Required
+GOOGLE_API_KEY=your-gemini-api-key
 
-# Testing
-npx tsx scripts/spike-*.ts    # Feature experiments
-
-# Debugging
-# Server logs tagged: [API], [Kitbash], [IronDome], [HybridGenerator]
-# Path repair logs: [path-repair]
+# Optional (legacy features)
+GOOGLE_CLOUD_PROJECT_ID=   # Style Jury, Imagen
 ```
 
 ---
 
-## 12. CONTINUATION PROMPT
+## 8. CONTINUATION PROMPT
 
-When starting a new context window, use this prompt:
+When starting a new context window for **Sprint 10-B**:
 
 ```
 I'm continuing work on Symbol Garden 2.0, a TypeScript/Next.js application.
 Read devbridge-context.md for full architecture details.
 
 Current state:
-- Sprint 09-A (Tracer Spike) complete: Code Transpilation approach validated
-- Generation pipelines: Sprout + Kitbash + **Tracer** (new!)
-- Iconify import working with streaming delivery
-- Key constraint: Icons stored as single path string (Icon.path)
+- Sprint 10-A COMPLETE: Sprout Engine backend is ready
+- API endpoint: POST /api/sprout (style transfer via code transpilation)
+- Token Optimizer: Reduces SVG 8-17% before LLM
+- Iron Dome: 6-stage SVG processing
 
-The codebase follows a Pipeline Pattern:
-  Ingestion → Autopsy (Style DNA) → Enrichment → Generation → Iron Dome (6 stages) → Storage
+CRITICAL: Pull from main to get Sprint 10-A files:
+  git pull origin main
 
-Key files:
-- hybrid-generator.ts: Sprout SVG generation
-- kitbash-engine.ts: Component assembly
-- /api/generate-tracer/route.ts: Code Transpilation (path→path style transfer)
-- svg-processor.ts: Iron Dome (6-stage SVG gateway)
-- svg-validator.ts: Path syntax validation + repair
-- svg-path-utils.ts: Path extraction/normalization
+Next step: Sprint 10-B - Build the Sprout Modal UI
 
-Generation Methods:
-1. **Sprout** - LLM generates SVG from scratch, guided by Style DNA
-2. **Kitbash** - Assemble existing components, optionally refine
-3. **Tracer** - Transpile reference icon paths to target style (NEW)
+The UI should implement:
+1. Search bar → Query Iconify API
+2. Results grid → Show icons from external libraries
+3. Selection → Click to select reference
+4. Two actions:
+   - "Adopt" → Import raw SVG (free, no AI)
+   - "Sprout" → Call /api/sprout to transpile (AI)
+5. Preview → Show result before saving
+6. Save → Add to workspace
 
-Key Insight from Sprint 09-A: LLMs are better at "refactoring code" than "tracing images".
-Vision-based tracing failed; Code Transpilation (treating SVG paths as source code) works.
+Key files to read:
+- src/lib/sprout-service.ts (core logic)
+- src/app/api/sprout/route.ts (API endpoint)
+- src/components/dialogs/AIIconGeneratorModal.tsx (current UI to replace)
 
 What would you like me to work on?
 ```
 
 ---
 
-## 13. KNOWN CRITICAL PATTERNS
+## 9. KEY PATTERNS
 
-### Defense in Depth for SVG Quality
+### Token Optimization Before LLM
 
-```
-LLM Output → Path Syntax Repair → Style Enforcement → SVGO → Validation → Storage
-   ↓              ↓                    ↓               ↓         ↓
- May be        Fixes M6 6 12 12    Fixes stroke-   Optimizes  Fixes OOB
- malformed     → M6 6 L12 12       linecap/join    paths      coords
-```
-
-### Single Path Storage Workaround
-
-When saving icons with multiple elements:
 ```typescript
-// Client code (AIIconGeneratorModal)
-const { pathData, viewBox, fillRule } = extractCombinedPathData(svg);
-// pathData = "M... M... M..." (all paths joined with space)
+import { optimizeSvgForLlm } from '@/lib/svg-optimizer';
 
-// Rendering (IconCard)
-<path d={icon.path} /> // Renders all sub-paths
+const { optimized, viewBox, tokensSaved } = optimizeSvgForLlm(sourceSvg);
+// optimized: cleaned SVG string
+// viewBox: extracted for coordinate math
+// tokensSaved: bytes saved
 ```
 
-### Semantic Bridge for Kitbash
+### Calling Sprout API
 
-When looking up components:
 ```typescript
-// 1. FIRST check source:iconName (exact match)
-componentIndex.get(`source:${iconName}`)
+const response = await fetch('/api/sprout', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    sourceSvg: selectedIcon.svg,
+    styleManifest: currentLibrary.styleManifest,
+    concept: searchQuery,
+  }),
+});
 
-// 2. THEN fall back to semantic tags
-componentIndex.get(semanticTag)
+const { svg, success, metadata } = await response.json();
 ```
 
 ---
 
-*This document is the canonical System Memory for AI development sessions. Update after significant architectural changes.*
+*This document is the canonical System Memory. Update after significant architectural changes.*
