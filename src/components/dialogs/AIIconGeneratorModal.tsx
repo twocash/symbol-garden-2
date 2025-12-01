@@ -488,33 +488,29 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             // Extract viewBox from SVG
             const viewBoxMatch = kitbashSvg.match(/viewBox="([^"]+)"/);
 
-            // Check if SVG has transforms (kitbashed icons use <g transform="...">)
-            const hasTransforms = kitbashSvg.includes('<g transform="');
-
             // Extract inner SVG content (everything between <svg> and </svg>)
+            // ALWAYS save svgContent for AI-generated icons to preserve original structure
             const innerMatch = kitbashSvg.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
             const svgContent = innerMatch ? innerMatch[1].trim() : undefined;
 
-            // Extract ALL path elements and combine their d attributes
-            // For fallback/simple path rendering
+            // Extract paths as fallback for legacy rendering
             const pathMatches = [...kitbashSvg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
-
-            if (pathMatches.length === 0) {
-                throw new Error("Could not extract path from kitbash SVG");
-            }
-
             const combinedPath = pathMatches.map(match => match[1]).join(' ');
 
-            console.log(`[Kitbash Save] ${pathMatches.length} path(s), hasTransforms: ${hasTransforms}`);
+            if (!svgContent && pathMatches.length === 0) {
+                throw new Error("Could not extract content from kitbash SVG");
+            }
+
+            console.log(`[Kitbash Save] ${pathMatches.length} path(s), svgContent: ${svgContent ? 'yes' : 'no'} (${svgContent?.length || 0} chars)`);
 
             const newIcon = {
                 id: crypto.randomUUID(),
                 name: prompt || "Kitbashed Icon",
                 library: "custom",
                 viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
-                path: combinedPath,
-                // For kitbashed icons with transforms, store the full SVG content
-                svgContent: hasTransforms ? svgContent : undefined,
+                path: combinedPath || 'M0 0', // Fallback path for schema compliance
+                // ALWAYS save svgContent for AI-generated icons
+                svgContent,
                 tags: ["ai-generated", "kitbash", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
@@ -668,34 +664,29 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
             const fillRuleMatch = svg.match(/fill-rule="([^"]+)"/);
 
-            // Check if SVG has transforms (kitbashed icons use <g transform="...">)
-            const hasTransforms = svg.includes('<g transform="');
-
             // Extract inner SVG content (everything between <svg> and </svg>)
+            // ALWAYS save svgContent for AI-generated icons to preserve original structure
             const innerMatch = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
             const svgContent = innerMatch ? innerMatch[1].trim() : undefined;
 
-            // Extract ALL path elements and combine their d attributes
-            // For simple icons without transforms, this works
+            // Extract paths as fallback for legacy rendering
             const pathMatches = [...svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
-
-            if (pathMatches.length === 0) {
-                throw new Error("Could not extract vector path from generated SVG");
-            }
-
-            // Combine all path d attributes into a single path string
             const combinedPath = pathMatches.map(match => match[1]).join(' ');
 
-            console.log(`[Modal] Saving icon with ${pathMatches.length} path(s), hasTransforms: ${hasTransforms}`);
+            if (!svgContent && pathMatches.length === 0) {
+                throw new Error("Could not extract content from generated SVG");
+            }
+
+            console.log(`[Modal] Saving icon with ${pathMatches.length} path(s), svgContent: ${svgContent ? 'yes' : 'no'} (${svgContent?.length || 0} chars)`);
 
             const newIcon = {
                 id: crypto.randomUUID(),
                 name: prompt || "Generated Icon",
                 library: "custom",
                 viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
-                path: combinedPath,
-                // For kitbashed icons with transforms, store the full SVG content
-                svgContent: hasTransforms ? svgContent : undefined,
+                path: combinedPath || 'M0 0', // Fallback path for schema compliance
+                // ALWAYS save svgContent for AI-generated icons
+                svgContent,
                 tags: ["ai-generated", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
