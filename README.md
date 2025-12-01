@@ -5,7 +5,7 @@ A modern, AI-enhanced icon library manager with native SVG generation, component
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
-![Version](https://img.shields.io/badge/version-0.4.1-green)
+![Version](https://img.shields.io/badge/version-0.5.0-green)
 
 ## Overview
 
@@ -27,14 +27,17 @@ Generate production-ready SVG icons that match your library's style:
 - **Reference Oracle**: Queries Iconify (275k+ icons) for structural consensus
 - **Style Enforcement**: Post-generation validation ensures 100% style compliance
 
-### 🧩 **Kitbash: Component Assembly**
+### 🧩 **Kitbash: Component Assembly** (v0.5.0 - Geometric Intelligence)
 
-Assemble new icons from existing library components:
+Assemble new icons from existing library components using the **Blueprint Protocol**:
 
-- **Semantic Component Index**: Icons are analyzed and tagged by parts (body, head, modifier, container)
-- **Coverage Analysis**: Know exactly what percentage of your concept exists in the library
-- **Layout Options**: Choose from multiple composition arrangements
-- **Hybrid Generation**: AI fills in missing parts while preserving found components
+- **Geometric Type Classification**: Components indexed by shape (capsule, triangle, circle, rect, etc.)
+- **Blueprint Protocol**: Concepts decomposed into geometric primitives, not semantic names
+  - "rocket" → [capsule body + triangle nose + triangle fins]
+  - Finds battery body, play icon, etc. as building blocks
+- **Coverage Analysis**: Know exactly what percentage of shapes exist in your library
+- **Deterministic Layouts**: Smart positioning based on part roles (body, nose, fins, base)
+- **Transform Preservation**: SVG `<g transform>` groups preserved through save/export
 - **Strategies**: GRAFT (100% assembly), HYBRID (partial + AI), ADAPT (modify existing)
 
 ### 🔍 **Iconify Integration**
@@ -175,23 +178,27 @@ Concept ("rocket")
        └─► Style Enforcement → Final compliant SVG
 ```
 
-### Kitbash Pipeline
+### Kitbash Pipeline (Blueprint Protocol - v0.5.0)
 
 ```
-Concept ("secure user")
+Concept ("rocket")
        │
-       ├─► Source Icon Identification → ["user", "shield", "lock"]
+       ├─► Geometric Decomposition → Blueprint: [capsule, triangle, triangle]
+       │   (Shapes, not semantic names)
        │
-       ├─► Component Index Search → Found/Missing parts
+       ├─► Geometric Index Search → Find components by shape type
+       │   geometric:capsule → battery body, tablet body, etc.
+       │   geometric:triangle → play icon, alert icon, etc.
        │
        ├─► Coverage Calculation → Strategy selection
        │   ├─ ≥90% → GRAFT (mechanical assembly)
        │   ├─ ≥50% → HYBRID (AI fills gaps)
        │   └─ <50% → GENERATE (full AI)
        │
-       ├─► Layout Generation → 3 composition options
+       ├─► Deterministic Layouts → Position by role (body→center, nose→top)
+       │   (No LLM needed for known structures)
        │
-       └─► Execution → Final assembled SVG
+       └─► Execution → Final assembled SVG with <g transform> groups
 ```
 
 ### Project Structure
@@ -217,7 +224,7 @@ src/
 
 ## Roadmap
 
-### ✅ Completed (v0.4.1)
+### ✅ Completed (v0.5.0 - Geometric Intelligence)
 
 - [x] Native SVG Generation (Sprout Engine)
 - [x] Component-based Assembly (Kitbash)
@@ -228,14 +235,20 @@ src/
 - [x] Ghost Preview (contextual validation)
 - [x] Multi-Workspace Management
 - [x] AI-Powered Enrichment
+- [x] **Blueprint Protocol**: Geometric decomposition for Kitbash (capsule, triangle, etc.)
+- [x] **Geometric Component Index**: Shape-based component queries (`geometric:capsule`)
+- [x] **Deterministic Layouts**: Reliable positioning without LLM for known structures
+- [x] **Transform Preservation**: SVG `<g transform>` groups preserved through save/export
+- [x] **svgContent Field**: Complex icons with transforms stored and rendered correctly
 
-### 🎯 Next (v0.5.0)
+### 🎯 Next (v0.6.0)
 
 - [ ] Collections (organize icons within workspaces)
 - [ ] Persistent component index (faster Kitbash)
 - [ ] Decomposition caching
 - [ ] Variant diversity improvements
 - [ ] Style Jury for native SVG
+- [ ] More static blueprints for common concepts
 
 ## Contributing
 
@@ -254,4 +267,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Status**: v0.4.1 Released | Sprout Engine Complete
+**Status**: v0.5.0 Released | Geometric Intelligence Complete

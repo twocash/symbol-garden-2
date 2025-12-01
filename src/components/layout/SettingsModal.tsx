@@ -373,15 +373,22 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             let importedIcons: Icon[] = [];
             let manifest = "";
             let collectionName = prefix;
+            let buffer = ""; // Accumulate partial lines across chunks
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split("\n").filter(Boolean);
+                // Append new chunk to buffer (stream: true handles partial UTF-8)
+                buffer += decoder.decode(value, { stream: true });
+
+                // Process complete lines (ending with \n)
+                const lines = buffer.split("\n");
+                // Keep the last partial line in buffer
+                buffer = lines.pop() || "";
 
                 for (const line of lines) {
+                    if (!line.trim()) continue;
                     try {
                         const event = JSON.parse(line);
                         if (event.status === "fetching") {
@@ -395,9 +402,23 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                             manifest = event.manifest || "";
                             collectionName = event.name || prefix;
                         }
-                    } catch {
-                        // Ignore parse errors for incomplete chunks
+                    } catch (e) {
+                        console.warn("[Iconify Import] Failed to parse line:", line.substring(0, 100), e);
                     }
+                }
+            }
+
+            // Process any remaining data in buffer after stream ends
+            if (buffer.trim()) {
+                try {
+                    const event = JSON.parse(buffer);
+                    if (event.status === "complete") {
+                        importedIcons = event.icons || [];
+                        manifest = event.manifest || "";
+                        collectionName = event.name || prefix;
+                    }
+                } catch (e) {
+                    console.warn("[Iconify Import] Failed to parse final buffer:", buffer.substring(0, 100), e);
                 }
             }
 

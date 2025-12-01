@@ -40,21 +40,36 @@ export function IconCard({ icon, color }: IconCardProps) {
                 </button>
             </div>
             <div className="relative flex h-1/2 w-1/2 items-center justify-center text-foreground transition-transform group-hover:scale-110" style={{ color: color }}>
-                <svg
-                    viewBox={icon.viewBox}
-                    fill={icon.renderStyle === "fill" ? (color || "currentColor") : "none"}
-                    stroke={icon.renderStyle === "fill" ? "none" : (color || "currentColor")}
-                    strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-full w-full"
-                >
-                    <path
-                        d={icon.path}
-                        fillRule={icon.fillRule as any}
-                        clipRule={icon.clipRule as any}
+                {icon.svgContent ? (
+                    // Complex icons with transforms - render inner SVG content directly
+                    <svg
+                        viewBox={icon.viewBox}
+                        fill={icon.renderStyle === "fill" ? (color || "currentColor") : "none"}
+                        stroke={icon.renderStyle === "fill" ? "none" : (color || "currentColor")}
+                        strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-full w-full"
+                        dangerouslySetInnerHTML={{ __html: icon.svgContent }}
                     />
-                </svg>
+                ) : (
+                    // Simple icons - use path directly
+                    <svg
+                        viewBox={icon.viewBox}
+                        fill={icon.renderStyle === "fill" ? (color || "currentColor") : "none"}
+                        stroke={icon.renderStyle === "fill" ? "none" : (color || "currentColor")}
+                        strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-full w-full"
+                    >
+                        <path
+                            d={icon.path}
+                            fillRule={icon.fillRule as any}
+                            clipRule={icon.clipRule as any}
+                        />
+                    </svg>
+                )}
             </div>
             <div className="absolute bottom-0 left-0 right-0 translate-y-full bg-background/90 p-2 text-center text-[10px] font-medium text-muted-foreground backdrop-blur-sm transition-transform group-hover:translate-y-0">
                 {icon.name}

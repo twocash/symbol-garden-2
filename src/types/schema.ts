@@ -28,6 +28,24 @@ export const ComponentCategorySchema = z.enum([
 ]);
 export type ComponentCategory = z.infer<typeof ComponentCategorySchema>;
 
+// Sprint 07: Geometric topology for Kitbash "Blueprint" matching
+// Describes the visual SHAPE of a component, independent of its semantic meaning
+// Example: A battery body, mic body, and rocket fuselage are all "capsule" shapes
+export const GeometricTypeSchema = z.enum([
+  'circle',      // Perfect circle or ring
+  'square',      // Equal sides, sharp or rounded corners
+  'rect',        // Non-square rectangle
+  'capsule',     // Pill shape (rounded rectangle with semicircle ends)
+  'triangle',    // Three-sided polygon
+  'line',        // Straight stroke
+  'curve',       // Simple arc or squiggle
+  'L-shape',     // 90-degree bend
+  'U-shape',     // Open container/cup shape
+  'cross',       // Plus or X shape
+  'complex',     // Irregular or detailed shape (fallback)
+]);
+export type GeometricType = z.infer<typeof GeometricTypeSchema>;
+
 // Bounding box for component positioning
 export const BoundingBoxSchema = z.object({
   x: z.number(),
@@ -40,9 +58,11 @@ export const BoundingBoxSchema = z.object({
 export type BoundingBox = z.infer<typeof BoundingBoxSchema>;
 
 // A discrete visual component within an icon (Sprout Engine F3)
+// Sprint 07: Added geometricType for Blueprint Protocol matching
 export const IconComponentSchema = z.object({
   name: z.string(),
   category: ComponentCategorySchema,
+  geometricType: GeometricTypeSchema.default('complex'), // Sprint 07: Shape classification
   pathData: z.string(),
   elementType: z.enum(['path', 'circle', 'rect', 'line', 'polyline', 'ellipse']),
   boundingBox: BoundingBoxSchema,
@@ -51,6 +71,15 @@ export const IconComponentSchema = z.object({
   weight: z.number().min(0).max(1),
 });
 export type IconComponent = z.infer<typeof IconComponentSchema>;
+
+// Sprint 07: Index result for component lookups
+export interface IconComponentIndex {
+  iconId: string;
+  iconName: string;
+  components: IconComponent[];
+  componentSignature: string;
+  complexity: 'simple' | 'moderate' | 'complex';
+}
 
 // AI-extracted metadata for smart sample selection
 export const AiMetadataSchema = z.object({
@@ -73,7 +102,10 @@ export const IconSchema = z.object({
   renderStyle: z.enum(["stroke", "fill"]).default("stroke").optional(),
   fillRule: z.string().optional(),
   clipRule: z.string().optional(),
-  path: z.string(), // SVG path data
+  path: z.string(), // SVG path data (for simple icons)
+  // Sprint 07: Full SVG inner content for complex/kitbashed icons with transforms
+  // When present, this takes precedence over 'path' for rendering
+  svgContent: z.string().optional(),
   viewBox: z.string().default("0 0 24 24"),
   tags: z.array(z.string()),
   categories: z.array(z.string()).optional(),

@@ -4,10 +4,14 @@
  * Two-tier system:
  * 1. Static: Pre-computed decompositions from decompositions.json (no LLM cost)
  * 2. Dynamic: On-demand LLM generation for novel concepts (cached after first use)
+ *
+ * Sprint 07: Added Geometric Decomposition for Blueprint Protocol
+ * - Breaks concepts into geometric primitives (capsule, triangle, circle)
+ * - Enables shape-based component matching in Kitbash
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Icon, SemanticCategory, GeometricTrait } from '../types/schema';
+import { Icon, SemanticCategory, GeometricTrait, GeometricType } from '../types/schema';
 import { PatternType } from './pattern-library';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -416,4 +420,296 @@ export function getAvailableDecompositions(): string[] {
  */
 export function clearDynamicCache(): void {
   dynamicCache.clear();
+}
+
+// =============================================================================
+// SPRINT 07: GEOMETRIC DECOMPOSITION (Blueprint Protocol)
+// =============================================================================
+
+/**
+ * A geometric primitive for Kitbash Blueprint Protocol
+ * Describes a shape requirement independent of semantic meaning
+ */
+export interface GeometricPrimitive {
+  /** Role in the composition (e.g., "body", "nose", "fins") */
+  role: string;
+  /** Shape type to search for */
+  shape: GeometricType;
+  /** Aspect ratio hint */
+  aspect?: 'tall' | 'wide' | 'square';
+  /** Position in composition */
+  position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
+}
+
+/**
+ * Blueprint - geometric decomposition for Kitbash assembly
+ * Instead of "rocket" → ["fuselage", "nose-cone", "fins"]
+ * We get: "rocket" → [{ role: "body", shape: "capsule" }, { role: "nose", shape: "triangle" }]
+ */
+export interface Blueprint {
+  /** Original concept */
+  concept: string;
+  /** Geometric primitives needed */
+  primitives: GeometricPrimitive[];
+  /** Assembly instructions */
+  assembly: string[];
+  /** Source of this blueprint */
+  source: 'static' | 'dynamic';
+}
+
+// Cache for geometric decompositions
+const blueprintCache = new Map<string, Blueprint>();
+
+// Static blueprints for common concepts
+const STATIC_BLUEPRINTS: Record<string, Omit<Blueprint, 'concept' | 'source'>> = {
+  rocket: {
+    primitives: [
+      { role: 'body', shape: 'capsule', aspect: 'tall', position: 'center' },
+      { role: 'nose', shape: 'triangle', position: 'top' },
+      { role: 'fins', shape: 'triangle', position: 'bottom' },
+    ],
+    assembly: [
+      'Nose aligns center-bottom to center-top of body',
+      'Fins attach to bottom-left and bottom-right of body',
+    ],
+  },
+  tv: {
+    primitives: [
+      { role: 'screen', shape: 'rect', aspect: 'wide', position: 'center' },
+      { role: 'stand', shape: 'rect', aspect: 'wide', position: 'bottom' },
+    ],
+    assembly: [
+      'Stand aligns center-top to center-bottom of screen',
+    ],
+  },
+  monitor: {
+    primitives: [
+      { role: 'screen', shape: 'rect', aspect: 'wide', position: 'center' },
+      { role: 'stand', shape: 'rect', aspect: 'tall', position: 'bottom' },
+      { role: 'base', shape: 'rect', aspect: 'wide', position: 'bottom' },
+    ],
+    assembly: [
+      'Stand connects screen to base',
+      'Base is wider than stand',
+    ],
+  },
+  battery: {
+    primitives: [
+      { role: 'case', shape: 'capsule', aspect: 'tall', position: 'center' },
+      { role: 'terminal', shape: 'rect', aspect: 'wide', position: 'top' },
+    ],
+    assembly: [
+      'Terminal sits on top of case',
+    ],
+  },
+  'play-button': {
+    primitives: [
+      { role: 'icon', shape: 'triangle', position: 'center' },
+    ],
+    assembly: [],
+  },
+  'stop-button': {
+    primitives: [
+      { role: 'icon', shape: 'square', position: 'center' },
+    ],
+    assembly: [],
+  },
+  target: {
+    primitives: [
+      { role: 'outer', shape: 'circle', position: 'center' },
+      { role: 'middle', shape: 'circle', position: 'center' },
+      { role: 'inner', shape: 'circle', position: 'center' },
+    ],
+    assembly: [
+      'Circles are concentric (same center)',
+      'Outer > middle > inner in radius',
+    ],
+  },
+  microphone: {
+    primitives: [
+      { role: 'head', shape: 'capsule', position: 'top' },
+      { role: 'stand', shape: 'line', position: 'bottom' },
+      { role: 'base', shape: 'curve', position: 'bottom' },
+    ],
+    assembly: [
+      'Stand extends from bottom of head',
+      'Base curves under stand',
+    ],
+  },
+  smartphone: {
+    primitives: [
+      { role: 'body', shape: 'capsule', aspect: 'tall', position: 'center' },
+      { role: 'screen', shape: 'rect', position: 'center' },
+    ],
+    assembly: [
+      'Screen is inset within body',
+    ],
+  },
+};
+
+/**
+ * Get geometric decomposition for a concept (Sprint 07: Blueprint Protocol)
+ *
+ * Instead of semantic decomposition ("rocket" → "fuselage", "nose-cone"),
+ * this returns geometric primitives ("rocket" → capsule + triangle + triangle)
+ */
+export async function getGeometricDecomposition(
+  concept: string,
+  apiKey?: string
+): Promise<Blueprint> {
+  const normalized = normalizeConcept(concept);
+
+  // Check cache
+  if (blueprintCache.has(normalized)) {
+    console.log(`[Decomposition] Blueprint cache hit for "${normalized}"`);
+    return blueprintCache.get(normalized)!;
+  }
+
+  // Check static blueprints
+  if (STATIC_BLUEPRINTS[normalized]) {
+    const blueprint: Blueprint = {
+      concept: normalized,
+      ...STATIC_BLUEPRINTS[normalized],
+      source: 'static',
+    };
+    blueprintCache.set(normalized, blueprint);
+    console.log(`[Decomposition] Static blueprint for "${normalized}"`);
+    return blueprint;
+  }
+
+  // Check for partial matches in static blueprints
+  for (const [key, value] of Object.entries(STATIC_BLUEPRINTS)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
+      const blueprint: Blueprint = {
+        concept: key,
+        ...value,
+        source: 'static',
+      };
+      blueprintCache.set(normalized, blueprint);
+      console.log(`[Decomposition] Static blueprint partial match: "${normalized}" → "${key}"`);
+      return blueprint;
+    }
+  }
+
+  // Generate dynamically
+  const resolvedApiKey = apiKey || process.env.GOOGLE_API_KEY;
+  if (!resolvedApiKey) {
+    console.warn('[Decomposition] No API key - returning basic blueprint');
+    return {
+      concept: normalized,
+      primitives: [{ role: 'main', shape: 'complex', position: 'center' }],
+      assembly: [],
+      source: 'dynamic',
+    };
+  }
+
+  console.log(`[Decomposition] Generating dynamic blueprint for "${normalized}"`);
+
+  const genAI = new GoogleGenerativeAI(resolvedApiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  const prompt = `You are a geometric shape analyst. Break down "${concept}" into GEOMETRIC PRIMITIVES for icon construction.
+
+IMPORTANT: Think about SHAPES, not semantics. What primitive forms make up this concept visually?
+
+Available shapes:
+- circle: Perfect circle or ring
+- square: Equal-sided rectangle
+- rect: Non-square rectangle
+- capsule: Pill/stadium shape (rounded rectangle with semicircle ends)
+- triangle: Three-sided polygon
+- line: Straight stroke
+- curve: Arc or squiggle
+- L-shape: 90-degree bend
+- U-shape: Open container shape
+- cross: Plus or X shape
+- complex: Only if truly irregular (avoid this if possible)
+
+Examples:
+- "rocket" → [{ role: "body", shape: "capsule", aspect: "tall" }, { role: "nose", shape: "triangle", position: "top" }, { role: "fins", shape: "triangle", position: "bottom" }]
+- "TV" → [{ role: "screen", shape: "rect", aspect: "wide" }, { role: "stand", shape: "rect", position: "bottom" }]
+- "battery" → [{ role: "case", shape: "capsule" }, { role: "terminal", shape: "rect", position: "top" }]
+- "play button" → [{ role: "main", shape: "triangle" }]
+- "eye" → [{ role: "outline", shape: "capsule", aspect: "wide" }, { role: "iris", shape: "circle", position: "center" }]
+
+For "${concept}", provide the geometric breakdown.
+
+Respond with valid JSON only:
+{
+  "primitives": [
+    { "role": "...", "shape": "circle|square|rect|capsule|triangle|line|curve|L-shape|U-shape|cross|complex", "aspect": "tall|wide|square", "position": "top|bottom|left|right|center" }
+  ],
+  "assembly": ["How parts connect, e.g., 'Nose aligns to top of body'"]
+}`;
+
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.2 },
+    });
+
+    const text = result.response.text().trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in response');
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Validate and normalize shapes
+    const validShapes = ['circle', 'square', 'rect', 'capsule', 'triangle', 'line', 'curve', 'L-shape', 'U-shape', 'cross', 'complex'];
+    const primitives: GeometricPrimitive[] = (parsed.primitives || []).map((p: any) => ({
+      role: p.role || 'part',
+      shape: validShapes.includes(p.shape) ? p.shape : 'complex',
+      aspect: ['tall', 'wide', 'square'].includes(p.aspect) ? p.aspect : undefined,
+      position: ['top', 'bottom', 'left', 'right', 'center'].includes(p.position) ? p.position : undefined,
+    }));
+
+    const blueprint: Blueprint = {
+      concept: normalized,
+      primitives,
+      assembly: parsed.assembly || [],
+      source: 'dynamic',
+    };
+
+    // Cache it
+    blueprintCache.set(normalized, blueprint);
+
+    return blueprint;
+  } catch (error) {
+    console.error('[Decomposition] Geometric decomposition failed:', error);
+    return {
+      concept: normalized,
+      primitives: [{ role: 'main', shape: 'complex', position: 'center' }],
+      assembly: [],
+      source: 'dynamic',
+    };
+  }
+}
+
+/**
+ * Format a blueprint for logging/display
+ */
+export function formatBlueprint(blueprint: Blueprint): string {
+  const primitivesText = blueprint.primitives
+    .map(p => {
+      let text = `• ${p.role}: ${p.shape}`;
+      if (p.aspect) text += ` (${p.aspect})`;
+      if (p.position) text += ` @ ${p.position}`;
+      return text;
+    })
+    .join('\n');
+
+  const assemblyText = blueprint.assembly.length > 0
+    ? `\nAssembly:\n${blueprint.assembly.map(a => `  - ${a}`).join('\n')}`
+    : '';
+
+  return `Blueprint for "${blueprint.concept}" (${blueprint.source}):\n${primitivesText}${assemblyText}`;
+}
+
+/**
+ * Clear the blueprint cache
+ */
+export function clearBlueprintCache(): void {
+  blueprintCache.clear();
 }

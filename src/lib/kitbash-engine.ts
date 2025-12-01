@@ -2,24 +2,29 @@
  * Kitbash Engine - Assembly from existing components
  *
  * Part of the Sprout Engine (F4)
+ * Sprint 07: Enhanced with Blueprint Protocol (Geometric Intelligence)
  *
  * Philosophy: Assemble icons from proven parts instead of generating from scratch.
  * LLMs are good at concepts but bad at precise geometry. The Kitbash Engine
  * leverages existing library components to create mathematically identical results.
  *
  * Process:
- * 1. Decompose concept into required parts (e.g., "secure user" → ["user", "shield"])
- * 2. Search component index for matches
- * 3. Calculate coverage (% of parts found)
+ * 1. Decompose concept into geometric primitives (e.g., "rocket" → [capsule, triangle, triangle])
+ * 2. Search component index for matching SHAPES (not names)
+ * 3. Calculate coverage (% of primitives found)
  * 4. If coverage > 70%: GRAFT (mechanical assembly)
  * 5. If coverage < 70%: HYBRID (AI fills gaps)
+ *
+ * Sprint 07 Changes:
+ * - Uses getGeometricDecomposition() for shape-based planning
+ * - Searches by geometric type (capsule, triangle, etc.)
+ * - Assembly uses Blueprint constraints
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Icon
- } from '@/types/schema';
-import { IconComponent, searchComponents, findByCategory } from './component-indexer';
-import { getDecomposition, Decomposition } from './decomposition-service';
+import { Icon, GeometricType } from '@/types/schema';
+import { IconComponent, searchComponents, findByCategory, findByGeometry } from './component-indexer';
+import { getDecomposition, Decomposition, getGeometricDecomposition, Blueprint, GeometricPrimitive, formatBlueprint } from './decomposition-service';
 import { enforceStyle, EnforcementRules, FEATHER_RULES } from './style-enforcer';
 
 /**
@@ -398,6 +403,7 @@ Respond with valid JSON only:
 
 /**
  * Get default layouts when LLM is unavailable
+ * Sprint 07: Uses position hints from blueprint primitives for smarter layouts
  */
 function getDefaultLayouts(parts: KitbashMatch[], missingParts: string[] = []): SkeletonLayout[] {
   const layouts: SkeletonLayout[] = [];
@@ -422,6 +428,66 @@ function getDefaultLayouts(parts: KitbashMatch[], missingParts: string[] = []): 
     return layouts;
   }
 
+  // Sprint 07: Parse position hints from part names (e.g., "body (capsule)" with position: 'center')
+  // For now, use a simple heuristic based on role names
+  const hasRocketLikeStructure = allPartNames.some(n => n.includes('body') || n.includes('case')) &&
+                                   allPartNames.some(n => n.includes('nose') || n.includes('top') || n.includes('terminal')) ||
+                                   allPartNames.some(n => n.includes('fins') || n.includes('bottom') || n.includes('base'));
+
+  if (hasRocketLikeStructure && totalParts >= 2) {
+    // Rocket-like: vertical structure with body in center, attachments top/bottom
+    const positions: Record<string, Position> = {};
+
+    for (const name of allPartNames) {
+      const lowerName = name.toLowerCase();
+
+      if (lowerName.includes('body') || lowerName.includes('case') || lowerName.includes('screen')) {
+        // Main body: center, large
+        positions[name] = { x: 12, y: 13, scale: 0.45, zIndex: 0 };
+      } else if (lowerName.includes('nose') || lowerName.includes('terminal') || lowerName.includes('top')) {
+        // Top attachment: above body, smaller, pointing up
+        positions[name] = { x: 12, y: 5, scale: 0.35, zIndex: 1 };
+      } else if (lowerName.includes('fins') || lowerName.includes('base') || lowerName.includes('stand')) {
+        // Bottom attachment: below body
+        positions[name] = { x: 12, y: 20, scale: 0.30, zIndex: 1 };
+      } else {
+        // Unknown: center it
+        positions[name] = { x: 12, y: 12, scale: 0.4, zIndex: 2 };
+      }
+    }
+
+    layouts.push({
+      name: 'standard',
+      description: 'Vertical structure with top and bottom attachments',
+      positions,
+    });
+
+    // Compact variant
+    const compactPositions: Record<string, Position> = {};
+    for (const name of allPartNames) {
+      const lowerName = name.toLowerCase();
+
+      if (lowerName.includes('body') || lowerName.includes('case') || lowerName.includes('screen')) {
+        compactPositions[name] = { x: 12, y: 12, scale: 0.55, zIndex: 0 };
+      } else if (lowerName.includes('nose') || lowerName.includes('terminal') || lowerName.includes('top')) {
+        compactPositions[name] = { x: 12, y: 4, scale: 0.30, zIndex: 1 };
+      } else if (lowerName.includes('fins') || lowerName.includes('base') || lowerName.includes('stand')) {
+        compactPositions[name] = { x: 12, y: 20, scale: 0.25, zIndex: 1 };
+      } else {
+        compactPositions[name] = { x: 12, y: 12, scale: 0.35, zIndex: 2 };
+      }
+    }
+
+    layouts.push({
+      name: 'compact',
+      description: 'Tighter vertical arrangement',
+      positions: compactPositions,
+    });
+
+    return layouts;
+  }
+
+  // Generic layouts for non-rocket-like structures
   if (totalParts === 2) {
     const [name1, name2] = allPartNames;
 
@@ -477,44 +543,163 @@ function getDefaultLayouts(parts: KitbashMatch[], missingParts: string[] = []): 
 }
 
 /**
- * Transform SVG path data
+ * Apply scale and translate to SVG path data (bake transform into coordinates)
+ * This properly handles SVG path commands and their coordinate types
  */
-function transformPathData(
+function applyTransformToPath(
   pathData: string,
-  transform: Transform,
-  position: Position,
-  originalBbox: { centerX: number; centerY: number; width: number; height: number }
+  scale: number,
+  translateX: number,
+  translateY: number
 ): string {
-  // Calculate the actual transform needed
-  const targetScale = position.scale * transform.scale;
-  const targetX = position.x;
-  const targetY = position.y;
+  // SVG path command patterns and their coordinate counts
+  // M/m, L/l, T/t: 2 coords (x,y)
+  // H/h: 1 coord (x)
+  // V/v: 1 coord (y)
+  // C/c: 6 coords (x1,y1,x2,y2,x,y)
+  // S/s, Q/q: 4 coords (x1,y1,x,y)
+  // A/a: 7 values (rx,ry,angle,large-arc,sweep,x,y) - only last 2 are coords to transform
 
-  // Calculate offset from original center to target center
-  const offsetX = targetX - originalBbox.centerX * targetScale;
-  const offsetY = targetY - originalBbox.centerY * targetScale;
+  const result: string[] = [];
+  let i = 0;
 
-  // Apply transform to path commands
-  // This is a simplified approach - real implementation would parse and transform each command
-  const transformed = pathData.replace(
-    /(-?\d+\.?\d*)/g,
-    (match, num, offset, str) => {
-      const value = parseFloat(num);
-      // Determine if this is an x or y coordinate based on position in command
-      // This is a rough heuristic - proper SVG parsing would be more accurate
-      const prevChar = str[offset - 1] || '';
-      const isY = /[VvMmLlCcSsQqTtAa]/.test(prevChar) &&
-                  str.slice(0, offset).split(/[VvMmLlCcSsQqTtAa]/).pop()?.split(/[\s,]+/).filter(Boolean).length! % 2 === 0;
-
-      if (isY) {
-        return String((value * targetScale + offsetY).toFixed(2));
-      } else {
-        return String((value * targetScale + offsetX).toFixed(2));
-      }
+  while (i < pathData.length) {
+    // Skip whitespace
+    while (i < pathData.length && /\s/.test(pathData[i])) {
+      result.push(pathData[i]);
+      i++;
     }
-  );
 
-  return transformed;
+    if (i >= pathData.length) break;
+
+    const char = pathData[i];
+
+    // Check if it's a command letter
+    if (/[MmLlHhVvCcSsQqTtAaZz]/.test(char)) {
+      result.push(char);
+      i++;
+
+      // Parse numbers following the command
+      const isRelative = char === char.toLowerCase();
+      const cmd = char.toUpperCase();
+
+      // For relative commands (lowercase), don't add translation, only scale
+      // For absolute commands (uppercase), add translation too
+
+      if (cmd === 'Z') {
+        // No coordinates
+        continue;
+      }
+
+      // Determine how many coordinate pairs this command expects
+      let coordCount = 0;
+      let isArc = false;
+      switch (cmd) {
+        case 'M': case 'L': case 'T': coordCount = 2; break;
+        case 'H': coordCount = 1; break;  // x only
+        case 'V': coordCount = 1; break;  // y only
+        case 'C': coordCount = 6; break;
+        case 'S': case 'Q': coordCount = 4; break;
+        case 'A': coordCount = 7; isArc = true; break;
+      }
+
+      // Parse and transform coordinates
+      let coordIndex = 0;
+      while (coordIndex < coordCount || coordCount === 0) {
+        // Skip whitespace and commas
+        while (i < pathData.length && /[\s,]/.test(pathData[i])) {
+          result.push(pathData[i]);
+          i++;
+        }
+
+        if (i >= pathData.length) break;
+
+        // Check for next command or end
+        if (/[MmLlHhVvCcSsQqTtAaZz]/.test(pathData[i])) break;
+
+        // Parse number
+        let numStr = '';
+        if (pathData[i] === '-' || pathData[i] === '+') {
+          numStr += pathData[i];
+          i++;
+        }
+        while (i < pathData.length && /[\d.]/.test(pathData[i])) {
+          numStr += pathData[i];
+          i++;
+        }
+
+        if (numStr === '') break;
+
+        const num = parseFloat(numStr);
+        let transformed: number;
+
+        if (isArc && coordIndex < 5) {
+          // Arc: first 5 values (rx, ry, angle, large-arc, sweep) - scale radii, keep others
+          if (coordIndex < 2) {
+            transformed = num * scale;  // Scale rx, ry
+          } else {
+            transformed = num;  // Keep angle, flags as-is
+          }
+        } else {
+          // Determine if x or y coordinate
+          const isY = (cmd === 'V') ||
+                      (cmd === 'H' ? false :
+                       (isArc ? coordIndex === 6 : coordIndex % 2 === 1));
+
+          if (isRelative) {
+            // Relative: only scale, no translation
+            transformed = num * scale;
+          } else {
+            // Absolute: scale and translate
+            if (isY) {
+              transformed = num * scale + translateY;
+            } else {
+              transformed = num * scale + translateX;
+            }
+          }
+        }
+
+        result.push(transformed.toFixed(2));
+        coordIndex++;
+
+        // For repeating commands (like M with multiple points), reset
+        if (coordIndex >= coordCount && coordCount > 0) {
+          coordIndex = 0;
+        }
+      }
+    } else {
+      // Unknown character, just copy
+      result.push(char);
+      i++;
+    }
+  }
+
+  return result.join('');
+}
+
+/**
+ * Find matching position for a part, handling LLM key variations
+ */
+function findPositionForPart(partName: string, positions: Record<string, Position>): Position | null {
+  // Direct match
+  if (positions[partName]) return positions[partName];
+
+  // Try lowercase
+  const lowerName = partName.toLowerCase();
+  for (const [key, pos] of Object.entries(positions)) {
+    if (key.toLowerCase() === lowerName) return pos;
+  }
+
+  // Try just the role part (e.g., "body" from "body (capsule)")
+  const roleMatch = partName.match(/^(\w+)\s*\(/);
+  if (roleMatch) {
+    const role = roleMatch[1];
+    for (const [key, pos] of Object.entries(positions)) {
+      if (key.toLowerCase().startsWith(role.toLowerCase())) return pos;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -525,44 +710,61 @@ function buildSvgFromComponents(
   layout: SkeletonLayout,
   rules: EnforcementRules
 ): string {
+  console.log(`[Kitbash] Building SVG with ${parts.length} parts`);
+  console.log(`[Kitbash] Layout positions: ${Object.keys(layout.positions).join(', ')}`);
+  console.log(`[Kitbash] Part names: ${parts.map(p => p.partName).join(', ')}`);
+
   // Sort by zIndex
   const sortedParts = [...parts].sort((a, b) => {
-    const posA = layout.positions[a.partName];
-    const posB = layout.positions[b.partName];
+    const posA = findPositionForPart(a.partName, layout.positions);
+    const posB = findPositionForPart(b.partName, layout.positions);
     return (posA?.zIndex || 0) - (posB?.zIndex || 0);
   });
 
   let paths = '';
 
   for (const part of sortedParts) {
-    const position = layout.positions[part.partName];
-    if (!position) continue;
+    const position = findPositionForPart(part.partName, layout.positions);
+    if (!position) {
+      console.warn(`[Kitbash] No position found for "${part.partName}"`);
+      continue;
+    }
 
-    // For now, we'll use a transform attribute instead of modifying path data
-    // This is more reliable and preserves the original path accuracy
     const bbox = part.component.boundingBox;
-    const scaleX = position.scale;
-    const scaleY = position.scale;
 
-    // Calculate transform to move component to target position
-    const translateX = position.x - bbox.centerX * scaleX;
-    const translateY = position.y - bbox.centerY * scaleY;
+    // Validate bounding box has required properties
+    if (bbox.centerX === undefined || bbox.centerY === undefined) {
+      console.warn(`[Kitbash] Missing centerX/centerY for "${part.partName}", using defaults`);
+      bbox.centerX = bbox.x + bbox.width / 2;
+      bbox.centerY = bbox.y + bbox.height / 2;
+    }
 
-    const transformAttr = `transform="translate(${translateX.toFixed(2)}, ${translateY.toFixed(2)}) scale(${scaleX.toFixed(2)})"`;
+    const scale = position.scale || 1;
+
+    // Calculate translation to move component center to target position
+    const translateX = (position.x || 12) - bbox.centerX * scale;
+    const translateY = (position.y || 12) - bbox.centerY * scale;
+
+    // Use a <g> wrapper with transform - this is the proper SVG way
+    // The browser will handle the math correctly for all path commands
+    const transform = `translate(${translateX.toFixed(2)} ${translateY.toFixed(2)}) scale(${scale.toFixed(2)})`;
 
     if (part.component.elementType === 'path') {
-      paths += `<path d="${part.component.pathData}" ${transformAttr} />\n`;
+      paths += `<g transform="${transform}"><path d="${part.component.pathData}"/></g>\n`;
     } else if (part.component.elementType === 'circle') {
-      paths += `<circle ${part.component.pathData} ${transformAttr} />\n`;
+      paths += `<g transform="${transform}"><circle ${part.component.pathData}/></g>\n`;
     } else if (part.component.elementType === 'rect') {
-      paths += `<rect ${part.component.pathData} ${transformAttr} />\n`;
+      paths += `<g transform="${transform}"><rect ${part.component.pathData}/></g>\n`;
     } else if (part.component.elementType === 'line') {
-      paths += `<line ${part.component.pathData} ${transformAttr} />\n`;
+      paths += `<g transform="${transform}"><line ${part.component.pathData}/></g>\n`;
     }
   }
 
   const svg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${rules.strokeWidth || 2}" stroke-linecap="${rules.strokeLinecap || 'round'}" stroke-linejoin="${rules.strokeLinejoin || 'round'}" xmlns="http://www.w3.org/2000/svg">
 ${paths}</svg>`;
+
+  console.log(`[Kitbash] Generated SVG with ${(svg.match(/<path/g) || []).length} path elements`);
+  console.log(`[Kitbash] SVG preview (first 500 chars): ${svg.substring(0, 500)}`);
 
   return svg;
 }
@@ -630,10 +832,313 @@ Example: <path d="M12 2v4" />`;
   }
 }
 
+// =============================================================================
+// SPRINT 07: GEOMETRIC PLANNING (Blueprint Protocol)
+// =============================================================================
+
 /**
- * Plan how to assemble an icon from concept
+ * A geometric match from the library (Sprint 07)
+ * Matches a geometric primitive (shape requirement) to a library component
  */
-export async function planKitbash(
+export interface GeometricMatch {
+  /** The primitive we were looking for */
+  primitive: GeometricPrimitive;
+  /** The component we found */
+  component: IconComponent;
+  /** Source icon name */
+  sourceIcon: string;
+  /** Match confidence 0-1 */
+  confidence: number;
+}
+
+/**
+ * Find components matching a geometric primitive
+ * Sprint 07: Shape-based search instead of name-based
+ */
+function findGeometricMatches(
+  primitive: GeometricPrimitive,
+  componentIndex: Map<string, IconComponent[]>
+): IconComponent[] {
+  // Direct geometric type match
+  const geometricMatches = findByGeometry(componentIndex, primitive.shape);
+
+  console.log(`[Kitbash] Searching for geometric:${primitive.shape} - found ${geometricMatches.length} matches`);
+
+  // Filter by aspect ratio if specified
+  if (primitive.aspect && geometricMatches.length > 0) {
+    const filtered = geometricMatches.filter(comp => {
+      const bbox = comp.boundingBox;
+      const aspectRatio = bbox.width / bbox.height;
+
+      // Relaxed thresholds: "tall" means height > width, "wide" means width > height
+      if (primitive.aspect === 'tall') return aspectRatio <= 1.0; // height >= width
+      if (primitive.aspect === 'wide') return aspectRatio >= 1.0; // width >= height
+      if (primitive.aspect === 'square') return aspectRatio >= 0.7 && aspectRatio <= 1.4;
+      return true;
+    });
+
+    // If aspect filtering eliminated all matches, return unfiltered (something is better than nothing)
+    if (filtered.length === 0 && geometricMatches.length > 0) {
+      console.log(`[Kitbash] Aspect filter (${primitive.aspect}) too strict, using unfiltered matches`);
+      return geometricMatches;
+    }
+    return filtered;
+  }
+
+  return geometricMatches;
+}
+
+/**
+ * Select the best geometric match from candidates
+ * Sprint 07: Prefers simpler components for structural parts
+ */
+function selectBestGeometricMatch(
+  primitive: GeometricPrimitive,
+  candidates: IconComponent[]
+): GeometricMatch | null {
+  if (candidates.length === 0) return null;
+
+  // Score candidates
+  const scored = candidates.map(comp => {
+    let score = 50; // Base score
+
+    // Prefer simpler components (lower weight = less visual mass = simpler)
+    score += (1 - comp.weight) * 30;
+
+    // Prefer body/container categories for structural parts
+    if (comp.category === 'body' || comp.category === 'container') {
+      score += 20;
+    }
+
+    // Penalize complex geometricType (shouldn't match but could be fallback)
+    if (comp.geometricType === 'complex') {
+      score -= 50;
+    }
+
+    // Bonus if the shape matches exactly
+    if (comp.geometricType === primitive.shape) {
+      score += 30;
+    }
+
+    return { component: comp, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  const best = scored[0];
+
+  return {
+    primitive,
+    component: best.component,
+    sourceIcon: best.component.sourceIcon,
+    confidence: Math.min(1, best.score / 100),
+  };
+}
+
+/**
+ * Generate layouts from Blueprint assembly rules
+ * Sprint 07: Uses geometric constraints for positioning
+ * NOTE: LLM layout generation is unreliable, so we prefer deterministic defaults
+ */
+async function generateLayoutsFromBlueprint(
+  concept: string,
+  parts: KitbashMatch[],
+  missingParts: string[] = [],
+  assemblyRules: string[] = [],
+  apiKey?: string
+): Promise<SkeletonLayout[]> {
+  // Sprint 07: Use deterministic layouts for rocket-like structures
+  // The LLM was generating incorrect positions (e.g., nose bigger than body)
+  const allPartNames = [...parts.map(p => p.partName), ...missingParts];
+
+  // Check if this is a known structure type we can handle deterministically
+  const hasVerticalStructure = allPartNames.some(n => n.toLowerCase().includes('body') || n.toLowerCase().includes('case')) &&
+                               (allPartNames.some(n => n.toLowerCase().includes('nose') || n.toLowerCase().includes('top') || n.toLowerCase().includes('terminal')) ||
+                                allPartNames.some(n => n.toLowerCase().includes('fins') || n.toLowerCase().includes('bottom') || n.toLowerCase().includes('base')));
+
+  // For known structures, use deterministic layouts - more reliable than LLM
+  if (hasVerticalStructure) {
+    console.log('[Kitbash] Using deterministic vertical layout for known structure');
+    return getDefaultLayouts(parts, missingParts);
+  }
+
+  const resolvedApiKey = apiKey || process.env.GOOGLE_API_KEY;
+
+  if (!resolvedApiKey) {
+    return getDefaultLayouts(parts, missingParts);
+  }
+
+  const genAI = new GoogleGenerativeAI(resolvedApiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  const partInfo = parts.map(p => {
+    const bbox = p.component.boundingBox;
+    return `- ${p.partName}: ${bbox.width.toFixed(0)}×${bbox.height.toFixed(0)} from "${p.sourceIcon}"`;
+  }).join('\n');
+
+  const assemblyInfo = assemblyRules.length > 0
+    ? `\n\nASSEMBLY CONSTRAINTS (follow these!):\n${assemblyRules.map(r => `- ${r}`).join('\n')}`
+    : '';
+
+  const prompt = `You are an icon layout expert. Create layouts for "${concept}".
+
+AVAILABLE PARTS:
+${partInfo}
+${missingParts.length > 0 ? `\nMISSING (need positions for generation): ${missingParts.join(', ')}` : ''}
+${assemblyInfo}
+
+Canvas: 24×24 with 2px padding (usable: 2-22)
+
+IMPORTANT RULES:
+- Main body parts should be scale 0.4-0.6, NOT 0.8-1.0
+- Attachment parts (nose, fins, badges) should be scale 0.2-0.4
+- Parts should NOT overlap completely - they should be visually distinct
+- "top" means low Y (y=3-6), "bottom" means high Y (y=18-21), "center" means y=10-14
+
+Suggest 2 layouts:
+1. Standard: Follow assembly constraints
+2. Compact: Tighter arrangement
+
+For each part, specify: x, y (center point), scale (0.2-0.6), zIndex (0=back, higher=front)
+
+JSON only:
+{
+  "layouts": [
+    {
+      "name": "standard",
+      "description": "...",
+      "positions": {
+        "body (capsule)": { "x": 12, "y": 13, "scale": 0.45, "zIndex": 0 },
+        "nose (triangle)": { "x": 12, "y": 5, "scale": 0.3, "zIndex": 1 }
+      }
+    }
+  ]
+}`;
+
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.2 },
+    });
+
+    const text = result.response.text().trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    const layouts = (parsed.layouts || []).map((l: any) => ({
+      name: l.name || 'unknown',
+      description: l.description || '',
+      positions: l.positions || {},
+    }));
+
+    // Validate that all parts have positions
+    for (const layout of layouts) {
+      const missingPositions = allPartNames.filter(name => !findPositionForPart(name, layout.positions));
+      if (missingPositions.length > 0) {
+        console.warn(`[Kitbash] Layout "${layout.name}" missing positions for: ${missingPositions.join(', ')}`);
+        // Fall back to defaults if LLM didn't provide all positions
+        return getDefaultLayouts(parts, missingParts);
+      }
+    }
+
+    return layouts;
+  } catch (error) {
+    console.error('[Kitbash] Blueprint layout generation failed:', error);
+    return getDefaultLayouts(parts, missingParts);
+  }
+}
+
+/**
+ * Plan Kitbash using Blueprint Protocol (Sprint 07)
+ * Uses geometric decomposition for shape-based matching
+ */
+async function planKitbashGeometric(
+  concept: string,
+  componentIndex: Map<string, IconComponent[]>,
+  apiKey?: string
+): Promise<KitbashPlan> {
+  // 1. Get geometric decomposition (shapes, not names)
+  const blueprint = await getGeometricDecomposition(concept, apiKey);
+  console.log(`[Kitbash] Blueprint for "${concept}":`);
+  console.log(formatBlueprint(blueprint));
+
+  // 2. Search library for each shape
+  const foundParts: KitbashMatch[] = [];
+  const missingParts: string[] = [];
+
+  for (const primitive of blueprint.primitives) {
+    const partLabel = `${primitive.role} (${primitive.shape})`;
+    const candidates = findGeometricMatches(primitive, componentIndex);
+
+    if (candidates.length > 0) {
+      const match = selectBestGeometricMatch(primitive, candidates);
+      if (match) {
+        foundParts.push({
+          partName: partLabel,
+          sourceIcon: match.sourceIcon,
+          component: match.component,
+          confidence: match.confidence,
+          transformRequired: { scale: 1, translateX: 0, translateY: 0 },
+        });
+        console.log(`[Kitbash] ✓ Found ${partLabel} from "${match.sourceIcon}" (${(match.confidence * 100).toFixed(0)}%)`);
+      }
+    } else {
+      missingParts.push(partLabel);
+      console.log(`[Kitbash] ✗ Missing ${partLabel}`);
+    }
+  }
+
+  // 3. Calculate coverage
+  const coverage = blueprint.primitives.length > 0
+    ? foundParts.length / blueprint.primitives.length
+    : 0;
+
+  // 4. Determine strategy
+  let strategy: AssemblyStrategy;
+  if (coverage >= 0.9) {
+    strategy = 'graft';
+  } else if (coverage >= 0.5) {
+    strategy = 'hybrid';
+  } else if (foundParts.length === 1) {
+    strategy = 'adapt';
+  } else {
+    strategy = 'generate';
+  }
+
+  console.log(`[Kitbash] Blueprint coverage: ${(coverage * 100).toFixed(0)}%, Strategy: ${strategy}`);
+
+  // 5. Generate layout suggestions with assembly hints
+  let suggestedLayouts: SkeletonLayout[] = [];
+  if (foundParts.length > 0 || missingParts.length > 0) {
+    suggestedLayouts = await generateLayoutsFromBlueprint(
+      concept,
+      foundParts,
+      missingParts,
+      blueprint.assembly,
+      apiKey
+    );
+  }
+
+  // Get semantic decomposition for fallback/hybrid generation
+  const decomposition = await getDecomposition(concept, 'auto', [], apiKey);
+
+  return {
+    concept,
+    requiredParts: blueprint.primitives.map(p => `${p.role} (${p.shape})`),
+    foundParts,
+    missingParts,
+    coverage,
+    strategy,
+    suggestedLayouts,
+    decomposition,
+  };
+}
+
+/**
+ * Plan Kitbash using semantic matching (original method)
+ * Kept for fallback when geometric matching fails
+ */
+async function planKitbashSemantic(
   concept: string,
   componentIndex: Map<string, IconComponent[]>,
   apiKey?: string,
@@ -683,15 +1188,12 @@ export async function planKitbash(
     strategy = 'generate';
   }
 
-  console.log(`[Kitbash] Coverage: ${(coverage * 100).toFixed(0)}%, Strategy: ${strategy}`);
+  console.log(`[Kitbash] Semantic coverage: ${(coverage * 100).toFixed(0)}%, Strategy: ${strategy}`);
 
   // 5. Generate layout suggestions (skip LLM call if no parts found)
-  // Pass both found and missing parts so layouts include positions for everything
   let suggestedLayouts: SkeletonLayout[] = [];
   if (foundParts.length > 0 || missingParts.length > 0) {
     suggestedLayouts = await generateLayouts(concept, foundParts, missingParts, apiKey);
-  } else {
-    console.log('[Kitbash] Skipping layout generation - no parts at all');
   }
 
   return {
@@ -704,6 +1206,36 @@ export async function planKitbash(
     suggestedLayouts,
     decomposition,
   };
+}
+
+/**
+ * Plan how to assemble an icon from concept
+ * Sprint 07: Now uses Blueprint Protocol (geometric) by default
+ */
+export async function planKitbash(
+  concept: string,
+  componentIndex: Map<string, IconComponent[]>,
+  apiKey?: string,
+  availableIconNames?: string[],
+  options?: { useGeometric?: boolean }
+): Promise<KitbashPlan> {
+  // Sprint 07: Default to geometric planning
+  const useGeometric = options?.useGeometric ?? true;
+
+  if (useGeometric) {
+    const geometricPlan = await planKitbashGeometric(concept, componentIndex, apiKey);
+
+    // If geometric planning found something, use it
+    if (geometricPlan.coverage > 0) {
+      return geometricPlan;
+    }
+
+    // Fall back to semantic planning if geometric found nothing
+    console.log('[Kitbash] Geometric planning found no matches, falling back to semantic');
+  }
+
+  // Semantic planning (original method)
+  return planKitbashSemantic(concept, componentIndex, apiKey, availableIconNames);
 }
 
 /**

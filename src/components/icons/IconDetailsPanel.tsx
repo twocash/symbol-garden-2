@@ -157,21 +157,36 @@ export function IconDetailsPanel({ icon }: IconDetailsPanelProps) {
                                 backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
                             }}
                         />
-                        <svg
-                            viewBox={icon.viewBox}
-                            fill={icon.renderStyle === "fill" ? color : "none"}
-                            stroke={icon.renderStyle === "fill" ? "none" : color}
-                            strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-32 w-32 transition-colors duration-200 relative z-10"
-                        >
-                            <path
-                                d={icon.path}
-                                fillRule={icon.fillRule as any}
-                                clipRule={icon.clipRule as any}
+                        {icon.svgContent ? (
+                            // Complex icons with transforms - render inner SVG content directly
+                            <svg
+                                viewBox={icon.viewBox}
+                                fill={icon.renderStyle === "fill" ? color : "none"}
+                                stroke={icon.renderStyle === "fill" ? "none" : color}
+                                strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-32 w-32 transition-colors duration-200 relative z-10"
+                                dangerouslySetInnerHTML={{ __html: icon.svgContent }}
                             />
-                        </svg>
+                        ) : (
+                            // Simple icons - use path directly
+                            <svg
+                                viewBox={icon.viewBox}
+                                fill={icon.renderStyle === "fill" ? color : "none"}
+                                stroke={icon.renderStyle === "fill" ? "none" : color}
+                                strokeWidth={icon.renderStyle === "fill" ? "0" : "2"}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-32 w-32 transition-colors duration-200 relative z-10"
+                            >
+                                <path
+                                    d={icon.path}
+                                    fillRule={icon.fillRule as any}
+                                    clipRule={icon.clipRule as any}
+                                />
+                            </svg>
+                        )}
                     </div>
 
                     {/* Quick Actions */}

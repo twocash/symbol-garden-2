@@ -24,11 +24,29 @@ import { Icon } from "@/types/schema";
 import { analyzeLibrary } from "@/app/actions/analyze-library";
 
 // Helper to extract path data from SVG
+// Icons can have multiple paths (e.g., airplay has screen + triangle)
 function extractPathFromSvg(svg: string): string | null {
-  // Try to extract <path d="...">
-  const pathMatch = svg.match(/<path[^>]*\sd="([^"]+)"/);
-  if (pathMatch) {
-    return pathMatch[1];
+  // Extract ALL path d attributes and combine them
+  const pathRegex = /<path[^>]*\sd="([^"]+)"/g;
+  const paths: string[] = [];
+  let match;
+
+  while ((match = pathRegex.exec(svg)) !== null) {
+    paths.push(match[1]);
+  }
+
+  if (paths.length > 0) {
+    // When combining paths, the first path is fine as-is
+    // But subsequent paths that start with lowercase 'm' (relative moveto)
+    // need to be converted to 'M' (absolute) since they're now standalone
+    const combinedPaths = paths.map((p, i) => {
+      if (i === 0) return p;
+      // Convert leading relative moveto to absolute
+      // A relative 'm' after a path ends would be relative to the last point,
+      // but when we split paths, each should start with absolute 'M'
+      return p.replace(/^m/, 'M');
+    });
+    return combinedPaths.join(' ');
   }
 
   // Try <circle>, <rect>, <line>, <polyline> - construct a simplified path

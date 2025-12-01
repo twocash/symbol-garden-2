@@ -485,8 +485,18 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
         setIsSaving(true);
         try {
-            // Extract viewBox and path from SVG
+            // Extract viewBox from SVG
             const viewBoxMatch = kitbashSvg.match(/viewBox="([^"]+)"/);
+
+            // Check if SVG has transforms (kitbashed icons use <g transform="...">)
+            const hasTransforms = kitbashSvg.includes('<g transform="');
+
+            // Extract inner SVG content (everything between <svg> and </svg>)
+            const innerMatch = kitbashSvg.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
+            const svgContent = innerMatch ? innerMatch[1].trim() : undefined;
+
+            // Extract ALL path elements and combine their d attributes
+            // For fallback/simple path rendering
             const pathMatches = [...kitbashSvg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
 
             if (pathMatches.length === 0) {
@@ -495,12 +505,16 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
 
             const combinedPath = pathMatches.map(match => match[1]).join(' ');
 
+            console.log(`[Kitbash Save] ${pathMatches.length} path(s), hasTransforms: ${hasTransforms}`);
+
             const newIcon = {
                 id: crypto.randomUUID(),
                 name: prompt || "Kitbashed Icon",
                 library: "custom",
                 viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
                 path: combinedPath,
+                // For kitbashed icons with transforms, store the full SVG content
+                svgContent: hasTransforms ? svgContent : undefined,
                 tags: ["ai-generated", "kitbash", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
@@ -654,8 +668,15 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
             const fillRuleMatch = svg.match(/fill-rule="([^"]+)"/);
 
+            // Check if SVG has transforms (kitbashed icons use <g transform="...">)
+            const hasTransforms = svg.includes('<g transform="');
+
+            // Extract inner SVG content (everything between <svg> and </svg>)
+            const innerMatch = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
+            const svgContent = innerMatch ? innerMatch[1].trim() : undefined;
+
             // Extract ALL path elements and combine their d attributes
-            // Generated SVGs often have multiple <path> elements for complex icons
+            // For simple icons without transforms, this works
             const pathMatches = [...svg.matchAll(/<path[^>]*d="([^"]+)"[^>]*\/?>/g)];
 
             if (pathMatches.length === 0) {
@@ -663,10 +684,9 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
             }
 
             // Combine all path d attributes into a single path string
-            // Each path becomes a separate move command in the combined path
             const combinedPath = pathMatches.map(match => match[1]).join(' ');
 
-            console.log(`[Modal] Saving icon with ${pathMatches.length} path(s), combined length: ${combinedPath.length}`);
+            console.log(`[Modal] Saving icon with ${pathMatches.length} path(s), hasTransforms: ${hasTransforms}`);
 
             const newIcon = {
                 id: crypto.randomUUID(),
@@ -674,6 +694,8 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                 library: "custom",
                 viewBox: viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24",
                 path: combinedPath,
+                // For kitbashed icons with transforms, store the full SVG content
+                svgContent: hasTransforms ? svgContent : undefined,
                 tags: ["ai-generated", "sprout"],
                 categories: ["Generated"],
                 renderStyle: "stroke" as const,
@@ -1087,9 +1109,9 @@ export function AIIconGeneratorModal({ isOpen, onClose }: AIIconGeneratorModalPr
                                                 kitbashPlan.foundParts.map((part, i) => (
                                                     <div key={i} className="flex items-center gap-1 text-xs">
                                                         <CheckCircle2 className="w-3 h-3 text-green-500" />
-                                                        <span className="truncate">{part.partName}</span>
-                                                        <span className="text-[9px] text-muted-foreground">
-                                                            ({Math.round(part.confidence * 100)}%)
+                                                        <span className="truncate" title={`From: ${part.sourceIcon}`}>{part.partName}</span>
+                                                        <span className="text-[9px] text-muted-foreground" title={`From ${part.sourceIcon}`}>
+                                                            ({part.sourceIcon.split('-')[0]})
                                                         </span>
                                                     </div>
                                                 ))

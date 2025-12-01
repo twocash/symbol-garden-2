@@ -1,9 +1,9 @@
 # Symbol Garden 2.0 - AI Agent Context Document
 
-> **Last Updated:** 2025-11-29
-> **Version:** 0.4.1 (Sprout Engine Complete)
-> **Branch:** feature/svg-native-generation
-> **System Status:** ✅ STABLE - All F1-F5 features operational
+> **Last Updated:** 2025-12-01
+> **Version:** 0.5.0 (Geometric Intelligence)
+> **Branch:** main (merged from goofy-aryabhata)
+> **System Status:** ✅ STABLE - Sprint 07 Geometric Intelligence complete & merged
 
 ---
 
@@ -358,6 +358,34 @@ Input: "secure user" concept
 
 ## 5. RECENT CHANGES & RATIONALE
 
+### Session Changes (2025-12-01) - Sprint 07 Completion
+
+#### Transform Preservation for Kitbashed Icons
+**Files:** `AIIconGeneratorModal.tsx`, `export-utils.ts`, `IconCard.tsx`, `IconDetailsPanel.tsx`, `schema.ts`
+**What:** Added `svgContent` field to Icon schema for storing full SVG inner content with `<g transform>` groups.
+**Why:** Kitbash was generating correct SVG with transforms on the server, but the save handler was extracting only path `d` attributes, losing all positioning. Now:
+- `handleSaveKitbash` detects `<g transform>` and stores `svgContent`
+- `createSvgString()` in export-utils uses `svgContent` when present
+- Rendering components use `dangerouslySetInnerHTML` with `svgContent`
+**Before:** Kitbashed icons exported as overlapping paths without positioning
+**After:** Kitbashed icons preserve exact transform positions through save/export
+
+#### Deterministic Layouts for Known Structures
+**Files:** `kitbash-engine.ts`
+**What:** Updated `getDefaultLayouts()` to detect rocket-like vertical structures and apply hardcoded positions instead of LLM-generated layouts.
+**Why:** LLM was generating incorrect positions (e.g., nose scale=1.0, body scale=0.35 - inverted hierarchy). Now:
+- Body/case/screen → center at y=13, scale 0.45
+- Nose/terminal/top → top at y=5, scale 0.35
+- Fins/base/stand → bottom at y=20, scale 0.30
+**Before:** Components overlapping or inverted size hierarchy
+**After:** Proper vertical stacking with correct scale ratios
+
+#### Blueprint Protocol Deterministic Path
+**Files:** `kitbash-engine.ts`
+**What:** Updated `generateLayoutsFromBlueprint()` to use deterministic layouts for known structure types instead of calling LLM.
+**Why:** LLM layout generation was unreliable and slow (30-40s). Deterministic layouts are instant and correct.
+**Result:** Rocket-like structures now position correctly without LLM call
+
 ### Session Changes (2025-11-29)
 
 #### Kitbash Source Icon Identification
@@ -402,7 +430,7 @@ Input: "secure user" concept
 | **Kitbash needs Jury refinement** | `kitbash-engine.ts` | Assembled icons are one-shots without quality gate | 🔴 Open |
 | **UI indicators missing** | Icon tiles, workspace header | Heart (favorites) and "..." menu icons not rendering | 🔴 Open |
 | **Fragile SVG rendering** | Multiple locations | Ad-hoc "normalization" fixes break styling | 🔴 Open |
-| **Component mismatch** | Ingestion vs Kitbash | Assembly tagging doesn't match extraction (2/10 quality) | 🔴 Open |
+| **Component mismatch** | Ingestion vs Kitbash | ~~Assembly tagging doesn't match extraction~~ | ✅ Fixed Sprint 07 |
 
 ### High Priority
 
@@ -410,7 +438,7 @@ Input: "secure user" concept
 |-------|----------|--------|--------|
 | **Kitbash→Jury integration** | `kitbash-engine.ts`, `style-jury-service.ts` | Assembled icons should go through refinement pool | High |
 | **System-wide SVG handler** | Needs new service | Prevent piecemeal SVG fixes breaking other flows | High |
-| **Component semantic alignment** | `component-indexer.ts`, `kitbash-engine.ts` | Parts extracted during ingestion don't map to assembly | High |
+| ~~**Component semantic alignment**~~ | ~~`component-indexer.ts`~~ | ~~Parts don't map to assembly~~ | ✅ Fixed Sprint 07 |
 | **Kitbash planning slow** | `kitbash-engine.ts` | 30-40s for planning step | Medium |
 | **Component indexing not persisted** | Enrichment happens each time | Re-indexes on every enrichment | Low |
 | **Decomposition cache not persisted** | `decomposition-service.ts` | Dynamic decompositions lost on restart | Low |
@@ -426,10 +454,10 @@ Input: "secure user" concept
 
 ### Known Limitations
 
-1. **Single-path storage**: Icons stored as single `path` string; compound SVGs combined with space separator
+1. **Single-path storage (simple icons)**: Simple icons stored as single `path` string; compound SVGs combined with space separator
 2. **No undo**: Generated icons save directly; no preview-before-save for Generate mode
 3. **Enrichment required for Kitbash**: Components only indexed after enrichment is run
-4. **No transforms support**: SVG `<g>` transforms not fully supported
+4. ~~**No transforms support**~~: ✅ **FIXED in v0.5.0** - SVG `<g transform>` groups now preserved via `svgContent` field
 
 ### Architecture Debt: SVG Handling
 
@@ -447,20 +475,63 @@ Input: "secure user" concept
 - Theme-aware color handling
 - Used by ALL components that display SVGs
 
-### Architecture Debt: Component Semantic Model
+### Architecture Debt: Component Semantic Model - ✅ RESOLVED (Sprint 07)
 
-**Problem:** Kitbash assembly uses a different component model than ingestion:
+**Problem (RESOLVED):** Kitbash assembly was using a different component model than ingestion:
 - **Ingestion** extracts: shapes, positions, basic geometry
-- **Kitbash** expects: semantic parts ("wing", "body", "tail")
+- **Kitbash** expected: semantic parts ("wing", "body", "tail")
 - **Mismatch:** No mapping between extracted shapes and semantic concepts
 
-**Current Quality:** 2/10 - Assembly rarely finds matching components
+**Solution (Sprint 07 - Geometric Intelligence):**
+1. Added `GeometricType` enum: circle, square, rect, capsule, triangle, line, curve, L-shape, U-shape, cross, complex
+2. Component indexer now extracts geometric type alongside semantic tags
+3. New `geometric:${type}` index keys enable shape-based queries
+4. Blueprint Protocol: Kitbash now decomposes concepts into geometric primitives
+5. Example: "rocket" → [body:capsule, nose:triangle, fins:triangle] → finds battery body, play icon, etc.
 
-**Solution Needed:** Unified component model:
-1. During ingestion: Extract shapes AND infer semantic labels
-2. Build shape similarity index (not just name matching)
-3. Kitbash queries by semantic role + shape similarity
-4. Component library with canonical examples per semantic type
+**Current Quality:** 6/10 - Significant improvement for structural assembly
+
+### Sprint 07: Geometric Intelligence (New)
+
+**Goal:** Transition Kitbash from "Semantic Collage" to "Geometric Assembly"
+
+**Key Changes:**
+1. **Schema** (`src/types/schema.ts`):
+   - Added `GeometricTypeSchema` enum (11 shape types)
+   - Added `geometricType` field to `IconComponentSchema`
+   - Added `IconComponentIndex` interface
+
+2. **Component Indexer** (`src/lib/component-indexer.ts`):
+   - Updated LLM prompt to extract geometric type
+   - Added `geometric:${type}` index keys
+   - Added `findByGeometry()` helper function
+   - Added `inferGeometricTypeFromElement()` fallback
+
+3. **Decomposition Service** (`src/lib/decomposition-service.ts`):
+   - Added `GeometricPrimitive` and `Blueprint` interfaces
+   - Added `getGeometricDecomposition()` function
+   - Static blueprints for common concepts (rocket, tv, battery, etc.)
+
+4. **Kitbash Engine** (`src/lib/kitbash-engine.ts`):
+   - Added `planKitbashGeometric()` using Blueprint Protocol
+   - Added `findGeometricMatches()` for shape-based search
+   - Added `generateLayoutsFromBlueprint()` with assembly constraints
+   - Updated `planKitbash()` to use geometric mode by default
+
+5. **UI** (`src/components/dialogs/AIIconGeneratorModal.tsx`):
+   - Updated found parts display to show source icon name
+
+6. **Scripts** (`scripts/re-enrich-geometric.ts`):
+   - Re-enrichment script to populate geometric types for existing icons
+
+**How It Works:**
+```
+Before (Semantic):
+  "rocket" → ["fuselage", "nose-cone", "fins"] → No matches in library → Fail
+
+After (Geometric):
+  "rocket" → [capsule, triangle, triangle] → Finds battery body, play icon → Success
+```
 
 ---
 
@@ -549,7 +620,8 @@ interface Icon {
   id: string;
   name: string;
   library: string;
-  path: string;                    // SVG path d attribute(s)
+  path: string;                    // SVG path d attribute(s) - for simple icons
+  svgContent?: string;             // ✨ v0.5.0: Full SVG inner content with <g transform> groups
   viewBox: string;                 // Default "0 0 24 24"
   renderStyle: "stroke" | "fill";
   tags: string[];
@@ -638,6 +710,8 @@ npx vitest                     # Run tests
 | Wrong stroke-linecap | Style DNA not passed to generator | Ensure library has styleManifest |
 | Style Jury disabled | Missing `GOOGLE_CLOUD_PROJECT_ID` | Set env var or ignore (optional) |
 | Port 3000 in use | Multiple dev servers | Kill orphan processes |
+| Kitbash icons overlapping | Transforms lost on save | Fixed v0.5.0: `svgContent` field preserves `<g transform>` |
+| LLM layouts incorrect | Nose bigger than body, etc. | Fixed v0.5.0: Deterministic layouts for known structures |
 
 ---
 

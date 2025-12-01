@@ -37,6 +37,22 @@ import {
   KitbashPlan,
 } from '@/lib/kitbash-engine';
 import { rulesFromStyleDNA, rulesFromManifest, FEATHER_RULES } from '@/lib/style-enforcer';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load enriched icons from server-side file (has components with geometricType)
+function loadEnrichedIcons(): Icon[] | null {
+  try {
+    const libPath = path.join(process.cwd(), 'data', 'feather-icons.json');
+    if (fs.existsSync(libPath)) {
+      const data = fs.readFileSync(libPath, 'utf-8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('[Kitbash] Failed to load enriched icons:', error);
+  }
+  return null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,10 +83,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Build component index from icons
-    // Note: In production, this should be pre-computed and cached
+    // Prefer server-side enriched icons (have components with geometricType)
+    // Fall back to client icons if no enriched data available
+    const enrichedIcons = loadEnrichedIcons();
+    const iconsToIndex = enrichedIcons || (icons as Icon[]);
+
+    console.log(`[Kitbash] Using ${enrichedIcons ? 'server-side enriched' : 'client-provided'} icons (${iconsToIndex.length} total)`);
+
     const componentIndex = new Map<string, IconComponent[]>();
 
-    for (const icon of icons as Icon[]) {
+    for (const icon of iconsToIndex) {
       if (icon.components && Array.isArray(icon.components)) {
         for (const comp of icon.components) {
           const existing = componentIndex.get(comp.name) || [];
@@ -90,6 +112,14 @@ export async function POST(req: NextRequest) {
           const catExisting = componentIndex.get(catKey) || [];
           catExisting.push(comp);
           componentIndex.set(catKey, catExisting);
+
+          // Sprint 07: Index by geometric type for Blueprint Protocol
+          if (comp.geometricType) {
+            const geoKey = `geometric:${comp.geometricType}`;
+            const geoExisting = componentIndex.get(geoKey) || [];
+            geoExisting.push(comp);
+            componentIndex.set(geoKey, geoExisting);
+          }
         }
       }
     }

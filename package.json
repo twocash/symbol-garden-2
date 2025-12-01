@@ -1,6 +1,6 @@
 {
   "name": "symbol-garden-2",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "AI-enhanced icon library manager with native SVG generation, component-based assembly (Kitbash), and style-aware icon synthesis",
   "private": true,
   "scripts": {

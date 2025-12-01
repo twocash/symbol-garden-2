@@ -6,6 +6,19 @@ function createSvgString(icon: Icon, size: number, color: string): string {
     const strokeAttr = isFill ? "none" : color;
     const strokeWidth = isFill ? "0" : "2";
 
+    // Debug: Log svgContent status
+    console.log(`[Export] Icon "${icon.name}" has svgContent: ${!!icon.svgContent}, length: ${icon.svgContent?.length || 0}`);
+
+    // Sprint 07: Use svgContent for complex/kitbashed icons with transforms
+    if (icon.svgContent) {
+        // Replace stroke color in the content
+        const coloredContent = icon.svgContent.replace(/stroke="currentColor"/g, `stroke="${color}"`);
+        console.log(`[Export] Using svgContent for "${icon.name}"`);
+        return `<svg viewBox="${icon.viewBox}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" fill="${fillAttr}" stroke="${strokeAttr}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${coloredContent}</svg>`;
+    }
+
+    // Simple icons: use path data directly
+    console.log(`[Export] Using path fallback for "${icon.name}"`);
     return `<svg viewBox="${icon.viewBox}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" fill="${fillAttr}" stroke="${strokeAttr}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"><path d="${icon.path}" fill-rule="${icon.fillRule || ''}" clip-rule="${icon.clipRule || ''}"/></svg>`;
 }
 

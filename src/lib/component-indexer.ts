@@ -1,79 +1,27 @@
 /**
- * Component Indexer - Semantic tagging of icon parts
+ * Component Indexer - Semantic and Geometric tagging of icon parts
  *
  * Part of the Sprout Engine (F3)
+ * Updated Sprint 07: Geometric Intelligence
  *
- * Philosophy: Know WHAT is in the library, not just HOW it's styled.
- * We already extract Style DNA (geometry). Now we extract Component DNA (semantics).
- *
- * This enables the Kitbash Engine (F4) to assemble icons from existing parts
- * rather than generating everything from scratch.
+ * Philosophy: Know WHAT is in the library (semantics) and HOW it is shaped (geometry).
+ * This enables the Kitbash Engine to use "Blueprints" for assembly
+ * (e.g. "I need a Capsule") rather than just names ("I need a Battery").
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Icon } from '@/types/schema';
+import {
+  Icon,
+  IconComponent,
+  IconComponentIndex,
+  ComponentCategory,
+  GeometricType,
+  BoundingBox,
+} from '@/types/schema';
+import { PATTERNS } from './pattern-library';
 
-/**
- * Category of a visual component within an icon
- */
-export type ComponentCategory =
-  | 'body'        // Main shape (user torso, document rectangle)
-  | 'head'        // Top element (user head, arrow point)
-  | 'modifier'    // Badge, indicator, status symbol
-  | 'container'   // Enclosing shape (circle, shield, square)
-  | 'indicator'   // Check, x, plus, minus, arrow
-  | 'detail'      // Internal lines, decorative elements
-  | 'connector';  // Lines joining other elements
-
-/**
- * Bounding box for a component
- */
-export interface BoundingBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  centerX: number;
-  centerY: number;
-}
-
-/**
- * A discrete visual component within an icon
- */
-export interface IconComponent {
-  /** Short name like "arrow-head", "circle-body", "shield-outline" */
-  name: string;
-  /** Component category for matching */
-  category: ComponentCategory;
-  /** The actual path data (d attribute) or element attributes for this component */
-  pathData: string;
-  /** Element type (path, circle, rect, etc.) */
-  elementType: 'path' | 'circle' | 'rect' | 'line' | 'polyline' | 'ellipse';
-  /** Bounding box in the 24x24 coordinate space */
-  boundingBox: BoundingBox;
-  /** Semantic tags for matching (e.g., ["directional", "upward", "action"]) */
-  semanticTags: string[];
-  /** Which icon this component came from */
-  sourceIcon: string;
-  /** Relative visual weight (0-1) of this component within the icon */
-  weight: number;
-}
-
-/**
- * Result of indexing a single icon's components
- */
-export interface IconComponentIndex {
-  /** Icon ID */
-  iconId: string;
-  /** Icon name */
-  iconName: string;
-  /** All components found in this icon */
-  components: IconComponent[];
-  /** Quick signature for matching (e.g., "user-body+user-head") */
-  componentSignature: string;
-  /** Estimated complexity based on component count and types */
-  complexity: 'simple' | 'moderate' | 'complex';
-}
+// Re-export types for use in other files
+export type { ComponentCategory, GeometricType, IconComponent, BoundingBox, IconComponentIndex };
 
 /**
  * Parse an SVG path's d attribute to extract basic bounding box
@@ -366,11 +314,12 @@ function buildSignature(components: IconComponent[]): string {
 }
 
 /**
- * Index an icon's semantic components using LLM analysis
+ * Index an icon's semantic and geometric components using LLM analysis
+ * Sprint 07: Now extracts geometricType for Blueprint Protocol
  *
  * @param icon - The icon to analyze
  * @param apiKey - Google API key for Gemini
- * @returns Array of identified components
+ * @returns Array of identified components with geometry classification
  */
 export async function indexIconComponents(
   icon: Icon,
@@ -384,6 +333,7 @@ export async function indexIconComponents(
     return elements.map((el, i) => ({
       name: `${icon.name}-part-${i + 1}`,
       category: 'body' as ComponentCategory,
+      geometricType: inferGeometricTypeFromElement(el) as GeometricType,
       pathData: el.data,
       elementType: el.type,
       boundingBox: el.boundingBox,
@@ -400,13 +350,14 @@ export async function indexIconComponents(
   const elements = parseSvgElements(icon.path);
   const fullSvg = buildFullSvg(icon);
 
+  // Sprint 07: Updated prompt with geometricType extraction
   const prompt = `You are an SVG icon analyst. Analyze this icon "${icon.name}" and identify its visual components.
 
 ## SVG CODE
 ${fullSvg}
 
 ## ELEMENTS FOUND (${elements.length} total)
-${elements.map((el, i) => `${i + 1}. <${el.type}> at approximately (${el.boundingBox.centerX.toFixed(1)}, ${el.boundingBox.centerY.toFixed(1)})`).join('\n')}
+${elements.map((el, i) => `${i + 1}. <${el.type}> at approximately (${el.boundingBox.centerX.toFixed(1)}, ${el.boundingBox.centerY.toFixed(1)}) size: ${el.boundingBox.width.toFixed(1)}×${el.boundingBox.height.toFixed(1)}`).join('\n')}
 
 ## YOUR TASK
 For EACH element/path in this icon, identify:
@@ -420,7 +371,27 @@ For EACH element/path in this icon, identify:
    - indicator: Action symbols (check, x, plus, minus, arrow)
    - detail: Internal lines, decorative elements
    - connector: Lines joining elements
-3. **semanticTags**: 2-4 tags describing function/meaning (e.g., ["directional", "upward"], ["person", "human"])
+3. **geometricType**: Analyze the VISUAL SHAPE topology. Choose ONE:
+   - circle: Perfect circle or ring
+   - square: Equal sides, sharp or rounded corners
+   - rect: Non-square rectangle
+   - capsule: Pill shape (rounded rectangle with semicircle ends)
+   - triangle: Three-sided polygon
+   - line: Straight stroke
+   - curve: Simple arc or squiggle
+   - L-shape: 90-degree bend
+   - U-shape: Open container/cup shape
+   - cross: Plus or X shape
+   - complex: Irregular or detailed shape
+4. **semanticTags**: 2-4 tags describing function/meaning
+
+CRITICAL FOR geometricType:
+- Analyze the ACTUAL SHAPE, not what it represents semantically
+- A battery case is a "capsule" (rounded rectangle)
+- A stop button is a "square"
+- A play button is a "triangle"
+- A radio button is a "circle"
+- A checkmark is a "curve" or "L-shape"
 
 IMPORTANT:
 - Match element count: You have ${elements.length} element(s) to analyze
@@ -430,7 +401,7 @@ IMPORTANT:
 Respond with valid JSON only:
 {
   "components": [
-    { "elementIndex": 0, "name": "...", "category": "...", "semanticTags": ["..."] }
+    { "elementIndex": 0, "name": "...", "category": "...", "geometricType": "...", "semanticTags": ["..."] }
   ]
 }`;
 
@@ -456,6 +427,7 @@ Respond with valid JSON only:
       return {
         name: llmData?.name || `${icon.name}-part-${i + 1}`,
         category: (llmData?.category || 'body') as ComponentCategory,
+        geometricType: (llmData?.geometricType || inferGeometricTypeFromElement(el)) as GeometricType,
         pathData: el.data,
         elementType: el.type,
         boundingBox: el.boundingBox,
@@ -468,10 +440,11 @@ Respond with valid JSON only:
     return components;
   } catch (error) {
     console.error('[ComponentIndexer] Error analyzing icon:', error);
-    // Return basic components on error
+    // Return basic components on error with inferred geometry
     return elements.map((el, i) => ({
       name: `${icon.name}-part-${i + 1}`,
       category: 'body' as ComponentCategory,
+      geometricType: inferGeometricTypeFromElement(el) as GeometricType,
       pathData: el.data,
       elementType: el.type,
       boundingBox: el.boundingBox,
@@ -480,6 +453,38 @@ Respond with valid JSON only:
       weight: estimateWeight(el.boundingBox),
     }));
   }
+}
+
+/**
+ * Infer geometric type from element properties (fallback when LLM unavailable)
+ */
+function inferGeometricTypeFromElement(el: ParsedElement): GeometricType {
+  const { type, boundingBox } = el;
+  const aspectRatio = boundingBox.width / boundingBox.height;
+
+  // Direct mapping for primitive SVG elements
+  if (type === 'circle') return 'circle';
+  if (type === 'line') return 'line';
+  if (type === 'rect') {
+    // Check if square vs rectangle
+    if (Math.abs(aspectRatio - 1) < 0.2) return 'square';
+    return 'rect';
+  }
+
+  // For paths, use heuristics based on bounding box
+  if (type === 'path') {
+    // Nearly square
+    if (Math.abs(aspectRatio - 1) < 0.15) {
+      // Could be circle, square, or cross
+      return 'complex'; // Can't determine without path analysis
+    }
+    // Very wide or very tall could be capsule or rect
+    if (aspectRatio > 2 || aspectRatio < 0.5) {
+      return 'rect'; // Default to rect for elongated shapes
+    }
+  }
+
+  return 'complex';
 }
 
 /**
@@ -502,8 +507,15 @@ export async function indexIcon(
 
 /**
  * Build a searchable index of all components in a library
+ * Sprint 07: Now indexes by geometric type for Blueprint Protocol
  *
  * Returns a Map where keys are component names and values are arrays of matching components
+ * Index key types:
+ * - Direct name: "arrow-head" → components named arrow-head
+ * - Tag: "tag:directional" → components with directional tag
+ * - Category: "category:body" → components in body category
+ * - Source: "source:battery" → components from battery icon
+ * - Geometric: "geometric:capsule" → components with capsule shape (Sprint 07)
  */
 export async function buildComponentIndex(
   icons: Icon[],
@@ -525,11 +537,12 @@ export async function buildComponentIndex(
 
       // Index by component name for fast lookup
       for (const component of components) {
+        // 1. Name match
         const existing = index.get(component.name) || [];
         existing.push(component);
         index.set(component.name, existing);
 
-        // Also index by semantic tags
+        // 2. Tag match
         for (const tag of component.semanticTags) {
           const tagKey = `tag:${tag}`;
           const tagExisting = index.get(tagKey) || [];
@@ -537,11 +550,26 @@ export async function buildComponentIndex(
           index.set(tagKey, tagExisting);
         }
 
-        // Index by category
+        // 3. Category match
         const catKey = `category:${component.category}`;
         const catExisting = index.get(catKey) || [];
         catExisting.push(component);
         index.set(catKey, catExisting);
+
+        // 4. Source icon match (Semantic Bridge from Sprint 06)
+        const sourceKey = `source:${icon.name.toLowerCase()}`;
+        const sourceExisting = index.get(sourceKey) || [];
+        sourceExisting.push(component);
+        index.set(sourceKey, sourceExisting);
+
+        // 5. Sprint 07: Geometric type match (Blueprint Protocol)
+        // Enables "Give me a capsule" queries
+        if (component.geometricType && component.geometricType !== 'complex') {
+          const geoKey = `geometric:${component.geometricType}`;
+          const geoExisting = index.get(geoKey) || [];
+          geoExisting.push(component);
+          index.set(geoKey, geoExisting);
+        }
       }
     } catch (error) {
       console.error(`[ComponentIndexer] Error indexing ${icon.name}:`, error);
@@ -560,6 +588,7 @@ export async function buildComponentIndex(
 
 /**
  * Search the component index for matches
+ * Sprint 07: Enhanced with geometric type support
  */
 export function searchComponents(
   index: Map<string, IconComponent[]>,
@@ -580,18 +609,63 @@ export function searchComponents(
     results.push(...tagMatch);
   }
 
-  // Partial name match
-  for (const [key, components] of index) {
-    if (key.includes(queryLower) && !key.startsWith('tag:') && !key.startsWith('category:')) {
-      for (const comp of components) {
-        if (!results.includes(comp)) {
-          results.push(comp);
+  // Sprint 07: Geometric match (explicit prefix)
+  if (queryLower.startsWith('geometric:')) {
+    const geoMatch = index.get(queryLower);
+    if (geoMatch) {
+      results.push(...geoMatch);
+    }
+  } else {
+    // Also try implicit geometric match for shape names
+    const geoMatch = index.get(`geometric:${queryLower}`);
+    if (geoMatch) {
+      results.push(...geoMatch);
+    }
+  }
+
+  // Source match (explicit prefix)
+  if (queryLower.startsWith('source:')) {
+    const sourceMatch = index.get(queryLower);
+    if (sourceMatch) {
+      results.push(...sourceMatch);
+    }
+  } else {
+    // Also try implicit source match
+    const sourceMatch = index.get(`source:${queryLower}`);
+    if (sourceMatch) {
+      results.push(...sourceMatch);
+    }
+  }
+
+  // Partial name match fallback
+  if (results.length === 0) {
+    for (const [key, components] of index) {
+      if (key.includes(queryLower) &&
+          !key.startsWith('tag:') &&
+          !key.startsWith('category:') &&
+          !key.startsWith('geometric:') &&
+          !key.startsWith('source:')) {
+        for (const comp of components) {
+          if (!results.includes(comp)) {
+            results.push(comp);
+          }
         }
       }
     }
   }
 
-  return results;
+  // Deduplicate
+  return [...new Set(results)];
+}
+
+/**
+ * Find components by geometric type (Sprint 07: Blueprint Protocol)
+ */
+export function findByGeometry(
+  index: Map<string, IconComponent[]>,
+  type: GeometricType
+): IconComponent[] {
+  return index.get(`geometric:${type}`) || [];
 }
 
 /**
@@ -629,10 +703,11 @@ export function deserializeIndex(json: string): Map<string, IconComponent[]> {
 
 /**
  * Format component for display/logging
+ * Sprint 07: Now includes geometricType
  */
 export function formatComponent(component: IconComponent): string {
   const bbox = component.boundingBox;
-  return `${component.name} (${component.category}) @ [${bbox.x.toFixed(1)}, ${bbox.y.toFixed(1)}, ${bbox.width.toFixed(1)}×${bbox.height.toFixed(1)}]`;
+  return `${component.name} (${component.category}/${component.geometricType}) @ [${bbox.x.toFixed(1)}, ${bbox.y.toFixed(1)}, ${bbox.width.toFixed(1)}×${bbox.height.toFixed(1)}]`;
 }
 
 /**
