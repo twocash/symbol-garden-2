@@ -205,7 +205,7 @@ export function Sidebar() {
 
             {/* Footer: Version + Settings */}
             < div className="p-4 border-t flex items-center justify-between" >
-                <span className="text-xs text-muted-foreground">v0.3.1</span>
+                <span className="text-xs text-muted-foreground">v0.5.0</span>
                 <Button
                     variant="ghost"
                     size="icon"
