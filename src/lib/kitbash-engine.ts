@@ -26,36 +26,15 @@ import { Icon, GeometricType } from '@/types/schema';
 import { IconComponent, searchComponents, findByCategory, findByGeometry } from './component-indexer';
 import { getDecomposition, Decomposition, getGeometricDecomposition, Blueprint, GeometricPrimitive, formatBlueprint } from './decomposition-service';
 import { enforceStyle, EnforcementRules, FEATHER_RULES } from './style-enforcer';
+import { SVGProcessor, createProfileFromRules } from './svg-processor';
+import { COMMON_ICON_NAMES } from './pattern-library';
 
 /**
  * Common icon names found in libraries - used for LLM guidance
+ * Now imported from pattern-library.ts for consistency with Indexer
+ * Cast to string[] for .includes() compatibility
  */
-const COMMON_ICON_PARTS = [
-  // Objects
-  'user', 'users', 'person', 'home', 'house', 'building', 'office',
-  'file', 'folder', 'document', 'book', 'notebook', 'clipboard',
-  'lock', 'unlock', 'key', 'shield', 'security',
-  'box', 'package', 'archive', 'briefcase', 'suitcase', 'bag',
-  'mail', 'envelope', 'message', 'chat', 'comment', 'inbox',
-  'phone', 'smartphone', 'tablet', 'laptop', 'monitor', 'desktop',
-  'camera', 'image', 'photo', 'video', 'film', 'music',
-  'clock', 'time', 'calendar', 'alarm', 'bell', 'notification',
-  'cart', 'shopping', 'basket', 'credit-card', 'wallet', 'money',
-  'heart', 'star', 'bookmark', 'flag', 'tag', 'label',
-  'settings', 'gear', 'cog', 'sliders', 'tool', 'wrench',
-  'search', 'zoom', 'filter', 'sort', 'eye', 'view',
-  'cloud', 'sun', 'moon', 'globe', 'map', 'location', 'pin',
-  'rocket', 'plane', 'car', 'truck', 'ship', 'train', 'bicycle',
-  'brain', 'lightbulb', 'idea', 'puzzle', 'target', 'award',
-  // Symbols
-  'check', 'checkmark', 'x', 'close', 'plus', 'minus', 'add', 'remove',
-  'arrow', 'chevron', 'caret', 'expand', 'collapse', 'refresh', 'sync',
-  'download', 'upload', 'share', 'send', 'external', 'link',
-  'edit', 'pencil', 'pen', 'trash', 'delete', 'copy', 'paste',
-  'play', 'pause', 'stop', 'skip', 'forward', 'backward',
-  // Containers
-  'circle', 'square', 'triangle', 'hexagon', 'badge', 'frame',
-];
+const COMMON_ICON_PARTS: readonly string[] = COMMON_ICON_NAMES;
 
 /**
  * Assembly strategy based on component coverage
@@ -139,6 +118,13 @@ export interface KitbashPlan {
 }
 
 /**
+ * Render mode for Kitbash output
+ * - 'draft': Raw assembly, minimal processing (for Refinery input)
+ * - 'final': Full processing through Iron Dome (production ready)
+ */
+export type KitbashRenderMode = 'draft' | 'final';
+
+/**
  * Result of executing a kitbash plan
  */
 export interface KitbashResult {
@@ -152,6 +138,8 @@ export interface KitbashResult {
   usedGeneration: boolean;
   /** Parts that were generated (if hybrid) */
   generatedParts: string[];
+  /** Render mode used for this result */
+  renderMode: KitbashRenderMode;
 }
 
 /**
@@ -226,24 +214,45 @@ Return ONLY a JSON array of strings, no explanation:
 
 /**
  * Find component matches for a part name
+ *
+ * SEMANTIC BRIDGE: Now checks source icon name FIRST
+ * This fixes the vocabulary mismatch between Kitbash planner (asks for "user")
+ * and the Indexer (tags parts as "person-torso", "head", etc.)
  */
 function findComponentMatches(
   partName: string,
   componentIndex: Map<string, IconComponent[]>
 ): IconComponent[] {
-  // Direct search
+  const partNameLower = partName.toLowerCase();
+
+  // =========================================================================
+  // PRIORITY 1: Check source icon name (SEMANTIC BRIDGE)
+  // If Kitbash asks for "user", get ALL components from the "user" icon
+  // =========================================================================
+  const sourceKey = `source:${partNameLower}`;
+  const sourceMatch = componentIndex.get(sourceKey);
+  if (sourceMatch && sourceMatch.length > 0) {
+    console.log(`[Kitbash] Found ${sourceMatch.length} components via source:${partNameLower}`);
+    return sourceMatch;
+  }
+
+  // =========================================================================
+  // PRIORITY 2: Direct component name search
+  // =========================================================================
   const direct = searchComponents(componentIndex, partName);
   if (direct.length > 0) {
     return direct;
   }
 
-  // Try variations
+  // =========================================================================
+  // PRIORITY 3: Try common variations
+  // =========================================================================
   const variations = [
-    partName.toLowerCase(),
-    `${partName}-body`,
-    `${partName}-outline`,
-    `${partName}-icon`,
-    partName.replace(/-/g, ' '),
+    partNameLower,
+    `${partNameLower}-body`,
+    `${partNameLower}-outline`,
+    `${partNameLower}-icon`,
+    partNameLower.replace(/-/g, ' '),
   ];
 
   for (const variation of variations) {
@@ -1245,7 +1254,8 @@ export async function executeKitbash(
   plan: KitbashPlan,
   layoutIndex: number = 0,
   rules: EnforcementRules = FEATHER_RULES,
-  apiKey?: string
+  apiKey?: string,
+  renderMode: KitbashRenderMode = 'final'
 ): Promise<KitbashResult> {
   const layout = plan.suggestedLayouts[layoutIndex] || plan.suggestedLayouts[0];
 
@@ -1253,7 +1263,7 @@ export async function executeKitbash(
     throw new Error('No layout available for kitbash');
   }
 
-  console.log(`[Kitbash] Executing with layout "${layout.name}"`);
+  console.log(`[Kitbash] Executing with layout "${layout.name}" (mode: ${renderMode})`);
 
   let svg: string;
   let usedGeneration = false;
@@ -1287,9 +1297,24 @@ export async function executeKitbash(
     generatedParts.push(...plan.requiredParts);
   }
 
-  // Apply style enforcement
-  const compliance = enforceStyle(svg, rules);
-  svg = compliance.autoFixed;
+  // =========================================================================
+  // RENDER MODE HANDLING
+  // 'draft' mode: Return raw assembly for Refinery processing
+  // 'final' mode: Full Iron Dome processing for production use
+  // =========================================================================
+  if (renderMode === 'final') {
+    const profile = createProfileFromRules(rules, 'generate');
+    const processResult = SVGProcessor.process(svg, 'generate', profile);
+
+    console.log(`[Kitbash] Iron Dome: ${processResult.modified ? 'MODIFIED' : 'UNCHANGED'}`);
+    if (processResult.compliance) {
+      console.log(`[Kitbash] Style compliance: ${processResult.compliance.passed ? 'PASS' : 'FAIL'} (Score: ${processResult.compliance.score}/100)`);
+    }
+
+    svg = processResult.svg;
+  } else {
+    console.log(`[Kitbash] Draft mode - skipping Iron Dome (for Refinery input)`);
+  }
 
   return {
     svg,
@@ -1297,6 +1322,7 @@ export async function executeKitbash(
     layout,
     usedGeneration,
     generatedParts,
+    renderMode,
   };
 }
 

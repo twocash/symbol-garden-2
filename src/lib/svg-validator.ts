@@ -16,7 +16,7 @@ export interface ValidationResult {
 }
 
 export interface ValidationError {
-  type: 'out-of-bounds' | 'invalid-structure' | 'missing-element' | 'parse-error';
+  type: 'out-of-bounds' | 'invalid-structure' | 'missing-element' | 'parse-error' | 'malformed-path';
   message: string;
   details?: Record<string, unknown>;
 }
@@ -288,6 +288,246 @@ function getSvgBoundingBox(svg: string): BoundingBox {
   }
 
   return { minX, minY, maxX, maxY };
+}
+
+/**
+ * Path Syntax Validation and Repair
+ *
+ * LLMs often generate malformed SVG paths like:
+ *   "M6 6 12 12" instead of "M6 6L12 12"
+ *
+ * According to SVG spec, after M/m, additional coordinate pairs are treated as
+ * implicit L/l commands. However, this is a common source of confusion and many
+ * renderers handle it inconsistently. We normalize these to explicit commands.
+ */
+
+export interface PathSyntaxResult {
+  isValid: boolean;
+  errors: string[];
+  fixedPath?: string;
+}
+
+/**
+ * Validate and optionally repair a single SVG path d attribute
+ *
+ * Detects common LLM path generation errors:
+ * - Missing command letters after M (implicit lineto)
+ * - Invalid command sequences
+ * - Malformed coordinate pairs
+ */
+export function validatePathSyntax(d: string, autoFix: boolean = false): PathSyntaxResult {
+  const errors: string[] = [];
+
+  if (!d || typeof d !== 'string') {
+    return { isValid: false, errors: ['Path data is empty or invalid'] };
+  }
+
+  // Split path into commands - each command starts with a letter
+  const commandRegex = /([MmZzLlHhVvCcSsQqTtAa])([^MmZzLlHhVvCcSsQqTtAa]*)/g;
+  const commands: Array<{ cmd: string; args: string; startIndex: number }> = [];
+
+  let match;
+  let lastIndex = 0;
+
+  // Check for content before first command
+  const firstCmdMatch = d.match(/[MmZzLlHhVvCcSsQqTtAa]/);
+  if (!firstCmdMatch) {
+    return { isValid: false, errors: ['Path has no valid commands'] };
+  }
+
+  if (firstCmdMatch.index! > 0) {
+    const prefix = d.substring(0, firstCmdMatch.index!).trim();
+    if (prefix) {
+      errors.push(`Path has content before first command: "${prefix}"`);
+    }
+  }
+
+  while ((match = commandRegex.exec(d)) !== null) {
+    commands.push({
+      cmd: match[1],
+      args: match[2].trim(),
+      startIndex: match.index,
+    });
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Check for trailing content
+  if (lastIndex < d.length) {
+    const trailing = d.substring(lastIndex).trim();
+    if (trailing) {
+      errors.push(`Path has trailing content: "${trailing}"`);
+    }
+  }
+
+  // Validate each command has the right number of arguments
+  const fixedCommands: string[] = [];
+
+  for (const { cmd, args } of commands) {
+    const nums = args.match(/-?[\d.]+(?:[eE][+-]?\d+)?/g)?.map(Number) || [];
+    const cmdUpper = cmd.toUpperCase();
+
+    // Expected argument counts per command
+    const argCounts: Record<string, number> = {
+      M: 2, L: 2, T: 2,       // x,y pairs
+      H: 1, V: 1,              // single value
+      C: 6,                    // x1,y1,x2,y2,x,y
+      S: 4, Q: 4,              // control + end point
+      A: 7,                    // rx,ry,angle,large-arc,sweep,x,y
+      Z: 0,                    // no args
+    };
+
+    const expectedCount = argCounts[cmdUpper];
+
+    if (expectedCount === undefined) {
+      errors.push(`Unknown path command: ${cmd}`);
+      fixedCommands.push(cmd + args);
+      continue;
+    }
+
+    if (expectedCount === 0) {
+      // Z command - no args needed
+      if (nums.length > 0) {
+        errors.push(`${cmd} command should have no arguments, found ${nums.length}`);
+      }
+      fixedCommands.push(cmd);
+      continue;
+    }
+
+    if (nums.length === 0 && expectedCount > 0) {
+      errors.push(`${cmd} command has no coordinates`);
+      fixedCommands.push(cmd + args);
+      continue;
+    }
+
+    // Handle M/m with extra coordinate pairs (implicit lineto)
+    if (cmdUpper === 'M' && nums.length > 2) {
+      // This is the common LLM error: M6 6 12 12 should be M6 6 L12 12
+      if (autoFix) {
+        // First pair is the moveto
+        const moveCoords = nums.slice(0, 2);
+        const lineCoords = nums.slice(2);
+
+        // Determine if we should use L or l based on original command case
+        const implicitCmd = cmd === 'M' ? 'L' : 'l';
+
+        let fixed = `${cmd}${moveCoords.join(' ')}`;
+
+        // Add implicit lineto commands for remaining pairs
+        for (let i = 0; i < lineCoords.length; i += 2) {
+          if (i + 1 < lineCoords.length) {
+            fixed += ` ${implicitCmd}${lineCoords[i]} ${lineCoords[i + 1]}`;
+          }
+        }
+
+        errors.push(`${cmd} has ${nums.length} values (implicit lineto) - converted to explicit L commands`);
+        fixedCommands.push(fixed);
+      } else {
+        errors.push(`${cmd} has ${nums.length} values instead of 2 (implicit lineto detected)`);
+        fixedCommands.push(cmd + args);
+      }
+      continue;
+    }
+
+    // Handle L/l with extra coordinate pairs
+    if (cmdUpper === 'L' && nums.length > 2 && nums.length % 2 === 0) {
+      // Multiple line-to coordinates - this is valid but let's normalize
+      if (autoFix) {
+        let fixed = '';
+        for (let i = 0; i < nums.length; i += 2) {
+          fixed += `${cmd}${nums[i]} ${nums[i + 1]} `;
+        }
+        fixedCommands.push(fixed.trim());
+      } else {
+        fixedCommands.push(cmd + args);
+      }
+      continue;
+    }
+
+    // Check if count is a multiple of expected (valid repetition)
+    if (nums.length % expectedCount !== 0) {
+      errors.push(`${cmd} command has ${nums.length} values, expected multiple of ${expectedCount}`);
+    }
+
+    fixedCommands.push(cmd + args);
+  }
+
+  const isValid = errors.length === 0 || (autoFix && errors.every(e => e.includes('converted') || e.includes('implicit')));
+
+  return {
+    isValid,
+    errors,
+    fixedPath: autoFix ? fixedCommands.join(' ') : undefined,
+  };
+}
+
+/**
+ * Validate and repair all paths in an SVG
+ * Returns the SVG with fixed paths if autoFix is true
+ */
+export function validateAndRepairPaths(svg: string, autoFix: boolean = false): {
+  isValid: boolean;
+  errors: ValidationError[];
+  fixedSvg?: string;
+} {
+  const errors: ValidationError[] = [];
+  let fixedSvg = svg;
+  let hasFixedAnyPath = false;
+
+  // Find all path elements
+  const pathRegex = /<path([^>]*)d\s*=\s*["']([^"']+)["']([^>]*)\/?>/g;
+
+  let match;
+  const replacements: Array<{ original: string; fixed: string }> = [];
+
+  while ((match = pathRegex.exec(svg)) !== null) {
+    const fullMatch = match[0];
+    const beforeD = match[1];
+    const pathData = match[2];
+    const afterD = match[3];
+
+    const result = validatePathSyntax(pathData, autoFix);
+
+    if (!result.isValid && !autoFix) {
+      errors.push({
+        type: 'malformed-path',
+        message: `Malformed path data: ${result.errors.join('; ')}`,
+        details: { path: pathData.substring(0, 100) + (pathData.length > 100 ? '...' : '') },
+      });
+    }
+
+    if (autoFix && result.fixedPath && result.fixedPath !== pathData) {
+      // afterD may contain "/" from self-closing tag, strip it to avoid double slash
+      const cleanAfterD = afterD.replace(/\s*\/\s*$/, '');
+      const fixedElement = `<path${beforeD}d="${result.fixedPath}"${cleanAfterD}/>`;
+      replacements.push({ original: fullMatch, fixed: fixedElement });
+      hasFixedAnyPath = true;
+
+      // Log what we fixed (still report as warning-level info)
+      if (result.errors.length > 0) {
+        errors.push({
+          type: 'malformed-path',
+          message: `Path repaired: ${result.errors.join('; ')}`,
+          details: {
+            original: pathData.substring(0, 50),
+            fixed: result.fixedPath.substring(0, 50),
+          },
+        });
+      }
+    }
+  }
+
+  // Apply replacements
+  if (autoFix) {
+    for (const { original, fixed } of replacements) {
+      fixedSvg = fixedSvg.replace(original, fixed);
+    }
+  }
+
+  return {
+    isValid: errors.length === 0 || (autoFix && hasFixedAnyPath),
+    errors,
+    fixedSvg: hasFixedAnyPath ? fixedSvg : undefined,
+  };
 }
 
 /**

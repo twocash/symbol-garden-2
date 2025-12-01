@@ -556,7 +556,11 @@ export async function buildComponentIndex(
         catExisting.push(component);
         index.set(catKey, catExisting);
 
-        // 4. Source icon match (Semantic Bridge from Sprint 06)
+        // =====================================================================
+        // SEMANTIC BRIDGE: Index by Source Icon Name
+        // This is the PRIMARY lookup method for Kitbash
+        // If icon is "user", all its parts are retrievable via "source:user"
+        // =====================================================================
         const sourceKey = `source:${icon.name.toLowerCase()}`;
         const sourceExisting = index.get(sourceKey) || [];
         sourceExisting.push(component);

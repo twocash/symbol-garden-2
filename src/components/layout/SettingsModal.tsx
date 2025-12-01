@@ -373,18 +373,18 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             let importedIcons: Icon[] = [];
             let manifest = "";
             let collectionName = prefix;
-            let buffer = ""; // Accumulate partial lines across chunks
+            let buffer = ""; // Buffer for incomplete JSON lines
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                // Append new chunk to buffer (stream: true handles partial UTF-8)
+                // Append new data to buffer
                 buffer += decoder.decode(value, { stream: true });
 
-                // Process complete lines (ending with \n)
+                // Split on newlines and process complete lines
                 const lines = buffer.split("\n");
-                // Keep the last partial line in buffer
+                // Keep the last potentially incomplete line in the buffer
                 buffer = lines.pop() || "";
 
                 for (const line of lines) {
@@ -393,32 +393,43 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                         const event = JSON.parse(line);
                         if (event.status === "fetching") {
                             setIconifyImportProgress(`Fetching icons... (${event.progress}/${event.total})`);
+                        } else if (event.status === "icons") {
+                            // Accumulate icons from incremental batches
+                            if (event.icons && Array.isArray(event.icons)) {
+                                importedIcons.push(...event.icons);
+                            }
+                            setIconifyImportProgress(`Fetching icons... (${event.progress}/${event.total}) - ${importedIcons.length} loaded`);
                         } else if (event.status === "converting") {
                             setIconifyImportProgress(`Converting to Symbol Garden format...`);
                         } else if (event.status === "analyzing") {
                             setIconifyImportProgress(`Generating Style DNA...`);
                         } else if (event.status === "complete") {
-                            importedIcons = event.icons || [];
+                            // Final event - icons already accumulated, just get metadata
                             manifest = event.manifest || "";
                             collectionName = event.name || prefix;
+                            console.log(`[Iconify Import] Complete: ${event.iconCount} icons, manifest: ${manifest ? "yes" : "no"}`);
+                        } else if (event.error) {
+                            throw new Error(event.error);
                         }
-                    } catch (e) {
-                        console.warn("[Iconify Import] Failed to parse line:", line.substring(0, 100), e);
+                    } catch (parseError) {
+                        // Log parse errors for debugging
+                        console.warn("[Iconify Import] Parse error for line:", line.substring(0, 100), parseError);
                     }
                 }
             }
 
-            // Process any remaining data in buffer after stream ends
+            // Process any remaining buffer content
             if (buffer.trim()) {
                 try {
                     const event = JSON.parse(buffer);
-                    if (event.status === "complete") {
-                        importedIcons = event.icons || [];
+                    if (event.status === "icons" && event.icons) {
+                        importedIcons.push(...event.icons);
+                    } else if (event.status === "complete") {
                         manifest = event.manifest || "";
                         collectionName = event.name || prefix;
                     }
-                } catch (e) {
-                    console.warn("[Iconify Import] Failed to parse final buffer:", buffer.substring(0, 100), e);
+                } catch {
+                    console.warn("[Iconify Import] Could not parse final buffer:", buffer.substring(0, 100));
                 }
             }
 
