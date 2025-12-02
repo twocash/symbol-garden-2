@@ -18,6 +18,7 @@ interface IconGridProps {
 // Library label mapping configuration
 const LIBRARY_LABELS: Record<string, string> = {
     "all": "All Libraries",
+    // Standard library names
     "lucide-icons": "Lucide Icons",
     "fontawesome": "Font Awesome",
     "bootstrap-icons": "Bootstrap Icons",
@@ -27,6 +28,26 @@ const LIBRARY_LABELS: Record<string, string> = {
     "material-icons": "Material Icons",
     "ionicons": "Ionicons",
     "simple-icons": "Simple Icons",
+    // Iconify prefixes (used by ingested icons)
+    "lucide": "Lucide",
+    "tabler": "Tabler",
+    "feather": "Feather",
+    "fe": "Feather",
+    "phosphor": "Phosphor",
+    "humbleicons": "Humble Icons",
+    "majesticons": "Majesticons",
+    "iconoir": "Iconoir",
+    "carbon": "Carbon",
+    "solar": "Solar",
+    "mdi": "Material Design",
+    "fa": "Font Awesome",
+    "fa6": "Font Awesome 6",
+    "bi": "Bootstrap",
+    "ri": "Remix",
+    "ion": "Ionicons",
+    // AI-generated icons
+    "ai-sprout": "Custom Sprouts",
+    "custom": "Custom Sprouts", // Legacy fallback
 };
 
 // Helper to prettify library names if not in config
@@ -62,9 +83,9 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
             }))
         ];
 
-        // Add "custom" library option if there are custom icons
+        // Add "ai-sprout" library option if there are custom icons
         if (hasCustomIcons) {
-            options.push({ id: "custom", label: "AI Generated" });
+            options.push({ id: "ai-sprout", label: "Custom Sprouts" });
         }
 
         return options;
@@ -76,7 +97,12 @@ export function IconGrid({ icons: propIcons }: IconGridProps) {
 
         // 1. Filter by Library (if not "all")
         if (selectedLibrary && selectedLibrary !== "all") {
-            result = result.filter(icon => icon.library === selectedLibrary);
+            // "ai-sprout" should also match legacy "custom" library icons
+            if (selectedLibrary === "ai-sprout") {
+                result = result.filter(icon => icon.library === "ai-sprout" || icon.library === "custom");
+            } else {
+                result = result.filter(icon => icon.library === selectedLibrary);
+            }
         }
 
         // 2. Filter by View Mode (Favorites)

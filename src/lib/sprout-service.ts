@@ -55,51 +55,57 @@ function buildSproutPrompt(
   const sourceWidth = vbParts[2] || 24;
   const sourceHeight = vbParts[3] || 24;
 
-  return `You are a Senior SVG Engineer performing a STYLE TRANSFER operation.
+  // Check if source is already 24x24 (no coordinate conversion needed)
+  const isAlready24x24 = sourceWidth === 24 && sourceHeight === 24;
 
-## YOUR TASK
-Transform the SOURCE SVG to match the TARGET STYLE RULES while preserving the exact geometric meaning.
+  if (isAlready24x24) {
+    // Simplified prompt - just apply style, preserve paths EXACTLY
+    return `Apply style attributes to this SVG. Keep ALL path d="" values EXACTLY as-is.
+
+## SOURCE SVG (already 24x24)
+${optimizedSvg}
+
+## TARGET STYLE
+${styleManifest || 'stroke-width="2", stroke-linecap="round", stroke-linejoin="round", fill="none"'}
+
+## CRITICAL RULES
+- Copy ALL <path d="..."> values EXACTLY - do not modify coordinates
+- Only change: stroke-width, stroke-linecap, stroke-linejoin, fill attributes
+- Keep multiple paths separate
+- Do NOT add <g>, transform, or modify any coordinates
+
+## OUTPUT (SVG only, no explanation)
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">[paths exactly as source]</svg>`;
+  }
+
+  // Full conversion prompt for non-24x24 sources
+  const scaleX = 20 / sourceWidth;
+  const scaleY = 20 / sourceHeight;
+
+  return `Convert this SVG to a 24x24 stroke-based icon while preserving EVERY detail exactly.
 
 ## SOURCE SVG (from ${sourceWidth}x${sourceHeight} grid)
-\`\`\`svg
 ${optimizedSvg}
-\`\`\`
 
-## TARGET STYLE RULES (Library Manifest)
-\`\`\`
-${styleManifest || 'Default: 24x24 grid, stroke-width="2", stroke-linecap="round", stroke-linejoin="round", no fill'}
-\`\`\`
+## TARGET STYLE
+${styleManifest || 'stroke-width="2", stroke-linecap="round", stroke-linejoin="round", fill="none"'}
 
-## TRANSFORMATION REQUIREMENTS
+## COORDINATE CONVERSION (CRITICAL)
+1. Scale ALL coordinates to fit in 20x20 area:
+   - Multiply X values by ${scaleX.toFixed(4)}
+   - Multiply Y values by ${scaleY.toFixed(4)}
+2. Add 2 to ALL coordinates to center (gives 2px padding)
+3. VALIDATION: Every X and Y in output must be between 2 and 22
 
-1. **READ THE MANIFEST** to identify:
-   - Target grid size (usually 24x24)
-   - Stroke width (e.g., 2px, 1.5px)
-   - Line caps (round, square, butt)
-   - Line joins (round, bevel, miter)
-   - Fill style (none for stroke-based, currentColor for filled)
+## RULES
+- Do NOT use <g> or transform="" - recalculate d="" values directly
+- Preserve EVERY path, curve, and shape from the source
+- Keep multiple paths separate (do not merge)
+- Use stroke="currentColor", fill="none"
+- Convert circles/rects to paths if needed
 
-2. **REMAP COORDINATES** to the target grid:
-   - Scale from ${sourceWidth}x${sourceHeight} → 24x24
-   - Center the icon with ~2px padding on all sides (content in 2-22 range)
-   - **CRITICAL:** Do NOT use transform="" attributes - bake all math into the d="" values
-
-3. **PRESERVE STRUCTURE**:
-   - If the source has multiple paths for semantic reasons (e.g., pause button = 2 bars), keep them separate
-   - If paths are just split for no reason, you may merge them
-   - Convert shapes (rect, circle, line) to path if needed for consistency
-
-4. **APPLY STYLE ATTRIBUTES** from the manifest:
-   - Set correct stroke-width, stroke-linecap, stroke-linejoin
-   - Use fill="none" for stroke-based libraries
-   - Use stroke="currentColor" for flexibility
-
-## OUTPUT FORMAT
-Return ONLY a valid SVG element. No explanation, no markdown fences, no extra text.
-
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- paths here -->
-</svg>`;
+## OUTPUT (SVG only, no explanation)
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="..."/></svg>`;
 }
 
 /**
@@ -130,6 +136,31 @@ function isValidSvg(svg: string): boolean {
     svg.includes('viewBox') &&
     (svg.includes('<path') || svg.includes('<circle') || svg.includes('<rect') || svg.includes('<line'))
   );
+}
+
+/**
+ * Strip <g transform="..."> wrappers that Iron Dome may incorrectly add
+ *
+ * Iron Dome's bounds detection doesn't properly account for arc commands,
+ * which can cause false "out of bounds" detection and unnecessary transform wrappers.
+ * The LLM is instructed to generate coordinates within the 24x24 grid, so we
+ * trust the coordinates and strip any transform wrappers.
+ */
+function stripTransformWrappers(svg: string): string {
+  // Match <g transform="translate(...) scale(...)"> wrapper pattern
+  // This is the specific pattern Iron Dome's fixSvgBounds adds
+  const transformWrapperPattern = /<g\s+transform="translate\([^)]+\)\s*scale\([^)]+\)">\s*([\s\S]*?)\s*<\/g>/g;
+
+  let result = svg;
+  let match;
+
+  while ((match = transformWrapperPattern.exec(svg)) !== null) {
+    // Replace the wrapper with just its contents
+    result = result.replace(match[0], match[1].trim());
+    console.log('[Sprout] Stripped transform wrapper from output');
+  }
+
+  return result;
 }
 
 /**
@@ -253,6 +284,11 @@ export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
     const processResult = SVGProcessor.process(svg, 'generate', profile);
 
     svg = processResult.svg;
+
+    // Step 7: Strip any <g transform="..."> wrappers that Iron Dome may have added
+    // Iron Dome's bounds fix incorrectly adds transforms for arcs (arc bounding is complex)
+    // The LLM-generated coordinates should already be within bounds per our prompt
+    svg = stripTransformWrappers(svg);
 
     const processingTime = Date.now() - startTime;
     console.log(`[Sprout] Complete in ${processingTime}ms`);

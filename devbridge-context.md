@@ -1,19 +1,16 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.9.0 (Sprint 10-A - Sprout Engine Complete)
+> **Version:** 0.10.0 (Sprint 10-B - Sprout Modal UI Complete)
 > **Last Updated:** 2025-12-01
-> **Branch:** main (merged from unruffled-banzai)
-> **System Status:** ✅ STABLE - Sprout Backend Complete, Ready for UI (Sprint 10-B)
+> **Branch:** gifted-jemison
+> **System Status:** ✅ STABLE - Sprout Engine + UI Complete
 
 ---
 
 > ⚠️ **WARNING FOR NEW SESSIONS**
 >
-> Sprint 10-A work was done in worktree `unruffled-banzai` and merged to `main`.
-> If you don't see `src/app/api/sprout/`, pull from main:
-> ```bash
-> git pull origin main
-> ```
+> Sprint 10-B UI work is in worktree `gifted-jemison`.
+> Key new file: `src/components/dialogs/SproutModal.tsx`
 
 ---
 
@@ -87,10 +84,11 @@ This is the primary user flow as of Sprint 10-A:
 
 ## 2. FILE MAP (Sprout-Centric)
 
-### Primary Files (Sprint 10-A)
+### Primary Files (Sprint 10-A + 10-B)
 
 | File | Purpose |
 |------|---------|
+| `src/components/dialogs/SproutModal.tsx` | **Sprout UI** - 3-panel modal (Sprint 10-B) |
 | `src/app/api/sprout/route.ts` | **Core API** - Style transfer endpoint |
 | `src/lib/sprout-service.ts` | **Core Service** - Transpilation logic |
 | `src/lib/svg-optimizer.ts` | **Token Optimizer** - Reduce SVG before LLM |
@@ -104,12 +102,13 @@ This is the primary user flow as of Sprint 10-A:
 | `src/lib/iconify-service.ts` | Iconify API integration |
 | `src/app/api/iconify/search/route.ts` | Icon search endpoint |
 | `src/app/api/iconify/import/route.ts` | Batch import endpoint |
-| `src/components/dialogs/AIIconGeneratorModal.tsx` | Current UI (to be replaced in 10-B) |
+| `src/lib/ui-context.tsx` | UI state provider (opens SproutModal) |
 
 ### Legacy Files (Deprecated but Present)
 
 | File | Status | Notes |
 |------|--------|-------|
+| `src/components/dialogs/AIIconGeneratorModal.tsx` | Legacy | Old complex UI (replaced by SproutModal) |
 | `src/lib/hybrid-generator.ts` | Legacy | Old "generate from scratch" flow |
 | `src/lib/kitbash-engine.ts` | Legacy | Component assembly (keep for "Compose" mode) |
 | `src/app/api/generate-svg/route.ts` | Legacy | Text-to-SVG generation |
@@ -209,6 +208,7 @@ All SVGs pass through the 6-stage pipeline:
 
 | Feature | Status | Sprint |
 |---------|--------|--------|
+| Sprout Modal UI | **Complete** | **10-B** |
 | Sprout API (`/api/sprout`) | **Complete** | **10-A** |
 | Sprout Service | **Complete** | **10-A** |
 | Token Optimizer | **Complete** | **10-A** |
@@ -218,17 +218,28 @@ All SVGs pass through the 6-stage pipeline:
 | Tracer Spike | Complete (superseded) | 09-A |
 | Kitbash Engine | Complete (legacy) | 05 |
 
-### What's Missing (Sprint 10-B)
+### Sprint 10-B Completed Features
 
-- [ ] **Sprout Modal UI** - Replace current AIIconGeneratorModal
-- [ ] **Adopt Button** - Import raw icon (free, no AI)
-- [ ] **Sprout Button** - Transpile to library style (AI)
-- [ ] **Search → Select → Action** workflow
-- [ ] Deprecate old Generate/Kitbash tabs
+- [x] **Sprout Modal UI** - Clean 3-panel design replaces AIIconGeneratorModal
+- [x] **Adopt Button** - Import raw icon (free, no AI)
+- [x] **Sprout Button** - Transpile to library style (AI)
+- [x] **Search → Select → Action** workflow
+- [x] Old Generate/Kitbash tabs deprecated (legacy modal still exists)
 
 ---
 
 ## 6. SPRINT HISTORY
+
+### Sprint 10-B (2025-12-01) - Sprout Modal UI
+
+**Completed:**
+- SproutModal component with 3-panel layout (Search | Workbench | Results)
+- Left panel: Iconify search with 20 results, 4-column grid
+- Center panel: Large icon preview, Adopt Original + Sprout buttons
+- Right panel: Sprouted result preview with metadata
+- Updated ui-context.tsx to use SproutModal instead of AIIconGeneratorModal
+
+**Key File:** `src/components/dialogs/SproutModal.tsx`
 
 ### Sprint 10-A (2025-12-01) - Sprout Engine Backend
 
@@ -264,37 +275,29 @@ GOOGLE_CLOUD_PROJECT_ID=   # Style Jury, Imagen
 
 ## 8. CONTINUATION PROMPT
 
-When starting a new context window for **Sprint 10-B**:
+When starting a new context window for **Sprint 11+**:
 
 ```
 I'm continuing work on Symbol Garden 2.0, a TypeScript/Next.js application.
 Read devbridge-context.md for full architecture details.
 
 Current state:
-- Sprint 10-A COMPLETE: Sprout Engine backend is ready
-- API endpoint: POST /api/sprout (style transfer via code transpilation)
-- Token Optimizer: Reduces SVG 8-17% before LLM
-- Iron Dome: 6-stage SVG processing
+- Sprint 10-A COMPLETE: Sprout Engine backend
+- Sprint 10-B COMPLETE: Sprout Modal UI
 
-CRITICAL: Pull from main to get Sprint 10-A files:
-  git pull origin main
+The Sprout workflow is fully functional:
+1. User opens Sprout modal (via "Sprout Custom Icon" button)
+2. Searches Iconify for reference icons
+3. Selects an icon to preview
+4. Either:
+   - "Adopt Original" → Import raw SVG (free, no AI)
+   - "Sprout [Library] Version" → POST /api/sprout (AI transpilation)
+5. Preview result and save to workspace
 
-Next step: Sprint 10-B - Build the Sprout Modal UI
-
-The UI should implement:
-1. Search bar → Query Iconify API
-2. Results grid → Show icons from external libraries
-3. Selection → Click to select reference
-4. Two actions:
-   - "Adopt" → Import raw SVG (free, no AI)
-   - "Sprout" → Call /api/sprout to transpile (AI)
-5. Preview → Show result before saving
-6. Save → Add to workspace
-
-Key files to read:
+Key files:
+- src/components/dialogs/SproutModal.tsx (UI)
 - src/lib/sprout-service.ts (core logic)
 - src/app/api/sprout/route.ts (API endpoint)
-- src/components/dialogs/AIIconGeneratorModal.tsx (current UI to replace)
 
 What would you like me to work on?
 ```

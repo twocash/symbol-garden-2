@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { RenameWorkspaceModal } from "@/components/dialogs/RenameWorkspaceModal";
 import { DuplicateWorkspaceModal } from "@/components/dialogs/DuplicateWorkspaceModal";
 import { DeleteWorkspaceModal } from "@/components/dialogs/DeleteWorkspaceModal";
-import { AIIconGeneratorModal } from "@/components/dialogs/AIIconGeneratorModal";
+import { SproutModal } from "@/components/dialogs/SproutModal";
 
 type RightDrawerMode = "none" | "icon" | "workspace";
 
@@ -109,8 +109,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
                     onClose={closeModals}
                 />
             )}
-            {/* We will import and render AIIconGeneratorModal here once created */}
-            <AIIconGeneratorModal
+            {/* Sprint 10-B: SproutModal replaces AIIconGeneratorModal */}
+            <SproutModal
                 isOpen={isAIGeneratorOpen}
                 onClose={() => setIsAIGeneratorOpen(false)}
             />
