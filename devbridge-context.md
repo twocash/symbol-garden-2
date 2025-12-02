@@ -1,16 +1,17 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.10.0 (Sprint 10-B - Sprout Modal UI Complete)
+> **Version:** 0.10.1 (Sprint 10-B Complete - Sprout Studio Shipped)
 > **Last Updated:** 2025-12-01
-> **Branch:** gifted-jemison
-> **System Status:** ✅ STABLE - Sprout Engine + UI Complete
+> **Branch:** gifted-jemison (ready for merge to main)
+> **System Status:** ✅ STABLE - Sprout Pivot Complete
 
 ---
 
 > ⚠️ **WARNING FOR NEW SESSIONS**
 >
-> Sprint 10-B UI work is in worktree `gifted-jemison`.
-> Key new file: `src/components/dialogs/SproutModal.tsx`
+> Sprint 10-B is **COMPLETE** and pushed to `gifted-jemison` branch.
+> Create a PR to merge to `main` or continue from this branch.
+> Key deliverable: `src/components/dialogs/SproutModal.tsx`
 
 ---
 
@@ -18,43 +19,43 @@
 
 Symbol Garden is a **Semantic Icon Style Transpiler** that transforms icons from any open-source library to match your design system's visual DNA.
 
-### Core Philosophy (Post-Sprint 10-A Pivot)
+### Core Philosophy (Post-Sprint 10 Pivot)
 
 > "LLMs are better at refactoring code than tracing images."
 
-**OLD APPROACH (Failed):**
+**OLD APPROACH (Failed - Sprint 09-A):**
 ```
 Text prompt → AI generates from scratch → Inconsistent results
 Image → AI traces shape → AI ignores image, hallucinates
 ```
 
-**NEW APPROACH (Sprout Engine):**
+**NEW APPROACH (Sprout Studio - Sprint 10):**
 ```
-Iconify search → User selects icon → Sprout API refactors SVG code → Perfect match
+User Search (Iconify) → Adopt (Raw) OR Sprout (Refactor) → Workspace
 ```
 
 The Sprout Engine treats SVG path data as "source code to be refactored". This leverages LLM strengths (code transformation) instead of fighting weaknesses (image generation).
 
 ---
 
-## 1. THE SPROUT CORE LOOP
+## 1. SPROUT STUDIO FLOW
 
-This is the primary user flow as of Sprint 10-A:
+The primary user workflow as of Sprint 10-B:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           SPROUT PIPELINE                                    │
+│                        SPROUT STUDIO (Sprint 10-B)                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌─────────────────┐                                                         │
-│  │   USER SEARCH   │  "rocket"                                               │
-│  │                 │  → Iconify API (275K+ icons)                           │
+│  │   SEARCH        │  User types "rocket"                                    │
+│  │   (Left Panel)  │  → Iconify API (275K+ icons, 20 results shown)         │
 │  └────────┬────────┘                                                         │
 │           │                                                                  │
 │           ▼                                                                  │
 │  ┌─────────────────┐                                                         │
-│  │   SELECTION     │  User picks reference icon                              │
-│  │                 │  (Material, Tabler, Lucide, FontAwesome, etc.)         │
+│  │   WORKBENCH     │  User clicks icon to preview                            │
+│  │   (Center)      │  Large preview with source collection name              │
 │  └────────┬────────┘                                                         │
 │           │                                                                  │
 │           ├──────────────────────────┐                                       │
@@ -62,19 +63,27 @@ This is the primary user flow as of Sprint 10-A:
 │           ▼                          ▼                                       │
 │  ┌─────────────────┐        ┌─────────────────┐                             │
 │  │   ADOPT         │        │   SPROUT        │                             │
-│  │   (Free)        │        │   (AI)          │                             │
+│  │   ORIGINAL      │        │   [Library]     │                             │
+│  │   (Free)        │        │   VERSION (AI)  │                             │
 │  │                 │        │                 │                             │
 │  │   Import raw    │        │   Token Opt     │                             │
 │  │   SVG as-is     │        │   → Gemini 2.5  │                             │
 │  │                 │        │   → Iron Dome   │                             │
+│  │                 │        │   → Strip Xform │ ← NEW: Transform stripping  │
 │  └────────┬────────┘        └────────┬────────┘                             │
 │           │                          │                                       │
 │           └──────────────────────────┘                                       │
 │                          │                                                   │
 │                          ▼                                                   │
 │  ┌─────────────────┐                                                         │
-│  │   WORKSPACE     │  Icon saved to user's project                          │
-│  │                 │  In library's style                                     │
+│  │   RESULTS       │  Preview sprouted icon (Right Panel)                    │
+│  │   (Right Panel) │  Shows processing time, compliance score               │
+│  └────────┬────────┘                                                         │
+│           │                                                                  │
+│           ▼                                                                   │
+│  ┌─────────────────┐                                                         │
+│  │   WORKSPACE     │  Icon saved with library: "ai-sprout"                   │
+│  │                 │  Visible in "Custom Sprouts" dropdown filter            │
 │  └─────────────────┘                                                         │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -88,12 +97,13 @@ This is the primary user flow as of Sprint 10-A:
 
 | File | Purpose |
 |------|---------|
-| `src/components/dialogs/SproutModal.tsx` | **Sprout UI** - 3-panel modal (Sprint 10-B) |
+| `src/components/dialogs/SproutModal.tsx` | **Sprout Studio UI** - 3-panel modal (Sprint 10-B) |
 | `src/app/api/sprout/route.ts` | **Core API** - Style transfer endpoint |
-| `src/lib/sprout-service.ts` | **Core Service** - Transpilation logic |
+| `src/lib/sprout-service.ts` | **Core Service** - Transpilation + Transform Stripping |
 | `src/lib/svg-optimizer.ts` | **Token Optimizer** - Reduce SVG before LLM |
 | `src/lib/svg-processor.ts` | **Iron Dome** - 6-stage SVG gateway |
 | `src/lib/style-enforcer.ts` | **Style DNA** - Compliance checking |
+| `src/components/icons/IconGrid.tsx` | **Icon Display** - Library labels + ai-sprout filter |
 
 ### Supporting Files
 
@@ -153,9 +163,10 @@ This is the primary user flow as of Sprint 10-A:
 const { optimized, viewBox } = optimizeSvgForLlm(sourceSvg);
 // Rounds coordinates, removes metadata, strips classes
 
-// 2. Build Prompt
+// 2. Build Prompt (24x24 detection!)
 const prompt = buildSproutPrompt(optimized, viewBox, styleManifest);
-// LLM reads manifest, extracts rules, refactors geometry
+// NEW: If source is 24x24, prompt tells LLM to preserve paths EXACTLY
+// Only style attributes change, no coordinate math
 
 // 3. Gemini Call
 const result = await model.generateContent({ ... });
@@ -168,13 +179,18 @@ if (!isValidSvg(svg)) throw new Error('Invalid SVG');
 // 5. Iron Dome Processing
 const final = SVGProcessor.process(svg, 'generate', profile);
 // 6 stages: sanitize, repair, normalize, enforce, optimize, validate
+
+// 6. Strip Transform Wrappers (Sprint 10-B fix)
+svg = stripTransformWrappers(svg);
+// Iron Dome's arc bounding is imprecise; we strip <g transform="...">
+// and trust the LLM's coordinates for true 24x24 fidelity
 ```
 
 ---
 
-## 4. IRON DOME (Unchanged)
+## 4. IRON DOME + TRANSFORM STRIPPING
 
-All SVGs pass through the 6-stage pipeline:
+All SVGs pass through the 6-stage pipeline, then get post-processed:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -198,48 +214,89 @@ All SVGs pass through the 6-stage pipeline:
 │  STAGE 6: VALIDATION                                         │
 │  └─► Bounds check, auto-fix out-of-bounds                    │
 └─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              POST-PROCESS: STRIP TRANSFORM WRAPPERS          │
+├─────────────────────────────────────────────────────────────┤
+│  Iron Dome's getSvgBoundingBox() doesn't properly handle     │
+│  arc commands (A/a), which extend beyond their endpoints.    │
+│                                                              │
+│  This causes false "out of bounds" detection and Iron Dome   │
+│  wraps paths in <g transform="translate(...) scale(...)">    │
+│                                                              │
+│  The fix: stripTransformWrappers() in sprout-service.ts      │
+│  removes these wrappers, trusting the LLM's coordinates.     │
+│                                                              │
+│  Result: True 24x24 fidelity with path d="" values baked in. │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 5. CURRENT STATE
 
+### Sprint 10-B Delivered Capabilities
+
+| Capability | Status | Notes |
+|------------|--------|-------|
+| 3-Panel Sprout Modal | ✅ Complete | Search \| Workbench \| Results |
+| Iconify Search Integration | ✅ Complete | 20 results, 4-column grid |
+| Adopt vs. Sprout Workflow | ✅ Complete | Free import OR AI transpile |
+| 24x24 Path Fidelity | ✅ Complete | Transform stripping fix |
+| Collection Display Names | ✅ Complete | Fe → Feather mapping |
+| ai-sprout Library Slug | ✅ Complete | Custom Sprouts filter |
+
 ### Feature Matrix
 
 | Feature | Status | Sprint |
 |---------|--------|--------|
-| Sprout Modal UI | **Complete** | **10-B** |
-| Sprout API (`/api/sprout`) | **Complete** | **10-A** |
-| Sprout Service | **Complete** | **10-A** |
-| Token Optimizer | **Complete** | **10-A** |
-| Iron Dome 6-Stage | Complete | 06 |
-| Iconify Integration | Complete | 06+ |
-| Style DNA Analysis | Complete | 05 |
-| Tracer Spike | Complete (superseded) | 09-A |
-| Kitbash Engine | Complete (legacy) | 05 |
-
-### Sprint 10-B Completed Features
-
-- [x] **Sprout Modal UI** - Clean 3-panel design replaces AIIconGeneratorModal
-- [x] **Adopt Button** - Import raw icon (free, no AI)
-- [x] **Sprout Button** - Transpile to library style (AI)
-- [x] **Search → Select → Action** workflow
-- [x] Old Generate/Kitbash tabs deprecated (legacy modal still exists)
+| Sprout Modal UI | ✅ **Complete** | **10-B** |
+| Transform Stripping Fix | ✅ **Complete** | **10-B** |
+| Sprout API (`/api/sprout`) | ✅ Complete | 10-A |
+| Sprout Service | ✅ Complete | 10-A |
+| Token Optimizer | ✅ Complete | 10-A |
+| Iron Dome 6-Stage | ✅ Complete | 06 |
+| Iconify Integration | ✅ Complete | 06+ |
+| Style DNA Analysis | ✅ Complete | 05 |
+| Tracer Spike | ✅ Complete (superseded) | 09-A |
+| Kitbash Engine | ✅ Complete (legacy) | 05 |
 
 ---
 
-## 6. SPRINT HISTORY
+## 6. SPRINT 11 ROADMAP (Candidates)
 
-### Sprint 10-B (2025-12-01) - Sprout Modal UI
+| Priority | Feature | Description |
+|----------|---------|-------------|
+| P1 | **Error Handling & Retry Logic** | Graceful API failure recovery, user-friendly error messages |
+| P2 | **Batch Sprout Operations** | Sprout multiple icons at once (sproutBatch already exists) |
+| P3 | **Style DNA Persistence** | Store library manifests in user preferences |
+| P4 | **Sprout History** | Track recently sprouted icons for quick re-use |
+| P5 | **Collection Favorites** | Save preferred Iconify collections |
 
-**Completed:**
-- SproutModal component with 3-panel layout (Search | Workbench | Results)
+---
+
+## 7. SPRINT HISTORY
+
+### Sprint 10-B (2025-12-01) - Sprout Studio UI ✅ COMPLETE
+
+**Delivered:**
+- `SproutModal.tsx` - 3-panel layout (Search | Workbench | Results)
 - Left panel: Iconify search with 20 results, 4-column grid
 - Center panel: Large icon preview, Adopt Original + Sprout buttons
 - Right panel: Sprouted result preview with metadata
-- Updated ui-context.tsx to use SproutModal instead of AIIconGeneratorModal
+- Updated `ui-context.tsx` to use SproutModal instead of AIIconGeneratorModal
+- Updated `IconGrid.tsx` with library labels and ai-sprout filter
 
-**Key File:** `src/components/dialogs/SproutModal.tsx`
+**Bug Fixes:**
+- Collection display names (Fe → Feather mapping)
+- SVG Transform Wrapper Bug (Iron Dome arc bounding issue)
+- 24x24 path preservation (special prompt for same-size sources)
+
+**Key Files:**
+- `src/components/dialogs/SproutModal.tsx` (NEW)
+- `src/lib/sprout-service.ts` (stripTransformWrappers)
+- `src/components/icons/IconGrid.tsx` (LIBRARY_LABELS)
 
 ### Sprint 10-A (2025-12-01) - Sprout Engine Backend
 
@@ -261,7 +318,7 @@ All SVGs pass through the 6-stage pipeline:
 
 ---
 
-## 7. ENVIRONMENT
+## 8. ENVIRONMENT
 
 ```bash
 # Required
@@ -273,7 +330,7 @@ GOOGLE_CLOUD_PROJECT_ID=   # Style Jury, Imagen
 
 ---
 
-## 8. CONTINUATION PROMPT
+## 9. CONTINUATION PROMPT
 
 When starting a new context window for **Sprint 11+**:
 
@@ -283,28 +340,39 @@ Read devbridge-context.md for full architecture details.
 
 Current state:
 - Sprint 10-A COMPLETE: Sprout Engine backend
-- Sprint 10-B COMPLETE: Sprout Modal UI
+- Sprint 10-B COMPLETE: Sprout Studio UI (SproutModal.tsx)
 
 The Sprout workflow is fully functional:
 1. User opens Sprout modal (via "Sprout Custom Icon" button)
-2. Searches Iconify for reference icons
-3. Selects an icon to preview
+2. Searches Iconify for reference icons (20 results displayed)
+3. Selects an icon to preview in Workbench panel
 4. Either:
    - "Adopt Original" → Import raw SVG (free, no AI)
    - "Sprout [Library] Version" → POST /api/sprout (AI transpilation)
-5. Preview result and save to workspace
+5. Preview result in Results panel and save to workspace
+
+Key bug fixes in Sprint 10-B:
+- Transform stripping in sprout-service.ts (Iron Dome arc bounding issue)
+- Collection display names (Fe → Feather mapping)
+- 24x24 path preservation (no coordinate modification for same-size sources)
 
 Key files:
 - src/components/dialogs/SproutModal.tsx (UI)
-- src/lib/sprout-service.ts (core logic)
+- src/lib/sprout-service.ts (core logic + stripTransformWrappers)
 - src/app/api/sprout/route.ts (API endpoint)
+- src/components/icons/IconGrid.tsx (library labels)
+
+Sprint 11 priorities:
+1. Error Handling & Retry Logic
+2. Batch Sprout Operations
+3. Style DNA Persistence
 
 What would you like me to work on?
 ```
 
 ---
 
-## 9. KEY PATTERNS
+## 10. KEY PATTERNS
 
 ### Token Optimization Before LLM
 
@@ -331,6 +399,24 @@ const response = await fetch('/api/sprout', {
 });
 
 const { svg, success, metadata } = await response.json();
+```
+
+### Collection Display Names (Sprint 10-B)
+
+```typescript
+const COLLECTION_DISPLAY_NAMES: Record<string, string> = {
+  lucide: "Lucide",
+  tabler: "Tabler",
+  feather: "Feather",
+  fe: "Feather",  // Some APIs return "fe" for Feather
+  phosphor: "Phosphor",
+  // ... more mappings
+};
+
+function getCollectionDisplayName(prefix: string): string {
+  return COLLECTION_DISPLAY_NAMES[prefix] ||
+    prefix.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 ```
 
 ---
