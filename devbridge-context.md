@@ -1,17 +1,17 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.10.1 (Sprint 10-B Complete - Sprout Studio Shipped)
-> **Last Updated:** 2025-12-01
-> **Branch:** gifted-jemison (ready for merge to main)
-> **System Status:** ✅ STABLE - Sprout Pivot Complete
+> **Version:** 0.11.0 (Sprint 11 - Arc Fidelity Fix)
+> **Last Updated:** 2025-12-03
+> **Branch:** goofy-nobel
+> **System Status:** ✅ STABLE - Arc Fidelity Bug Fixed
 
 ---
 
 > ⚠️ **WARNING FOR NEW SESSIONS**
 >
-> Sprint 10-B is **COMPLETE** and pushed to `gifted-jemison` branch.
-> Create a PR to merge to `main` or continue from this branch.
-> Key deliverable: `src/components/dialogs/SproutModal.tsx`
+> Sprint 11 fixes a critical bug where SVG arc commands were corrupted during
+> token optimization, causing flame/curved shapes to render incorrectly.
+> Key fix: `src/lib/svg-optimizer.ts` (arc-aware coordinate rounding)
 
 ---
 
@@ -264,7 +264,7 @@ All SVGs pass through the 6-stage pipeline, then get post-processed:
 
 ---
 
-## 6. SPRINT 11 ROADMAP (Candidates)
+## 6. SPRINT 12 ROADMAP (Candidates)
 
 | Priority | Feature | Description |
 |----------|---------|-------------|
@@ -277,6 +277,34 @@ All SVGs pass through the 6-stage pipeline, then get post-processed:
 ---
 
 ## 7. SPRINT HISTORY
+
+### Sprint 11 (2025-12-03) - Arc Fidelity Fix ✅ COMPLETE
+
+**Root Cause:** The Sprout fidelity bug (flame shapes under rocket fins rendering
+incorrectly) was caused by `svg-optimizer.ts` corrupting SVG arc flags during
+token optimization.
+
+**The Problem:**
+- Arc commands have format: `A rx ry rotation large-arc-flag sweep-flag x y`
+- Flags are always 0 or 1, but compact notation allows them to run together
+- Example: `a22 22 0 012-3.9` means rotation=0, large-arc=0, sweep=1, x=2, y=-3.9
+- The naive regex `/-?\d+\.?\d*/g` parsed `012` as the number 12, destroying flags
+
+**The Fix:**
+- `roundPathCoordinates()` - Now parses SVG path commands individually
+- `roundArcArguments()` - Preserves arc flags at positions 3 and 4
+- `tokenizeArcArgs()` - Handles compact notation where flags run together
+
+**Key Files:**
+- `src/lib/svg-optimizer.ts` (arc-aware rounding, lines 93-246)
+- `scripts/test-arc-fidelity.ts` (test suite - all 11 arcs preserved)
+
+**Test Results:**
+```
+Heroicons rocket-launch: 11 arcs → 11 arcs preserved ✅
+Compact notation (0 01): flags preserved correctly ✅
+Circle arcs (1 1 flags): preserved correctly ✅
+```
 
 ### Sprint 10-B (2025-12-01) - Sprout Studio UI ✅ COMPLETE
 
@@ -332,7 +360,7 @@ GOOGLE_CLOUD_PROJECT_ID=   # Style Jury, Imagen
 
 ## 9. CONTINUATION PROMPT
 
-When starting a new context window for **Sprint 11+**:
+When starting a new context window for **Sprint 12+**:
 
 ```
 I'm continuing work on Symbol Garden 2.0, a TypeScript/Next.js application.
@@ -341,8 +369,9 @@ Read devbridge-context.md for full architecture details.
 Current state:
 - Sprint 10-A COMPLETE: Sprout Engine backend
 - Sprint 10-B COMPLETE: Sprout Studio UI (SproutModal.tsx)
+- Sprint 11 COMPLETE: Arc Fidelity Fix (svg-optimizer.ts)
 
-The Sprout workflow is fully functional:
+The Sprout workflow is fully functional with proper arc preservation:
 1. User opens Sprout modal (via "Sprout Custom Icon" button)
 2. Searches Iconify for reference icons (20 results displayed)
 3. Selects an icon to preview in Workbench panel
@@ -351,18 +380,19 @@ The Sprout workflow is fully functional:
    - "Sprout [Library] Version" → POST /api/sprout (AI transpilation)
 5. Preview result in Results panel and save to workspace
 
-Key bug fixes in Sprint 10-B:
-- Transform stripping in sprout-service.ts (Iron Dome arc bounding issue)
-- Collection display names (Fe → Feather mapping)
-- 24x24 path preservation (no coordinate modification for same-size sources)
+Key bug fix in Sprint 11:
+- Arc-aware coordinate rounding in svg-optimizer.ts
+- Preserves arc flags (large-arc, sweep) in compact notation
+- Tested with Heroicons rocket-launch (11 arcs preserved)
 
 Key files:
+- src/lib/svg-optimizer.ts (arc-aware rounding)
 - src/components/dialogs/SproutModal.tsx (UI)
 - src/lib/sprout-service.ts (core logic + stripTransformWrappers)
 - src/app/api/sprout/route.ts (API endpoint)
-- src/components/icons/IconGrid.tsx (library labels)
+- scripts/test-arc-fidelity.ts (arc test suite)
 
-Sprint 11 priorities:
+Sprint 12 priorities:
 1. Error Handling & Retry Logic
 2. Batch Sprout Operations
 3. Style DNA Persistence

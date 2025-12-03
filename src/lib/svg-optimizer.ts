@@ -91,18 +91,158 @@ function roundToDecimal(num: number, decimals: number): string {
 }
 
 /**
- * Round all coordinates in a path d attribute
- * Handles: M, m, L, l, H, h, V, v, C, c, S, s, Q, q, T, t, A, a, Z, z
+ * Round all coordinates in a path d attribute (Arc-Aware)
+ *
+ * CRITICAL: Arc commands have a special format where flags (0 or 1) must NOT be rounded.
+ * Arc format: A rx ry x-rotation large-arc-flag sweep-flag x y
+ *
+ * Compact notation example: "a22 22 0 012-3.9" means:
+ *   rx=22, ry=22, rotation=0, large-arc=0, sweep=1, x=2, y=-3.9
+ *
+ * The naive regex /-?\d+\.?\d/g would see "012" as the number 12, corrupting the flags.
+ * This function parses commands properly to preserve arc flag semantics.
  */
 function roundPathCoordinates(pathData: string, decimals: number): string {
-  // Match numbers (including negative and decimals)
-  return pathData.replace(/-?\d+\.?\d*/g, (match) => {
-    const num = parseFloat(match);
-    if (!isNaN(num)) {
-      return roundToDecimal(num, decimals);
+  // Split into commands - each starts with a letter
+  const commandRegex = /([MmZzLlHhVvCcSsQqTtAa])([^MmZzLlHhVvCcSsQqTtAa]*)/g;
+  const result: string[] = [];
+  let match;
+
+  while ((match = commandRegex.exec(pathData)) !== null) {
+    const cmd = match[1];
+    const args = match[2].trim();
+
+    if (cmd.toUpperCase() === 'Z') {
+      // Z has no arguments
+      result.push(cmd);
+      continue;
     }
-    return match;
-  });
+
+    if (cmd.toUpperCase() === 'A') {
+      // Arc command needs special handling to preserve flags
+      result.push(cmd + roundArcArguments(args, decimals));
+    } else {
+      // All other commands: just round all numbers
+      const rounded = args.replace(/-?[\d.]+(?:[eE][+-]?\d+)?/g, (numStr) => {
+        const num = parseFloat(numStr);
+        return isNaN(num) ? numStr : roundToDecimal(num, decimals);
+      });
+      result.push(cmd + rounded);
+    }
+  }
+
+  return result.join('');
+}
+
+/**
+ * Round arc command arguments while preserving flags
+ *
+ * Arc: rx ry x-rotation large-arc-flag sweep-flag x y
+ * - rx, ry: radii (round these)
+ * - x-rotation: angle in degrees (round this)
+ * - large-arc-flag: MUST be 0 or 1 (preserve exactly)
+ * - sweep-flag: MUST be 0 or 1 (preserve exactly)
+ * - x, y: endpoint (round these)
+ *
+ * Handles compact notation where flags run together: "0 012-3.9"
+ * means rotation=0, large-arc=0, sweep=1, x=2, y=-3.9
+ */
+function roundArcArguments(args: string, decimals: number): string {
+  // Tokenize: we need to extract numbers while being aware of arc structure
+  // Arc has 7 parameters per arc command, and multiple arcs can be chained
+
+  const tokens = tokenizeArcArgs(args);
+  if (tokens.length === 0) return args;
+
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < tokens.length) {
+    // Need at least 7 tokens for one arc
+    if (i + 6 >= tokens.length) {
+      // Not enough for a full arc, just append remaining as-is
+      result.push(...tokens.slice(i).map(t => t.value));
+      break;
+    }
+
+    // rx, ry, rotation - round these
+    result.push(roundToDecimal(parseFloat(tokens[i].value), decimals));
+    result.push(' ');
+    result.push(roundToDecimal(parseFloat(tokens[i + 1].value), decimals));
+    result.push(' ');
+    result.push(roundToDecimal(parseFloat(tokens[i + 2].value), decimals));
+    result.push(' ');
+
+    // large-arc-flag, sweep-flag - preserve exactly as 0 or 1
+    const largeArc = tokens[i + 3].value === '1' ? '1' : '0';
+    const sweep = tokens[i + 4].value === '1' ? '1' : '0';
+    result.push(largeArc);
+    result.push(' ');
+    result.push(sweep);
+    result.push(' ');
+
+    // x, y - round these
+    result.push(roundToDecimal(parseFloat(tokens[i + 5].value), decimals));
+    result.push(' ');
+    result.push(roundToDecimal(parseFloat(tokens[i + 6].value), decimals));
+
+    i += 7;
+
+    // Add space before next arc if there is one
+    if (i < tokens.length) {
+      result.push(' ');
+    }
+  }
+
+  return result.join('');
+}
+
+/**
+ * Tokenize arc arguments, handling compact notation
+ *
+ * Compact notation challenges:
+ * - "0 012-3.9" = [0, 0, 1, 2, -3.9] (flags 0,1 followed by coords 2,-3.9)
+ * - Flags are always single digits (0 or 1)
+ * - After rotation, next two single digits are flags
+ */
+function tokenizeArcArgs(args: string): Array<{ value: string; isFlag: boolean }> {
+  const tokens: Array<{ value: string; isFlag: boolean }> = [];
+  let pos = 0;
+  let paramIndex = 0; // 0-6 for each arc (rx,ry,rot,large,sweep,x,y)
+
+  while (pos < args.length) {
+    // Skip whitespace and commas
+    while (pos < args.length && /[\s,]/.test(args[pos])) {
+      pos++;
+    }
+    if (pos >= args.length) break;
+
+    // Parameters 3 and 4 (indices 3,4 within each 7-param arc) are flags
+    const isFlag = (paramIndex % 7 === 3) || (paramIndex % 7 === 4);
+
+    if (isFlag) {
+      // Flag: must be exactly '0' or '1'
+      if (args[pos] === '0' || args[pos] === '1') {
+        tokens.push({ value: args[pos], isFlag: true });
+        pos++;
+        paramIndex++;
+        continue;
+      }
+    }
+
+    // Regular number: capture until next separator, command, or flag position
+    const numMatch = args.slice(pos).match(/^-?[\d.]+(?:[eE][+-]?\d+)?/);
+    if (numMatch) {
+      tokens.push({ value: numMatch[0], isFlag: false });
+      pos += numMatch[0].length;
+      paramIndex++;
+    } else {
+      // Unexpected character, skip
+      pos++;
+    }
+  }
+
+  return tokens;
 }
 
 /**
