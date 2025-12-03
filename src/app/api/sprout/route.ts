@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[Sprout API] Request: concept="${concept || 'unknown'}", svg=${sourceSvg.length} chars`);
+    console.log(`[Sprout API] Source SVG preview: ${sourceSvg.substring(0, 300)}...`);
 
     // Build config and call service
     const config: SproutConfig = {

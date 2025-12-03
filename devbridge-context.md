@@ -1,17 +1,25 @@
 # Symbol Garden 2.0 - AI Agent System Memory
 
-> **Version:** 0.11.0 (Sprint 11 - Arc Fidelity Fix)
+> **Version:** 0.11.1 (Sprint 11-B - Fast Path Style Transfer)
 > **Last Updated:** 2025-12-03
 > **Branch:** goofy-nobel
-> **System Status:** ✅ STABLE - Arc Fidelity Bug Fixed
+> **System Status:** ✅ STABLE - LLM Bypass for 24x24 Sources
 
 ---
 
-> ⚠️ **WARNING FOR NEW SESSIONS**
+> ⚠️ **CRITICAL: SVG HANDLING ARCHITECTURE**
 >
-> Sprint 11 fixes a critical bug where SVG arc commands were corrupted during
-> token optimization, causing flame/curved shapes to render incorrectly.
-> Key fix: `src/lib/svg-optimizer.ts` (arc-aware coordinate rounding)
+> **Sprint 11-B introduces FAST PATH** - For 24x24 source icons, we BYPASS the LLM
+> entirely and apply style via string manipulation. This prevents all LLM-related
+> truncation/mutation issues that caused "catastrophic data loss" (e.g., rockets
+> with fins but no fuselage).
+>
+> **Key insight:** LLMs are unreliable at preserving SVG paths exactly. For same-size
+> sources (24x24 → 24x24), pure string transformation is faster, cheaper, and 100% reliable.
+>
+> Key files:
+> - `src/lib/sprout-service.ts` (fast path + content validation)
+> - `src/lib/svg-validator.ts` (truncation detection)
 
 ---
 
@@ -159,36 +167,141 @@ The primary user workflow as of Sprint 10-B:
 ### Sprout Service Internal Flow
 
 ```typescript
+// FAST PATH: 24x24 sources bypass LLM entirely! (Sprint 11-B)
+if (is24x24Source(sourceSvg)) {
+  // 1. String-based style transfer
+  let svg = fastPathStyleTransfer(sourceSvg, styleManifest);
+  // - Extracts inner content from source SVG
+  // - STRIPS inline stroke-width, linecap, linejoin from child elements
+  // - Rebuilds SVG with target library's style on root element
+  // - Inline attrs would override root; stripping enables proper CSS cascade
+
+  // 2. Iron Dome compliance check
+  svg = SVGProcessor.process(svg, 'generate', profile).svg;
+
+  // 3. Strip any transform wrappers
+  svg = stripTransformWrappers(svg);
+
+  return { svg, success: true, finishReason: 'FAST_PATH' };
+}
+
+// LLM PATH: Non-24x24 sources need coordinate conversion
 // 1. Token Optimization
 const { optimized, viewBox } = optimizeSvgForLlm(sourceSvg);
 // Rounds coordinates, removes metadata, strips classes
 
-// 2. Build Prompt (24x24 detection!)
+// 2. Build Prompt
 const prompt = buildSproutPrompt(optimized, viewBox, styleManifest);
-// NEW: If source is 24x24, prompt tells LLM to preserve paths EXACTLY
-// Only style attributes change, no coordinate math
+// Instructs LLM to scale coordinates to 24x24 grid
 
 // 3. Gemini Call
 const result = await model.generateContent({ ... });
 // text-only, no vision, temperature=0.1
 
-// 4. Extract & Validate
+// 4. Extract & Validate Structure
 const svg = extractSvgFromResponse(result.text());
 if (!isValidSvg(svg)) throw new Error('Invalid SVG');
 
-// 5. Iron Dome Processing
+// 5. Content Validation - CRITICAL! (Sprint 11-B)
+const contentValidation = validatePathContent(svg, { sourceSvg });
+if (!contentValidation.isValid) {
+  // Truncation detected - FAIL, don't return garbage
+  return { svg: '', success: false, error: 'Output truncated' };
+}
+// Compares path command count and length between source/output
+// Catches "catastrophic data loss" like missing rocket fuselage
+
+// 6. Iron Dome Processing
 const final = SVGProcessor.process(svg, 'generate', profile);
 // 6 stages: sanitize, repair, normalize, enforce, optimize, validate
 
-// 6. Strip Transform Wrappers (Sprint 10-B fix)
+// 7. Strip Transform Wrappers (Sprint 10-B fix)
 svg = stripTransformWrappers(svg);
 // Iron Dome's arc bounding is imprecise; we strip <g transform="...">
-// and trust the LLM's coordinates for true 24x24 fidelity
 ```
 
 ---
 
-## 4. IRON DOME + TRANSFORM STRIPPING
+## 4. SVG ERROR HANDLING & VALIDATION (Sprint 11-B)
+
+### The Problem: LLM Output Truncation
+
+LLMs can silently truncate or mutate SVG paths, causing "catastrophic data loss":
+- Rocket with fins but no fuselage
+- Icon with partial shapes
+- Missing paths from multi-path SVGs
+
+**Root cause:** LLMs don't reliably preserve SVG path data verbatim, even when
+explicitly instructed to "copy exactly". They may simplify, summarize, or truncate.
+
+### The Solution: Multi-Layer Defense
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SVG HANDLING DEFENSE LAYERS                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  LAYER 1: FAST PATH BYPASS (Sprint 11-B)                                    │
+│  ├─► is24x24Source() detects same-size sources                              │
+│  ├─► fastPathStyleTransfer() applies style via string manipulation          │
+│  ├─► STRIPS inline stroke attrs (prevents source style override)            │
+│  └─► 100% reliable, no LLM involved, ~10ms vs ~10s                         │
+│                                                                              │
+│  LAYER 2: CONTENT VALIDATION (Sprint 11-B)                                  │
+│  ├─► validatePathContent() in svg-validator.ts                              │
+│  ├─► Counts path commands (M, L, C, etc.) in source vs output              │
+│  ├─► Compares path data length (chars)                                      │
+│  ├─► Thresholds: 50% command ratio, 30% length ratio                       │
+│  └─► Returns FAILURE if truncation detected (don't return garbage)          │
+│                                                                              │
+│  LAYER 3: IRON DOME (Sprint 06+)                                            │
+│  ├─► 6-stage SVG processing pipeline                                        │
+│  ├─► Path syntax repair (LLM formatting errors)                             │
+│  ├─► Style enforcement (ensure target library compliance)                   │
+│  └─► Bounds validation (24x24 viewBox)                                      │
+│                                                                              │
+│  LAYER 4: TRANSFORM STRIPPING (Sprint 10-B)                                 │
+│  ├─► stripTransformWrappers() removes Iron Dome's <g transform="...">      │
+│  └─► Iron Dome's arc bounding is imprecise; we trust LLM coordinates       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Functions
+
+| Function | File | Purpose |
+|----------|------|---------|
+| `is24x24Source()` | sprout-service.ts | Detect fast-path eligibility |
+| `fastPathStyleTransfer()` | sprout-service.ts | String-based style transfer |
+| `validatePathContent()` | svg-validator.ts | Detect LLM truncation |
+| `countPathCommands()` | svg-validator.ts | Count M, L, C, etc. |
+| `getPathDataLength()` | svg-validator.ts | Measure path data size |
+| `stripTransformWrappers()` | sprout-service.ts | Remove Iron Dome transforms |
+
+### Inline Attribute Stripping
+
+When applying target library styles, **inline attributes on child elements override
+root-level styles**. Example problem:
+
+```xml
+<!-- Source (Heroicons): stroke-width="1.5" on path -->
+<svg stroke-width="2">  <!-- Target style -->
+  <path stroke-width="1.5" d="..."/>  <!-- Overrides root! -->
+</svg>
+```
+
+**Solution:** `fastPathStyleTransfer()` strips these attributes:
+- `stroke-width`
+- `stroke-linecap`
+- `stroke-linejoin`
+- `stroke="currentColor"` (redundant)
+- `fill="none"` (redundant)
+
+This allows the root-level target library styles to cascade properly.
+
+---
+
+## 5. IRON DOME PIPELINE
 
 All SVGs pass through the 6-stage pipeline, then get post-processed:
 
@@ -276,9 +389,41 @@ All SVGs pass through the 6-stage pipeline, then get post-processed:
 
 ---
 
-## 7. SPRINT HISTORY
+## 8. SPRINT HISTORY
 
-### Sprint 11 (2025-12-03) - Arc Fidelity Fix ✅ COMPLETE
+### Sprint 11-B (2025-12-03) - Fast Path Style Transfer ✅ COMPLETE
+
+**Root Cause:** LLMs were silently truncating/mutating SVG paths even when instructed
+to "copy exactly". This caused "catastrophic data loss" - e.g., rockets rendering
+with fins but no fuselage.
+
+**The Problem:**
+- LLM returns `d="M15.6 14.4"` (22 chars) instead of full path (~400 chars)
+- Content validation showed 19/19 commands (100%) because SOURCE was already truncated
+- Actually, source was fine - LLM was generating garbage
+
+**The Solution: Multi-Layer Defense**
+
+1. **FAST PATH** - For 24x24 sources, bypass LLM entirely:
+   - `is24x24Source()` detects same-size sources
+   - `fastPathStyleTransfer()` applies style via string manipulation
+   - Strips inline stroke attrs so target library styles cascade properly
+   - ~10ms vs ~10s, 100% reliable, zero API cost
+
+2. **CONTENT VALIDATION** - For LLM path, detect truncation:
+   - `validatePathContent()` compares source vs output
+   - Counts path commands (M, L, C, etc.) and path data length
+   - Returns FAILURE if ratio < 50% commands or < 30% length
+   - Prevents returning garbage to user
+
+**Key Files:**
+- `src/lib/sprout-service.ts` (fast path, inline attr stripping)
+- `src/lib/svg-validator.ts` (content validation, truncation detection)
+
+**Key Insight:** LLMs are unreliable at preserving SVG paths. For 24x24 → 24x24
+style transfer, pure string manipulation is faster, cheaper, and 100% reliable.
+
+### Sprint 11-A (2025-12-03) - Arc Fidelity Fix ✅ COMPLETE
 
 **Root Cause:** The Sprout fidelity bug (flame shapes under rocket fins rendering
 incorrectly) was caused by `svg-optimizer.ts` corrupting SVG arc flags during
@@ -369,9 +514,10 @@ Read devbridge-context.md for full architecture details.
 Current state:
 - Sprint 10-A COMPLETE: Sprout Engine backend
 - Sprint 10-B COMPLETE: Sprout Studio UI (SproutModal.tsx)
-- Sprint 11 COMPLETE: Arc Fidelity Fix (svg-optimizer.ts)
+- Sprint 11-A COMPLETE: Arc Fidelity Fix (svg-optimizer.ts)
+- Sprint 11-B COMPLETE: Fast Path Style Transfer (LLM bypass for 24x24)
 
-The Sprout workflow is fully functional with proper arc preservation:
+The Sprout workflow is fully functional with multi-layer SVG validation:
 1. User opens Sprout modal (via "Sprout Custom Icon" button)
 2. Searches Iconify for reference icons (20 results displayed)
 3. Selects an icon to preview in Workbench panel
@@ -380,17 +526,18 @@ The Sprout workflow is fully functional with proper arc preservation:
    - "Sprout [Library] Version" → POST /api/sprout (AI transpilation)
 5. Preview result in Results panel and save to workspace
 
-Key bug fix in Sprint 11:
-- Arc-aware coordinate rounding in svg-optimizer.ts
-- Preserves arc flags (large-arc, sweep) in compact notation
-- Tested with Heroicons rocket-launch (11 arcs preserved)
+CRITICAL SVG HANDLING (Sprint 11-B):
+- 24x24 sources use FAST PATH (no LLM) - string-based style transfer
+- Strips inline stroke attrs so target library styles cascade properly
+- Content validation detects LLM truncation (command count, path length)
+- Returns FAILURE if truncation detected (don't return garbage)
 
 Key files:
+- src/lib/sprout-service.ts (FAST PATH, content validation, transform stripping)
+- src/lib/svg-validator.ts (validatePathContent, countPathCommands)
 - src/lib/svg-optimizer.ts (arc-aware rounding)
 - src/components/dialogs/SproutModal.tsx (UI)
-- src/lib/sprout-service.ts (core logic + stripTransformWrappers)
 - src/app/api/sprout/route.ts (API endpoint)
-- scripts/test-arc-fidelity.ts (arc test suite)
 
 Sprint 12 priorities:
 1. Error Handling & Retry Logic

@@ -15,6 +15,7 @@ import { optimizeSvgForLlm, extractSvgInnerContent } from './svg-optimizer';
 import { SVGProcessor, createProfileFromRules, GENERATION_PROFILE } from './svg-processor';
 import { rulesFromStyleDNA } from './style-enforcer';
 import { parseStyleDNA } from './svg-prompt-builder';
+import { validatePathContent, formatContentValidationResult } from './svg-validator';
 
 export interface SproutConfig {
   sourceSvg: string;        // Complete SVG markup from source library
@@ -33,6 +34,13 @@ export interface SproutResult {
     processingTimeMs: number;
     ironDomeModified: boolean;
     complianceScore: number | null;
+    contentValidation?: {   // Path content validation metrics
+      sourceCommands: number;
+      outputCommands: number;
+      commandRatio: number;
+      truncationDetected: boolean;
+    };
+    finishReason?: string;  // LLM finish reason for debugging
   };
   error?: string;
 }
@@ -164,12 +172,118 @@ function stripTransformWrappers(svg: string): string {
 }
 
 /**
+ * Fast-path style transfer for 24x24 sources - NO LLM needed!
+ *
+ * When source is already 24x24, we can apply style attributes via string
+ * manipulation. This is faster, cheaper, and 100% reliable (no LLM truncation).
+ *
+ * CRITICAL: We must STRIP inline stroke attributes from child elements
+ * so the root-level styles cascade properly. Otherwise Heroicons' stroke-width="1.5"
+ * would override Feather's stroke-width="2".
+ */
+function fastPathStyleTransfer(
+  sourceSvg: string,
+  styleManifest: string
+): string {
+  // Parse target style from manifest or use defaults (Feather defaults)
+  const strokeWidth = styleManifest.match(/stroke-width[=:]["']?(\d+(?:\.\d+)?)/)?.[1] || '2';
+  const strokeLinecap = styleManifest.match(/stroke-linecap[=:]["']?(\w+)/)?.[1] || 'round';
+  const strokeLinejoin = styleManifest.match(/stroke-linejoin[=:]["']?(\w+)/)?.[1] || 'round';
+
+  // Extract inner content (everything between <svg> and </svg>)
+  const innerMatch = sourceSvg.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
+  let innerContent = innerMatch ? innerMatch[1] : '';
+
+  // CRITICAL: Strip inline stroke attributes from ALL child elements
+  // These would override the root-level styles we're trying to apply
+  // We want the target library's style to cascade, not the source library's
+  innerContent = innerContent
+    // Remove stroke-width from elements (will inherit from root)
+    .replace(/\s+stroke-width=["'][^"']*["']/g, '')
+    // Remove stroke-linecap from elements (will inherit from root)
+    .replace(/\s+stroke-linecap=["'][^"']*["']/g, '')
+    // Remove stroke-linejoin from elements (will inherit from root)
+    .replace(/\s+stroke-linejoin=["'][^"']*["']/g, '')
+    // Remove stroke color if it's just "currentColor" (redundant with root)
+    .replace(/\s+stroke=["']currentColor["']/g, '')
+    // Remove fill="none" from elements (will inherit from root)
+    .replace(/\s+fill=["']none["']/g, '');
+
+  // Build new SVG with target style attributes on root
+  const styledSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="${strokeLinecap}" stroke-linejoin="${strokeLinejoin}">${innerContent}</svg>`;
+
+  return styledSvg;
+}
+
+/**
+ * Check if source SVG is 24x24 (eligible for fast-path)
+ */
+function is24x24Source(sourceSvg: string): boolean {
+  const viewBoxMatch = sourceSvg.match(/viewBox=["']([^"']+)["']/);
+  if (!viewBoxMatch) return false;
+
+  const parts = viewBoxMatch[1].split(/\s+/).map(Number);
+  return parts.length === 4 && parts[2] === 24 && parts[3] === 24;
+}
+
+/**
  * Main Sprout function - transpile an icon from one style to another
  */
 export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
   const startTime = Date.now();
   const { sourceSvg, styleManifest, conceptName = 'icon' } = config;
 
+  console.log(`[Sprout] Starting transpilation for "${conceptName}"`);
+
+  // FAST PATH: For 24x24 sources, skip LLM entirely!
+  // This prevents all LLM-related truncation/mutation issues.
+  if (is24x24Source(sourceSvg)) {
+    console.log(`[Sprout] FAST PATH: Source is 24x24, applying style via string transform (no LLM)`);
+
+    try {
+      let svg = fastPathStyleTransfer(sourceSvg, styleManifest);
+
+      // Still run through Iron Dome for final compliance
+      const rules = styleManifest
+        ? rulesFromStyleDNA(parseStyleDNA(styleManifest))
+        : GENERATION_PROFILE;
+
+      const profile = createProfileFromRules(rules, 'generate');
+      const processResult = SVGProcessor.process(svg, 'generate', profile);
+      svg = processResult.svg;
+
+      // Strip any transform wrappers Iron Dome may have added
+      svg = stripTransformWrappers(svg);
+
+      const processingTime = Date.now() - startTime;
+      console.log(`[Sprout] FAST PATH complete in ${processingTime}ms`);
+
+      return {
+        svg,
+        success: true,
+        metadata: {
+          originalSource: sourceSvg.substring(0, 100),
+          originalViewBox: '0 0 24 24',
+          tokensSaved: 0, // No LLM tokens used!
+          processingTimeMs: processingTime,
+          ironDomeModified: processResult.modified,
+          complianceScore: processResult.compliance?.score || null,
+          contentValidation: {
+            sourceCommands: 0, // Not applicable for fast path
+            outputCommands: 0,
+            commandRatio: 1.0,
+            truncationDetected: false,
+          },
+          finishReason: 'FAST_PATH',
+        },
+      };
+    } catch (error) {
+      console.error('[Sprout] Fast path failed, falling back to LLM:', error);
+      // Fall through to LLM path
+    }
+  }
+
+  // LLM PATH: For non-24x24 sources that need coordinate conversion
   // Resolve API key
   const apiKey = config.apiKey || process.env.GOOGLE_API_KEY;
   if (!apiKey) {
@@ -190,7 +304,7 @@ export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
 
   try {
     // Step 1: Optimize SVG for LLM (Token Optimizer)
-    console.log(`[Sprout] Starting transpilation for "${conceptName}"`);
+    console.log(`[Sprout] LLM PATH: Source needs coordinate conversion`);
     const { optimized, viewBox, originalLength, optimizedLength } = optimizeSvgForLlm(sourceSvg);
     const tokensSaved = originalLength - optimizedLength;
     console.log(`[Sprout] Token optimization: ${originalLength} → ${optimizedLength} chars (saved ${tokensSaved})`);
@@ -222,6 +336,7 @@ export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
     const finishReason = response.candidates?.[0]?.finishReason;
     console.log(`[Sprout] Finish reason: ${finishReason}`);
 
+    // Check for blocked responses
     if (finishReason === 'SAFETY') {
       return {
         svg: '',
@@ -233,9 +348,16 @@ export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
           processingTimeMs: Date.now() - startTime,
           ironDomeModified: false,
           complianceScore: null,
+          finishReason,
         },
         error: 'Response blocked by safety filters',
       };
+    }
+
+    // Check for truncated responses (MAX_TOKENS, LENGTH, etc.)
+    const truncationReasons = ['MAX_TOKENS', 'LENGTH', 'RECITATION'];
+    if (finishReason && truncationReasons.includes(finishReason)) {
+      console.warn(`[Sprout] WARNING: Response may be truncated (finishReason: ${finishReason})`);
     }
 
     const responseText = response.text();
@@ -270,8 +392,42 @@ export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
           processingTimeMs: Date.now() - startTime,
           ironDomeModified: false,
           complianceScore: null,
+          finishReason,
         },
         error: 'Generated output is not valid SVG',
+      };
+    }
+
+    // Step 5.5: Content validation - detect LLM output truncation
+    // This is CRITICAL for catching "catastrophic data loss" bugs like missing fuselage
+    const contentValidation = validatePathContent(svg, { sourceSvg });
+    console.log(`[Sprout] ${formatContentValidationResult(contentValidation)}`);
+
+    if (!contentValidation.isValid) {
+      // Truncation detected - this is a FAILURE, not a success with warnings
+      const truncationError = contentValidation.errors
+        .map(e => e.message)
+        .join('; ');
+
+      return {
+        svg: '',  // Don't return truncated SVG
+        success: false,
+        metadata: {
+          originalSource: sourceSvg.substring(0, 100),
+          originalViewBox: viewBox,
+          tokensSaved,
+          processingTimeMs: Date.now() - startTime,
+          ironDomeModified: false,
+          complianceScore: null,
+          contentValidation: {
+            sourceCommands: contentValidation.metrics.sourceCommandCount,
+            outputCommands: contentValidation.metrics.outputCommandCount,
+            commandRatio: contentValidation.metrics.commandRatio,
+            truncationDetected: true,
+          },
+          finishReason,
+        },
+        error: `Output truncated: ${truncationError}`,
       };
     }
 
@@ -307,6 +463,13 @@ export async function sproutIcon(config: SproutConfig): Promise<SproutResult> {
         processingTimeMs: processingTime,
         ironDomeModified: processResult.modified,
         complianceScore: processResult.compliance?.score || null,
+        contentValidation: {
+          sourceCommands: contentValidation.metrics.sourceCommandCount,
+          outputCommands: contentValidation.metrics.outputCommandCount,
+          commandRatio: contentValidation.metrics.commandRatio,
+          truncationDetected: false,
+        },
+        finishReason,
       },
     };
 

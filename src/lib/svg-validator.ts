@@ -16,13 +16,13 @@ export interface ValidationResult {
 }
 
 export interface ValidationError {
-  type: 'out-of-bounds' | 'invalid-structure' | 'missing-element' | 'parse-error' | 'malformed-path';
+  type: 'out-of-bounds' | 'invalid-structure' | 'missing-element' | 'parse-error' | 'malformed-path' | 'content-truncated';
   message: string;
   details?: Record<string, unknown>;
 }
 
 export interface ValidationWarning {
-  type: 'near-boundary' | 'unusual-size' | 'style-inconsistency';
+  type: 'near-boundary' | 'unusual-size' | 'style-inconsistency' | 'content-reduced';
   message: string;
   details?: Record<string, unknown>;
 }
@@ -812,6 +812,205 @@ export function formatValidationResult(result: ValidationResult): string {
 
   if (result.fixedSvg) {
     lines.push('  → Auto-fix applied');
+  }
+
+  return lines.join('\n');
+}
+
+// =============================================================================
+// PATH CONTENT VALIDATION - Detects LLM output truncation
+// =============================================================================
+
+/**
+ * Options for content validation (comparing source to output)
+ */
+export interface ContentValidationOptions {
+  /** Original source SVG to compare against */
+  sourceSvg: string;
+  /** Minimum ratio of output/input path commands (default: 0.5 = 50%) */
+  minCommandRatio?: number;
+  /** Minimum ratio of output/input path length (default: 0.3 = 30%) */
+  minLengthRatio?: number;
+}
+
+/**
+ * Result of content validation
+ */
+export interface ContentValidationResult {
+  /** Did the output pass content validation? */
+  isValid: boolean;
+  /** Errors (truncation detected) */
+  errors: ValidationError[];
+  /** Warnings (significant reduction but not catastrophic) */
+  warnings: ValidationWarning[];
+  /** Metrics about the comparison */
+  metrics: {
+    sourceCommandCount: number;
+    outputCommandCount: number;
+    commandRatio: number;
+    sourcePathLength: number;
+    outputPathLength: number;
+    lengthRatio: number;
+  };
+}
+
+/**
+ * Count SVG path commands in a string
+ * Commands are: M, L, H, V, C, S, Q, T, A, Z (case-insensitive)
+ */
+export function countPathCommands(svg: string): number {
+  const pathMatches = svg.matchAll(/d\s*=\s*["']([^"']+)["']/g);
+  let totalCommands = 0;
+
+  for (const match of pathMatches) {
+    const d = match[1];
+    // Count command letters
+    const commands = d.match(/[MLHVCSQTAZmlhvcsqtaz]/g);
+    totalCommands += commands?.length || 0;
+  }
+
+  return totalCommands;
+}
+
+/**
+ * Get total path data length (sum of all d="" attribute values)
+ */
+export function getPathDataLength(svg: string): number {
+  const pathMatches = svg.matchAll(/d\s*=\s*["']([^"']+)["']/g);
+  let totalLength = 0;
+
+  for (const match of pathMatches) {
+    totalLength += match[1].length;
+  }
+
+  return totalLength;
+}
+
+/**
+ * Validate that output SVG contains sufficient content compared to source
+ *
+ * This is the key defense against LLM output truncation - if the LLM
+ * returns a partial SVG, we detect it here rather than letting the
+ * user see a broken icon.
+ *
+ * @param outputSvg - The generated/transformed SVG
+ * @param options - Validation options including source SVG
+ * @returns ContentValidationResult with errors/warnings if truncation detected
+ */
+export function validatePathContent(
+  outputSvg: string,
+  options: ContentValidationOptions
+): ContentValidationResult {
+  const minCommandRatio = options.minCommandRatio ?? 0.5;
+  const minLengthRatio = options.minLengthRatio ?? 0.3;
+
+  const errors: ValidationError[] = [];
+  const warnings: ValidationWarning[] = [];
+
+  // Count commands and path length for both
+  const sourceCommandCount = countPathCommands(options.sourceSvg);
+  const outputCommandCount = countPathCommands(outputSvg);
+  const sourcePathLength = getPathDataLength(options.sourceSvg);
+  const outputPathLength = getPathDataLength(outputSvg);
+
+  // Calculate ratios (handle division by zero)
+  const commandRatio = sourceCommandCount > 0
+    ? outputCommandCount / sourceCommandCount
+    : (outputCommandCount > 0 ? 1 : 0);
+
+  const lengthRatio = sourcePathLength > 0
+    ? outputPathLength / sourcePathLength
+    : (outputPathLength > 0 ? 1 : 0);
+
+  const metrics = {
+    sourceCommandCount,
+    outputCommandCount,
+    commandRatio,
+    sourcePathLength,
+    outputPathLength,
+    lengthRatio,
+  };
+
+  // Check for catastrophic truncation (ERROR level)
+  // This catches cases like the rocket with no fuselage
+  if (commandRatio < minCommandRatio && sourceCommandCount >= 5) {
+    errors.push({
+      type: 'content-truncated',
+      message: `Output appears truncated: only ${outputCommandCount}/${sourceCommandCount} path commands (${(commandRatio * 100).toFixed(0)}% of source)`,
+      details: {
+        sourceCommandCount,
+        outputCommandCount,
+        commandRatio,
+        threshold: minCommandRatio,
+      },
+    });
+  }
+
+  // Also check path length ratio as backup
+  // (some transformations might legitimately reduce command count but not length)
+  if (lengthRatio < minLengthRatio && sourcePathLength >= 50) {
+    errors.push({
+      type: 'content-truncated',
+      message: `Path data severely reduced: ${outputPathLength}/${sourcePathLength} chars (${(lengthRatio * 100).toFixed(0)}% of source)`,
+      details: {
+        sourcePathLength,
+        outputPathLength,
+        lengthRatio,
+        threshold: minLengthRatio,
+      },
+    });
+  }
+
+  // Warning level: significant reduction but not catastrophic
+  // This helps catch partial truncation before it becomes a problem
+  if (errors.length === 0) {
+    if (commandRatio < 0.7 && commandRatio >= minCommandRatio && sourceCommandCount >= 5) {
+      warnings.push({
+        type: 'content-reduced',
+        message: `Output has fewer path commands than source: ${outputCommandCount}/${sourceCommandCount} (${(commandRatio * 100).toFixed(0)}%)`,
+        details: { commandRatio },
+      });
+    }
+
+    if (lengthRatio < 0.5 && lengthRatio >= minLengthRatio && sourcePathLength >= 50) {
+      warnings.push({
+        type: 'content-reduced',
+        message: `Path data significantly reduced: ${(lengthRatio * 100).toFixed(0)}% of source length`,
+        details: { lengthRatio },
+      });
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+    metrics,
+  };
+}
+
+/**
+ * Format content validation result for logging
+ */
+export function formatContentValidationResult(result: ContentValidationResult): string {
+  const lines: string[] = [];
+  const m = result.metrics;
+
+  if (result.isValid) {
+    lines.push(`✅ Content validation passed`);
+  } else {
+    lines.push(`❌ Content validation FAILED - possible LLM truncation`);
+  }
+
+  lines.push(`   Commands: ${m.outputCommandCount}/${m.sourceCommandCount} (${(m.commandRatio * 100).toFixed(0)}%)`);
+  lines.push(`   Path length: ${m.outputPathLength}/${m.sourcePathLength} (${(m.lengthRatio * 100).toFixed(0)}%)`);
+
+  for (const error of result.errors) {
+    lines.push(`   ERROR: ${error.message}`);
+  }
+
+  for (const warning of result.warnings) {
+    lines.push(`   WARN: ${warning.message}`);
   }
 
   return lines.join('\n');
