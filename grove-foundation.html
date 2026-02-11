@@ -5,57 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Grove Foundation — Investor Presentation</title>
 
-    <!-- Fonts: Archivo (display) + Nunito (body) — Swiss Modern pairing -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         /* ===========================================
-           THEME: MIDNIGHT EXECUTIVE
-           Swiss Modern precision on deep midnight.
-           Institutional red accent. No gradients.
-           No playful elements. Grid structure.
+           THEME: CLEAN CORPORATE
+           White backgrounds, navy primary, orange accent.
+           No decorative elements. Consulting-firm professional.
            =========================================== */
         :root {
-            /* Colors — Midnight Executive palette */
-            --bg-primary: #08090c;
-            --bg-surface: #0f1117;
-            --bg-elevated: #161922;
-            --border: #1e2230;
-            --border-subtle: #141720;
+            --bg-primary: #ffffff;
+            --bg-surface: #f7f8fa;
+            --bg-elevated: #eef0f4;
+            --border: #d8dce6;
+            --border-subtle: #e8ebf0;
 
-            --text-primary: #e4e4e7;
-            --text-secondary: #71717a;
-            --text-muted: #3f3f46;
+            --navy: #1a2744;
+            --navy-mid: #2c3e5a;
+            --navy-light: #4a5b78;
+            --text-primary: #1a2744;
+            --text-secondary: #4a5b78;
+            --text-muted: #8a94a6;
 
-            --accent: #c8102e;
-            --accent-dim: rgba(200, 16, 46, 0.15);
-            --accent-text: #e8354f;
+            --accent: #e67325;
+            --accent-dim: rgba(230, 115, 37, 0.08);
+            --accent-text: #d4671f;
 
-            /* Typography — MUST use clamp() */
-            --font-display: 'Archivo', sans-serif;
-            --font-body: 'Nunito', sans-serif;
-            --title-size: clamp(1.6rem, 4.5vw, 3.5rem);
-            --h2-size: clamp(1.3rem, 3.5vw, 2.4rem);
-            --h3-size: clamp(0.95rem, 2vw, 1.35rem);
-            --body-size: clamp(0.72rem, 1.3vw, 1rem);
-            --small-size: clamp(0.6rem, 0.9vw, 0.8rem);
-            --label-size: clamp(0.55rem, 0.8vw, 0.72rem);
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --title-size: clamp(1.6rem, 4.5vw, 3.2rem);
+            --h2-size: clamp(1.3rem, 3.5vw, 2.2rem);
+            --h3-size: clamp(0.85rem, 1.6vw, 1.15rem);
+            --body-size: clamp(0.72rem, 1.2vw, 0.95rem);
+            --small-size: clamp(0.62rem, 0.9vw, 0.8rem);
+            --label-size: clamp(0.55rem, 0.75vw, 0.7rem);
 
-            /* Spacing — scales with viewport */
             --slide-padding: clamp(1.5rem, 4vw, 4.5rem);
-            --content-gap: clamp(0.75rem, 2vw, 2rem);
-            --element-gap: clamp(0.3rem, 1vw, 0.75rem);
+            --content-gap: clamp(0.75rem, 2vw, 1.75rem);
+            --element-gap: clamp(0.3rem, 0.8vw, 0.65rem);
 
-            /* Animation */
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
             --duration: 0.6s;
         }
 
-        /* ===========================================
-           RESET & BASE
-           =========================================== */
         *, *::before, *::after {
             margin: 0;
             padding: 0;
@@ -70,7 +63,7 @@
         }
 
         body {
-            font-family: var(--font-body);
+            font-family: var(--font-primary);
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
@@ -80,9 +73,7 @@
         }
 
         /* ===========================================
-           SLIDE CONTAINER — VIEWPORT LOCKED
-           Each slide = exactly one viewport height.
-           overflow: hidden prevents ANY scrolling.
+           SLIDE CONTAINER
            =========================================== */
         .slide {
             width: 100vw;
@@ -94,6 +85,7 @@
             flex-direction: column;
             position: relative;
             padding: var(--slide-padding);
+            background: var(--bg-primary);
         }
 
         .slide-content {
@@ -103,35 +95,19 @@
             justify-content: center;
             max-height: 100%;
             overflow: hidden;
-        }
-
-        /* ===========================================
-           GRID BACKGROUND — Swiss Modern signature
-           Subtle structural grid visible behind content.
-           =========================================== */
-        .slide::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(var(--border-subtle) 1px, transparent 1px),
-                linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
-            background-size: clamp(40px, 6vw, 80px) clamp(40px, 6vw, 80px);
-            opacity: 0.4;
-            pointer-events: none;
+            position: relative;
+            z-index: 1;
         }
 
         /* ===========================================
            TYPOGRAPHY
-           Archivo for headings — heavy, authoritative.
-           Nunito for body — clean, readable.
            =========================================== */
         h1, h2, h3 {
-            font-family: var(--font-display);
-            font-weight: 800;
-            line-height: 1.1;
+            font-family: var(--font-primary);
+            font-weight: 700;
+            line-height: 1.15;
             letter-spacing: -0.02em;
-            text-transform: uppercase;
+            color: var(--navy);
         }
 
         h1 { font-size: var(--title-size); }
@@ -139,17 +115,16 @@
         h3 { font-size: var(--h3-size); }
 
         p, li {
-            font-family: var(--font-body);
+            font-family: var(--font-primary);
             font-size: var(--body-size);
-            line-height: 1.5;
+            line-height: 1.55;
             color: var(--text-secondary);
         }
 
         .label {
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 600;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             color: var(--text-muted);
         }
@@ -159,18 +134,16 @@
         }
 
         .quote-line {
-            font-family: var(--font-body);
             font-size: var(--body-size);
             font-style: italic;
             color: var(--text-secondary);
-            border-left: 2px solid var(--accent);
-            padding-left: clamp(0.5rem, 1.5vw, 1rem);
-            margin-top: var(--element-gap);
+            border-left: 3px solid var(--accent);
+            padding-left: clamp(0.6rem, 1.5vw, 1rem);
+            margin-top: var(--content-gap);
         }
 
         /* ===========================================
-           SLIDE HEADER — Consistent top element
-           Section number + label on every content slide.
+           SLIDE HEADER
            =========================================== */
         .slide-header {
             display: flex;
@@ -182,7 +155,6 @@
         }
 
         .slide-number {
-            font-family: var(--font-display);
             font-size: clamp(0.6rem, 1vw, 0.85rem);
             font-weight: 700;
             color: var(--accent);
@@ -197,10 +169,9 @@
         }
 
         .slide-header .section-label {
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 600;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--text-muted);
         }
@@ -211,53 +182,40 @@
         .columns-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: clamp(0.75rem, 2vw, 2rem);
+            gap: clamp(0.6rem, 1.5vw, 1.5rem);
         }
 
         .columns-2 {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: clamp(0.75rem, 2vw, 2rem);
+            gap: clamp(0.6rem, 1.5vw, 1.5rem);
         }
 
         .column-card {
             background: var(--bg-surface);
             border: 1px solid var(--border);
-            padding: clamp(0.75rem, 2vw, 1.5rem);
-            position: relative;
+            padding: clamp(0.7rem, 1.5vw, 1.25rem);
+            border-radius: 2px;
         }
 
         .column-card h3 {
             margin-bottom: var(--element-gap);
-            color: var(--text-primary);
+            color: var(--navy);
         }
 
         .column-card p {
             font-size: var(--small-size);
         }
 
-        .column-card .card-number {
-            font-family: var(--font-display);
-            font-size: clamp(2rem, 5vw, 4rem);
-            font-weight: 900;
-            color: var(--accent-dim);
-            position: absolute;
-            top: clamp(0.25rem, 0.5vw, 0.5rem);
-            right: clamp(0.5rem, 1vw, 1rem);
-            line-height: 1;
-            color: var(--bg-elevated);
+        .accent-top {
+            border-top: 2px solid var(--accent);
         }
 
         /* Stat block */
-        .stat {
-            text-align: center;
-        }
-
         .stat-value {
-            font-family: var(--font-display);
             font-size: clamp(1.5rem, 4vw, 3rem);
-            font-weight: 900;
-            color: var(--text-primary);
+            font-weight: 800;
+            color: var(--navy);
             line-height: 1;
         }
 
@@ -267,7 +225,6 @@
             margin-top: clamp(0.15rem, 0.4vw, 0.35rem);
         }
 
-        /* Horizontal rule */
         .rule {
             width: 100%;
             height: 1px;
@@ -275,13 +232,8 @@
             margin: var(--element-gap) 0;
         }
 
-        /* Red top accent bar on cards */
-        .accent-top {
-            border-top: 2px solid var(--accent);
-        }
-
         /* ===========================================
-           FOOTER — persistent bottom element
+           FOOTER
            =========================================== */
         .slide-footer {
             position: absolute;
@@ -295,7 +247,6 @@
         }
 
         .slide-footer .page {
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 600;
             color: var(--text-muted);
@@ -303,7 +254,6 @@
         }
 
         .slide-footer .org {
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 600;
             color: var(--text-muted);
@@ -312,11 +262,36 @@
         }
 
         /* ===========================================
-           ANIMATIONS — Reveal on scroll
+           SPEAKER NOTES (hidden, printable)
+           =========================================== */
+        .speaker-note {
+            display: none;
+        }
+
+        @media print {
+            .speaker-note {
+                display: block;
+                margin-top: 1rem;
+                padding: 0.75rem;
+                background: #fffbe6;
+                border: 1px solid #e6d88a;
+                font-size: 0.75rem;
+                color: #333;
+                page-break-inside: avoid;
+            }
+            .speaker-note::before {
+                content: 'SPEAKER NOTE: ';
+                font-weight: 700;
+                color: #996600;
+            }
+        }
+
+        /* ===========================================
+           ANIMATIONS
            =========================================== */
         .reveal {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(16px);
             transition: opacity var(--duration) var(--ease-out-expo),
                         transform var(--duration) var(--ease-out-expo);
         }
@@ -332,9 +307,10 @@
         .reveal:nth-child(4) { transition-delay: 0.26s; }
         .reveal:nth-child(5) { transition-delay: 0.33s; }
         .reveal:nth-child(6) { transition-delay: 0.40s; }
+        .reveal:nth-child(7) { transition-delay: 0.47s; }
 
         /* ===========================================
-           PROGRESS BAR — thin red line at top
+           PROGRESS BAR
            =========================================== */
         .progress-bar {
             position: fixed;
@@ -347,7 +323,7 @@
         }
 
         /* ===========================================
-           NAV DOTS — right edge
+           NAV DOTS
            =========================================== */
         .nav-dots {
             position: fixed;
@@ -363,45 +339,70 @@
         .nav-dot {
             width: 6px;
             height: 6px;
-            background: var(--text-muted);
+            border-radius: 50%;
+            background: var(--border);
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .nav-dot.active {
             background: var(--accent);
-            height: 18px;
+            height: 16px;
+            border-radius: 3px;
         }
 
         /* ===========================================
-           SLIDE 1: TITLE — Asymmetric Swiss layout
+           SLIDE 1: TITLE
            =========================================== */
         .title-slide .slide-content {
-            justify-content: flex-end;
-            padding-bottom: clamp(3rem, 8vh, 6rem);
+            justify-content: center;
+            align-items: flex-start;
         }
 
         .title-slide h1 {
-            font-size: clamp(1.8rem, 5vw, 4rem);
-            max-width: 80%;
+            font-size: clamp(1.6rem, 4.5vw, 3.2rem);
+            max-width: 75%;
+            font-weight: 800;
         }
 
         .title-slide .subtitle {
-            font-family: var(--font-body);
             font-size: var(--body-size);
             color: var(--text-secondary);
             margin-top: var(--element-gap);
             font-weight: 400;
-            letter-spacing: 0.02em;
         }
 
         .title-slide .footer-statement {
-            font-family: var(--font-display);
             font-size: var(--small-size);
             font-weight: 600;
             color: var(--accent-text);
             margin-top: var(--content-gap);
-            letter-spacing: 0.05em;
+        }
+
+        .title-visual {
+            display: flex;
+            align-items: center;
+            gap: clamp(1.5rem, 4vw, 3.5rem);
+            margin-top: var(--content-gap);
+        }
+
+        .title-visual .visual-group {
+            text-align: center;
+        }
+
+        .title-visual .visual-label {
+            font-size: var(--label-size);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: clamp(0.3rem, 0.6vw, 0.5rem);
+        }
+
+        .title-visual .visual-sublabel {
+            font-size: var(--label-size);
+            color: var(--text-muted);
+            font-weight: 400;
         }
 
         .title-mark {
@@ -412,17 +413,16 @@
         }
 
         .title-mark .mark-line {
-            width: clamp(2rem, 5vw, 5rem);
+            width: clamp(2rem, 5vw, 4rem);
             height: 2px;
             background: var(--accent);
         }
 
         .title-mark .mark-text {
-            font-family: var(--font-display);
             font-size: var(--label-size);
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-muted);
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             margin-top: clamp(0.25rem, 0.5vw, 0.5rem);
         }
@@ -431,7 +431,6 @@
             position: absolute;
             top: var(--slide-padding);
             right: var(--slide-padding);
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 700;
             color: var(--text-muted);
@@ -440,13 +439,13 @@
         }
 
         /* ===========================================
-           SLIDE 2: BAR CHART — CSS-only comparison
+           SLIDE 2: BAR CHART
            =========================================== */
         .chart-container {
             display: flex;
             align-items: flex-end;
             gap: clamp(1.5rem, 4vw, 4rem);
-            height: clamp(8rem, 25vh, 16rem);
+            height: clamp(7rem, 22vh, 14rem);
             padding-top: var(--element-gap);
         }
 
@@ -462,35 +461,33 @@
         .chart-bar {
             width: 100%;
             max-width: clamp(4rem, 10vw, 10rem);
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
             position: relative;
             display: flex;
             align-items: flex-start;
             justify-content: center;
             padding-top: clamp(0.4rem, 1vw, 0.75rem);
-            transition: height 1s var(--ease-out-expo);
+            border-radius: 2px 2px 0 0;
         }
 
         .chart-bar.bar-telecom {
             height: 40%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
         }
 
         .chart-bar.bar-ai {
             height: 100%;
-            border-color: var(--accent);
-            border-width: 1px;
+            background: var(--navy);
         }
 
         .chart-bar .bar-value {
-            font-family: var(--font-display);
-            font-size: clamp(0.9rem, 2vw, 1.5rem);
-            font-weight: 900;
-            color: var(--text-primary);
+            font-size: clamp(0.9rem, 2vw, 1.4rem);
+            font-weight: 800;
+            color: var(--navy);
         }
 
         .chart-bar.bar-ai .bar-value {
-            color: var(--accent-text);
+            color: #ffffff;
         }
 
         .chart-bar-label {
@@ -498,13 +495,14 @@
             color: var(--text-secondary);
             text-align: center;
             margin-top: var(--element-gap);
+            font-weight: 600;
         }
 
         .chart-bar-sublabel {
             font-size: var(--label-size);
             color: var(--text-muted);
             text-align: center;
-            margin-top: clamp(0.1rem, 0.2vw, 0.2rem);
+            margin-top: 2px;
         }
 
         .stats-row {
@@ -516,40 +514,41 @@
 
         .stat-block {
             text-align: center;
-            padding: clamp(0.4rem, 1vw, 0.75rem);
+            padding: clamp(0.5rem, 1vw, 0.85rem);
             border: 1px solid var(--border);
             background: var(--bg-surface);
+            border-radius: 2px;
         }
 
         .stat-block .stat-num {
-            font-family: var(--font-display);
-            font-size: clamp(1rem, 2.5vw, 1.75rem);
-            font-weight: 900;
-            color: var(--text-primary);
+            font-size: clamp(1rem, 2.5vw, 1.6rem);
+            font-weight: 800;
+            color: var(--navy);
         }
 
         .stat-block .stat-desc {
             font-size: var(--label-size);
             color: var(--text-secondary);
-            margin-top: clamp(0.1rem, 0.3vw, 0.25rem);
+            margin-top: 2px;
         }
 
         /* ===========================================
-           SLIDE 4: FLOW DIAGRAM — horizontal pipeline
+           SLIDE 4: FLOW DIAGRAM
            =========================================== */
         .flow-diagram {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            gap: clamp(0.4rem, 1.2vw, 1.2rem);
             margin: var(--content-gap) 0;
         }
 
         .flow-node {
-            padding: clamp(0.6rem, 1.5vw, 1.25rem) clamp(0.75rem, 2vw, 1.5rem);
+            padding: clamp(0.5rem, 1.2vw, 1rem) clamp(0.6rem, 1.5vw, 1.25rem);
             border: 1px solid var(--border);
             background: var(--bg-surface);
             text-align: center;
+            border-radius: 2px;
             flex-shrink: 0;
         }
 
@@ -559,8 +558,8 @@
         }
 
         .flow-node h3 {
-            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
-            margin-bottom: clamp(0.15rem, 0.3vw, 0.25rem);
+            font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+            margin-bottom: 2px;
         }
 
         .flow-node p {
@@ -568,14 +567,23 @@
         }
 
         .flow-arrow {
-            font-family: var(--font-display);
             font-size: clamp(0.8rem, 1.5vw, 1.2rem);
             color: var(--text-muted);
             flex-shrink: 0;
         }
 
+        .flow-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         /* ===========================================
-           SLIDE 5: BELL CURVE — CSS/SVG shape
+           SLIDE 5: BELL CURVE
            =========================================== */
         .curve-container {
             display: flex;
@@ -591,7 +599,7 @@
         }
 
         /* ===========================================
-           SLIDE 6: PILLARS — three columns → base
+           SLIDE 6: PILLARS
            =========================================== */
         .pillars-diagram {
             display: flex;
@@ -603,28 +611,29 @@
         .pillar-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            gap: clamp(0.4rem, 1vw, 1rem);
             width: 100%;
         }
 
         .pillar {
             text-align: center;
-            padding: clamp(0.6rem, 1.5vw, 1.25rem);
+            padding: clamp(0.5rem, 1.2vw, 1rem);
             border: 1px solid var(--border);
             background: var(--bg-surface);
+            border-radius: 2px;
         }
 
         .pillar h3 {
-            font-size: clamp(0.75rem, 1.3vw, 1rem);
+            font-size: clamp(0.7rem, 1.2vw, 0.9rem);
         }
 
         .pillar p {
             font-size: var(--label-size);
-            margin-top: clamp(0.15rem, 0.3vw, 0.25rem);
+            margin-top: 2px;
         }
 
         .connector-bar {
-            width: 80%;
+            width: 70%;
             height: 2px;
             background: var(--accent);
             position: relative;
@@ -639,19 +648,77 @@
             width: 8px;
             height: 8px;
             background: var(--accent);
+            border-radius: 50%;
         }
 
         .coordination-layer {
             width: 100%;
             text-align: center;
-            padding: clamp(0.6rem, 1.5vw, 1.25rem);
+            padding: clamp(0.5rem, 1.2vw, 1rem);
             border: 2px solid var(--accent);
             background: var(--accent-dim);
+            border-radius: 2px;
         }
 
         .coordination-layer h3 {
-            color: var(--text-primary);
-            font-size: clamp(0.8rem, 1.4vw, 1.1rem);
+            color: var(--navy);
+            font-size: clamp(0.75rem, 1.3vw, 1rem);
+        }
+
+        .properties-row {
+            display: flex;
+            justify-content: center;
+            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            margin-top: var(--element-gap);
+            flex-wrap: wrap;
+        }
+
+        .property-tag {
+            font-size: var(--label-size);
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--navy-light);
+            padding: clamp(0.15rem, 0.4vw, 0.3rem) clamp(0.4rem, 1vw, 0.75rem);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            background: var(--bg-surface);
+        }
+
+        .gpo-callout {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: clamp(0.5rem, 1.2vw, 1rem);
+            margin-top: var(--element-gap);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .gpo-callout h3 {
+            font-size: clamp(0.7rem, 1.1vw, 0.85rem);
+            color: var(--accent-text);
+            margin-bottom: 4px;
+        }
+
+        .gpo-callout p {
+            font-size: var(--small-size);
+        }
+
+        .gpo-stats {
+            display: flex;
+            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            margin-top: var(--element-gap);
+        }
+
+        .gpo-stat {
+            font-size: var(--label-size);
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .gpo-stat span {
+            font-weight: 400;
+            color: var(--text-secondary);
         }
 
         /* ===========================================
@@ -666,41 +733,56 @@
         .timeline-item {
             display: flex;
             align-items: center;
-            gap: clamp(0.5rem, 1.5vw, 1.5rem);
-            padding: clamp(0.5rem, 1.2vw, 1rem) clamp(0.75rem, 2vw, 1.5rem);
+            gap: clamp(0.5rem, 1.5vw, 1.25rem);
+            padding: clamp(0.4rem, 1vw, 0.85rem) clamp(0.6rem, 1.5vw, 1.25rem);
             border: 1px solid var(--border);
             background: var(--bg-surface);
+            border-radius: 2px;
         }
 
         .timeline-arrow {
-            font-family: var(--font-display);
             font-size: clamp(1rem, 2vw, 1.5rem);
             color: var(--accent);
             flex-shrink: 0;
         }
 
         .timeline-content h3 {
-            font-size: clamp(0.8rem, 1.3vw, 1.05rem);
+            font-size: clamp(0.75rem, 1.2vw, 0.95rem);
         }
 
         .timeline-content p {
             font-size: var(--small-size);
         }
 
+        .convergence-callout {
+            text-align: center;
+            padding: clamp(0.4rem, 1vw, 0.75rem);
+            border: 2px solid var(--accent);
+            background: var(--accent-dim);
+            margin-top: var(--element-gap);
+            border-radius: 2px;
+        }
+
+        .convergence-callout p {
+            font-weight: 700;
+            color: var(--navy);
+            font-size: var(--body-size);
+        }
+
         /* ===========================================
-           SLIDE 9: ROADMAP PHASES — horizontal
+           SLIDE 9: ROADMAP PHASES
            =========================================== */
         .roadmap {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            gap: clamp(0.5rem, 1.5vw, 1.25rem);
         }
 
         .phase {
-            padding: clamp(0.75rem, 1.5vw, 1.5rem);
+            padding: clamp(0.6rem, 1.2vw, 1.25rem);
             border: 1px solid var(--border);
             background: var(--bg-surface);
-            position: relative;
+            border-radius: 2px;
         }
 
         .phase.phase-active {
@@ -709,17 +791,16 @@
         }
 
         .phase-label {
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 700;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--accent-text);
             margin-bottom: var(--element-gap);
         }
 
         .phase h3 {
-            font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+            font-size: clamp(0.8rem, 1.3vw, 1.05rem);
             margin-bottom: var(--element-gap);
         }
 
@@ -728,11 +809,10 @@
         }
 
         .phase .phase-amount {
-            font-family: var(--font-display);
-            font-size: clamp(1rem, 2vw, 1.5rem);
-            font-weight: 900;
-            color: var(--text-primary);
-            margin-bottom: clamp(0.15rem, 0.4vw, 0.3rem);
+            font-size: clamp(1rem, 1.8vw, 1.4rem);
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 4px;
         }
 
         /* ===========================================
@@ -741,34 +821,34 @@
         .tiers {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            gap: clamp(0.5rem, 1.5vw, 1.25rem);
         }
 
         .tier {
-            padding: clamp(0.75rem, 1.5vw, 1.5rem);
+            padding: clamp(0.6rem, 1.2vw, 1.25rem);
             border: 1px solid var(--border);
             background: var(--bg-surface);
+            border-radius: 2px;
         }
 
         .tier.tier-top {
             border-color: var(--accent);
+            border-width: 2px;
         }
 
         .tier-amount {
-            font-family: var(--font-display);
-            font-size: clamp(1.1rem, 2.5vw, 1.75rem);
-            font-weight: 900;
-            color: var(--text-primary);
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            font-weight: 800;
+            color: var(--navy);
         }
 
         .tier-name {
-            font-family: var(--font-display);
             font-size: var(--label-size);
             font-weight: 700;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             color: var(--accent-text);
-            margin-top: clamp(0.1rem, 0.3vw, 0.2rem);
+            margin-top: 2px;
             margin-bottom: var(--element-gap);
         }
 
@@ -789,9 +869,10 @@
 
         .contact-block {
             margin-top: var(--content-gap);
-            padding: clamp(0.5rem, 1.2vw, 1rem);
-            border-left: 2px solid var(--accent);
+            padding: clamp(0.5rem, 1vw, 0.85rem);
+            border-left: 3px solid var(--accent);
             background: var(--bg-surface);
+            border-radius: 0 2px 2px 0;
         }
 
         .contact-block p {
@@ -799,27 +880,34 @@
         }
 
         .contact-block .contact-name {
-            font-family: var(--font-display);
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--navy);
             font-size: var(--body-size);
         }
 
-        /* ===========================================
-           RESPONSIVE BREAKPOINTS — Height-based
-           =========================================== */
+        .balance-visual {
+            display: flex;
+            justify-content: center;
+            margin: var(--element-gap) 0;
+        }
 
-        /* Short screens (< 700px) */
+        .balance-visual svg {
+            width: min(90%, 480px);
+            height: auto;
+        }
+
+        /* ===========================================
+           RESPONSIVE
+           =========================================== */
         @media (max-height: 700px) {
             :root {
                 --slide-padding: clamp(0.75rem, 3vw, 2rem);
                 --content-gap: clamp(0.4rem, 1.5vw, 1rem);
-                --title-size: clamp(1.3rem, 4vw, 2.5rem);
-                --h2-size: clamp(1.1rem, 3vw, 1.8rem);
+                --title-size: clamp(1.3rem, 4vw, 2.4rem);
+                --h2-size: clamp(1.1rem, 3vw, 1.7rem);
             }
         }
 
-        /* Very short (< 600px) */
         @media (max-height: 600px) {
             :root {
                 --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
@@ -828,12 +916,11 @@
                 --body-size: clamp(0.68rem, 1.1vw, 0.9rem);
             }
 
-            .nav-dots, .decorative {
+            .nav-dots {
                 display: none;
             }
         }
 
-        /* Extremely short — landscape phones (< 500px) */
         @media (max-height: 500px) {
             :root {
                 --slide-padding: clamp(0.4rem, 2vw, 1rem);
@@ -843,9 +930,12 @@
             }
         }
 
-        /* Narrow screens (< 600px) */
         @media (max-width: 600px) {
             .columns-3, .roadmap, .tiers, .pillar-row, .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .columns-2 {
                 grid-template-columns: 1fr;
             }
 
@@ -856,9 +946,17 @@
             .chart-container {
                 height: clamp(6rem, 20vh, 10rem);
             }
+
+            .title-visual {
+                gap: 1rem;
+            }
+
+            .gpo-stats {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
         }
 
-        /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -887,17 +985,46 @@
         <div class="title-year reveal">2026</div>
         <div class="slide-content">
             <h1 class="reveal">The Grove Foundation:<br>Building the Cognitive Counterweight</h1>
-            <p class="subtitle reveal">AI concentration &middot; Systemic stability &middot; Distributed infrastructure</p>
-            <p class="footer-statement reveal">$650B from 4 companies&mdash;no one funding the audit layer.</p>
+            <div class="title-visual reveal">
+                <div class="visual-group">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Solid circle representing centralized fragility">
+                        <circle cx="40" cy="40" r="34" fill="#1a2744"/>
+                    </svg>
+                    <div class="visual-label">Centralized</div>
+                    <div class="visual-sublabel">Fragile</div>
+                </div>
+                <div style="font-size: var(--h3-size); color: var(--text-muted); font-weight: 300;">vs</div>
+                <div class="visual-group">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Wireframe sphere representing distributed resilience">
+                        <!-- Outer circle -->
+                        <circle cx="40" cy="40" r="34" stroke="#1a2744" stroke-width="1.5" fill="none"/>
+                        <!-- Latitude lines -->
+                        <ellipse cx="40" cy="40" rx="34" ry="12" stroke="#1a2744" stroke-width="0.8" fill="none"/>
+                        <ellipse cx="40" cy="40" rx="28" ry="6" stroke="#1a2744" stroke-width="0.5" fill="none" transform="translate(0,-14)"/>
+                        <ellipse cx="40" cy="54" rx="28" ry="6" stroke="#1a2744" stroke-width="0.5" fill="none"/>
+                        <!-- Longitude lines -->
+                        <ellipse cx="40" cy="40" rx="12" ry="34" stroke="#1a2744" stroke-width="0.8" fill="none"/>
+                        <ellipse cx="40" cy="40" rx="26" ry="34" stroke="#1a2744" stroke-width="0.5" fill="none"/>
+                        <!-- Accent node -->
+                        <circle cx="40" cy="6" r="2.5" fill="#e67325"/>
+                        <circle cx="72" cy="44" r="2" fill="#e67325"/>
+                        <circle cx="14" cy="30" r="2" fill="#e67325"/>
+                    </svg>
+                    <div class="visual-label">Distributed</div>
+                    <div class="visual-sublabel">Resilient</div>
+                </div>
+            </div>
+            <p class="footer-statement reveal">$650B from 4 companies to own cognition&mdash;no one funding the audit layer.</p>
         </div>
         <div class="slide-footer">
             <span class="page">01 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">This is the structural argument: the most consequential infrastructure buildout in history is being funded entirely by entities with commercial interests in the outcome. Grove exists to build the independent audit and counterweight layer that no market actor will fund voluntarily.</div>
     </section>
 
     <!-- ==========================================
-         SLIDE 2: $650B ANOMALY
+         SLIDE 2: THE $650B ANOMALY
          ========================================== -->
     <section class="slide" aria-label="The $650B anomaly">
         <div class="slide-content">
@@ -906,7 +1033,7 @@
                 <div class="divider"></div>
                 <span class="section-label">The $650B Anomaly</span>
             </div>
-            <h2 class="reveal">Privatization of<br>knowledge processing.</h2>
+            <h2 class="reveal">The privatization of<br>knowledge processing.</h2>
             <div class="chart-container reveal">
                 <div class="chart-bar-group">
                     <div class="chart-bar bar-telecom">
@@ -926,7 +1053,7 @@
             <div class="stats-row reveal">
                 <div class="stat-block">
                     <div class="stat-num">94%</div>
-                    <div class="stat-desc">Of AI cash flows</div>
+                    <div class="stat-desc">Cash flows to capex</div>
                 </div>
                 <div class="stat-block">
                     <div class="stat-num">1.9%</div>
@@ -934,7 +1061,7 @@
                 </div>
                 <div class="stat-block">
                     <div class="stat-num">$1.5T</div>
-                    <div class="stat-desc">Bond issuance gap</div>
+                    <div class="stat-desc">Bond gap (JP Morgan)</div>
                 </div>
             </div>
         </div>
@@ -942,39 +1069,41 @@
             <span class="page">02 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">Frame this as historically unprecedented concentration. The 1990s telecom boom spread $200B across 50 companies. AI is funneling 3x the capital through 4 companies. 94% of AI cash flows go directly to capital expenditure with no public-interest infrastructure. JP Morgan flags a $1.5 trillion bond issuance gap that must be financed. This is not a market &mdash; it is a monoculture.</div>
     </section>
 
     <!-- ==========================================
-         SLIDE 3: CONSENSUS BREAKING
+         SLIDE 3: NARRATIVE FRACTURING
          ========================================== -->
-    <section class="slide" aria-label="Consensus is breaking">
+    <section class="slide" aria-label="Narrative fracturing">
         <div class="slide-content">
             <div class="slide-header reveal">
                 <span class="slide-number">03</span>
                 <div class="divider"></div>
-                <span class="section-label">Consensus Breaking</span>
+                <span class="section-label">Narrative Fracturing</span>
             </div>
             <h2 class="reveal">When the GPU king<br>hedges, listen.</h2>
             <div class="columns-3 reveal" style="margin-top: var(--content-gap);">
                 <div class="column-card accent-top">
                     <h3>Jensen Huang</h3>
-                    <p>NVIDIA capex guidance cut from $100B to $20B. The architect of the boom is hedging.</p>
+                    <p>NVIDIA capex guidance: $100B &rarr; $20B. Cites &ldquo;private concerns.&rdquo; The architect of the boom is hedging.</p>
                 </div>
                 <div class="column-card accent-top">
                     <h3>METR Study</h3>
-                    <p>AI-assisted coders measured 19% slower on real tasks. Productivity promises unverified.</p>
+                    <p>AI-assisted coders measured 19% slower on real tasks. Productivity thesis unverified at scale.</p>
                 </div>
                 <div class="column-card accent-top">
                     <h3>Yann LeCun</h3>
-                    <p>Meta&rsquo;s chief scientist: &ldquo;LLMs cannot create new knowledge.&rdquo; Architecture ceiling.</p>
+                    <p>Meta&rsquo;s chief scientist exits LLM consensus: &ldquo;LLMs cannot generate new knowledge.&rdquo; Architecture ceiling.</p>
                 </div>
             </div>
-            <p class="quote-line reveal">Brute-force scaling is hitting limits. The question is what comes next.</p>
+            <p class="quote-line reveal">Brute-force scaling hitting limits. The question is what infrastructure exists when the narrative corrects.</p>
         </div>
         <div class="slide-footer">
             <span class="page">03 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">Three signals from insiders, not critics. Jensen is cutting his own guidance &mdash; he knows the supply-demand mismatch. METR&rsquo;s controlled study contradicts the productivity narrative driving enterprise adoption. LeCun is saying the architecture itself may be wrong. When the people building the boom start hedging, the correction window opens. Grove needs to be operational before that window closes.</div>
     </section>
 
     <!-- ==========================================
@@ -987,16 +1116,16 @@
                 <div class="divider"></div>
                 <span class="section-label">Epistemic Capture</span>
             </div>
-            <h2 class="reveal">Cannot audit the oracle,<br>lose truth.</h2>
+            <h2 class="reveal">When we cannot audit<br>the oracle, we lose truth.</h2>
             <div class="flow-diagram reveal">
                 <div class="flow-node">
                     <h3>Query</h3>
                     <p>User asks question</p>
                 </div>
                 <span class="flow-arrow">&rarr;</span>
-                <div class="flow-node danger">
+                <div class="flow-node danger" style="position: relative;">
                     <h3>Black Box</h3>
-                    <p>Ads + product preference</p>
+                    <p>Ad auction + product<br>preference inputs</p>
                 </div>
                 <span class="flow-arrow">&rarr;</span>
                 <div class="flow-node">
@@ -1004,12 +1133,13 @@
                     <p>Unauditable answer</p>
                 </div>
             </div>
-            <p class="quote-line reveal">The entity selling you answers also sells advertising. No independent verification exists.</p>
+            <p class="quote-line reveal">The entity selling answers also sells ads and competes in your market. No independent verification exists.</p>
         </div>
         <div class="slide-footer">
             <span class="page">04 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">This is the core epistemic risk. When the same entity provides answers, sells advertising against those answers, and competes directly in the markets its users operate in, the incentive structure guarantees bias. Unlike search, where users see sources, AI answers arrive without provenance. No one can audit the weighting. Grove builds the independent verification layer.</div>
     </section>
 
     <!-- ==========================================
@@ -1022,18 +1152,15 @@
                 <div class="divider"></div>
                 <span class="section-label">Societal Stakes</span>
             </div>
-            <h2 class="reveal">&ldquo;Elite Overproduction<br>accelerates instability.&rdquo;</h2>
-            <p class="label reveal" style="margin-top: var(--element-gap);">&mdash; Peter Turchin, structural-demographic theory</p>
+            <h2 class="reveal">Elite Overproduction<br>accelerates instability.</h2>
+            <p class="label reveal" style="margin-top: var(--element-gap);">&mdash; Peter Turchin / Seshat Database</p>
 
             <div class="curve-container reveal">
                 <svg viewBox="0 0 500 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Bell curve with rupture point">
-                    <!-- Bell curve -->
-                    <path d="M 20 110 Q 100 110, 150 80 Q 200 40, 250 15 Q 300 40, 350 80 Q 400 110, 480 110" stroke="#71717a" stroke-width="2" fill="none"/>
-                    <!-- Rupture line -->
-                    <line x1="320" y1="5" x2="320" y2="115" stroke="#c8102e" stroke-width="2" stroke-dasharray="4,4"/>
-                    <text x="325" y="20" fill="#c8102e" font-family="Archivo, sans-serif" font-size="10" font-weight="700">RUPTURE</text>
-                    <!-- Shaded displacement zone -->
-                    <path d="M 320 65 Q 350 80, 400 100 Q 440 110, 480 110 L 480 115 L 320 115 Z" fill="rgba(200,16,46,0.12)"/>
+                    <path d="M 20 110 Q 100 110, 150 80 Q 200 40, 250 15 Q 300 40, 350 80 Q 400 110, 480 110" stroke="#4a5b78" stroke-width="2" fill="none"/>
+                    <line x1="320" y1="5" x2="320" y2="115" stroke="#e67325" stroke-width="2" stroke-dasharray="4,4"/>
+                    <text x="325" y="18" fill="#e67325" font-family="Inter, sans-serif" font-size="10" font-weight="700">RUPTURE</text>
+                    <path d="M 320 65 Q 350 80, 400 100 Q 440 110, 480 110 L 480 115 L 320 115 Z" fill="rgba(230,115,37,0.08)"/>
                 </svg>
             </div>
 
@@ -1044,7 +1171,7 @@
                 </div>
                 <div class="column-card accent-top">
                     <h3>Strategic Imperative</h3>
-                    <p>Hedge against displaced-class radicalization. Build transition infrastructure now.</p>
+                    <p>Structural hedge against displaced-class radicalization. Build transition infrastructure now.</p>
                 </div>
             </div>
         </div>
@@ -1052,32 +1179,33 @@
             <span class="page">05 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">Turchin&rsquo;s structural-demographic model, backed by the Seshat historical database, shows that elite overproduction &mdash; more credentialed professionals than positions available &mdash; precedes every major instability event. The Anthropic benchmark shows the compression speed: 37 years of specialized work in 2 weeks for $20K. This is not a future risk; the displacement curve is already accelerating. Grove provides the structural hedge: independent infrastructure that channels disruption into productive transition rather than radicalization.</div>
     </section>
 
     <!-- ==========================================
          SLIDE 6: CONSORTIUM MODEL
          ========================================== -->
-    <section class="slide" aria-label="The consortium">
+    <section class="slide" aria-label="The consortium model">
         <div class="slide-content">
             <div class="slide-header reveal">
                 <span class="slide-number">06</span>
                 <div class="divider"></div>
                 <span class="section-label">The Consortium</span>
             </div>
-            <h2 class="reveal">Auditable, distributed<br>AI infrastructure.</h2>
-            <div class="pillars-diagram reveal" style="margin-top: var(--content-gap);">
+            <h2 class="reveal">Auditable, distributed AI<br>infrastructure with market power.</h2>
+            <div class="pillars-diagram reveal" style="margin-top: var(--element-gap);">
                 <div class="pillar-row">
                     <div class="pillar">
                         <h3>Academia</h3>
-                        <p>Research independence, peer review</p>
+                        <p>Research independence</p>
                     </div>
                     <div class="pillar">
                         <h3>Open Source</h3>
-                        <p>Transparent models, public audit</p>
+                        <p>Transparent, public audit</p>
                     </div>
                     <div class="pillar">
-                        <h3>Civic</h3>
-                        <p>Public interest, democratic input</p>
+                        <h3>Civic Society</h3>
+                        <p>Democratic input</p>
                     </div>
                 </div>
                 <div class="connector-bar"></div>
@@ -1085,12 +1213,27 @@
                     <h3>Grove Foundation &mdash; Coordination Layer</h3>
                 </div>
             </div>
+            <div class="gpo-callout reveal">
+                <h3>Purchasing Power: The GPO Model</h3>
+                <p>Healthcare GPOs drove hundreds of billions in savings through aggregated demand. Grove creates the same for AI: a coordinated, price-sensitive demand bloc that gives universities negotiating leverage no single institution can achieve alone.</p>
+                <div class="gpo-stats">
+                    <div class="gpo-stat">$5&ndash;10M commitments <span>&rarr; 30&ndash;50% discounts</span></div>
+                    <div class="gpo-stat">Largest partners <span>&rarr; up to 80% off list</span></div>
+                </div>
+            </div>
+            <div class="properties-row reveal">
+                <span class="property-tag">Auditable</span>
+                <span class="property-tag">Distributed</span>
+                <span class="property-tag">Public Good</span>
+                <span class="property-tag">Collective Bargaining</span>
+            </div>
             <p class="quote-line reveal">Models are seeds. Architecture is soil.</p>
         </div>
         <div class="slide-footer">
             <span class="page">06 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">The consortium model creates immediate financial value for university partners. Healthcare GPOs proved aggregated purchasing power generates massive savings. Grove applies the same logic to AI compute and licensing. A university spending $5&ndash;10M individually has no leverage; 25 universities spending collectively create a demand bloc that commands 30&ndash;50% discounts, with the largest commitments reaching 80% off list prices. This is not charity &mdash; it is a rational economic structure that happens to also serve the public interest.</div>
     </section>
 
     <!-- ==========================================
@@ -1107,15 +1250,15 @@
             <div class="columns-3 reveal" style="margin-top: var(--content-gap);">
                 <div class="column-card accent-top">
                     <h3>Ratchet</h3>
-                    <p>7-month capability doubling. Infrastructure must anticipate, not react.</p>
+                    <p>7-month capability doubling commoditizes today&rsquo;s frontier. Infrastructure must anticipate, not react.</p>
                 </div>
                 <div class="column-card accent-top">
                     <h3>Hybrid Cognition</h3>
-                    <p>Local + cloud. Sovereignty requires compute at the edge, not only in the datacenter.</p>
+                    <p>Local routine processing, cloud for complex tasks. Sovereignty requires compute at the edge, not only the datacenter.</p>
                 </div>
                 <div class="column-card accent-top">
                     <h3>Exploration Architecture</h3>
-                    <p>Optimized for discovery over extraction. Knowledge creation, not content generation.</p>
+                    <p>Optimized for unknown discovery over known extraction. Knowledge creation, not content generation.</p>
                 </div>
             </div>
         </div>
@@ -1123,6 +1266,7 @@
             <span class="page">07 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">Three architectural principles. First, the ratchet: capabilities double roughly every 7 months, which means anything built for today&rsquo;s frontier is obsolete by deployment. We design for the next cycle, not the current one. Second, hybrid cognition: sensitive and routine processing stays local; complex tasks use shared cloud. This preserves institutional sovereignty. Third, exploration architecture: commercial AI optimizes for extraction (ad clicks, engagement). Grove optimizes for discovery &mdash; genuine knowledge creation that serves research and public understanding.</div>
     </section>
 
     <!-- ==========================================
@@ -1135,20 +1279,20 @@
                 <div class="divider"></div>
                 <span class="section-label">The Window</span>
             </div>
-            <h2 class="reveal">Infrastructure<br>before demand.</h2>
-            <p class="reveal" style="margin-bottom: var(--content-gap);">Three converging forces close the window by late 2027.</p>
+            <h2 class="reveal">Infrastructure must exist<br>before demand.</h2>
+            <p class="reveal" style="margin-bottom: var(--content-gap); color: var(--text-secondary);">Three forces converge by late 2027.</p>
             <div class="timeline reveal">
                 <div class="timeline-item">
                     <span class="timeline-arrow">&rarr;</span>
                     <div class="timeline-content">
-                        <h3>Regulatory Crystallization</h3>
-                        <p>EU AI Act enforcement begins. U.S. executive orders expand. Standards set without public infrastructure input.</p>
+                        <h3>Regulatory Pressure</h3>
+                        <p>EU AI Act enforcement begins. U.S. executive orders expand. Standards crystallize without public-interest input.</p>
                     </div>
                 </div>
                 <div class="timeline-item">
                     <span class="timeline-arrow">&rarr;</span>
                     <div class="timeline-content">
-                        <h3>ROI Reckoning</h3>
+                        <h3>ROI Reckoning ($1.5T)</h3>
                         <p>$1.5T in AI investment demands returns. Consolidation accelerates. Smaller players absorbed or eliminated.</p>
                     </div>
                 </div>
@@ -1160,22 +1304,26 @@
                     </div>
                 </div>
             </div>
+            <div class="convergence-callout reveal">
+                <p>Critical path: build now.</p>
+            </div>
         </div>
         <div class="slide-footer">
             <span class="page">08 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">This is a timing argument. Three independent forces converge by late 2027, and whichever institutions are operational at that point will shape the outcome. Regulatory frameworks are setting now &mdash; without public-interest infrastructure at the table, standards will be written by incumbents. The $1.5T ROI reckoning will drive consolidation, shrinking the window for independent alternatives. And public awareness of displacement will create political demand for solutions. Grove must be built and operational before all three converge.</div>
     </section>
 
     <!-- ==========================================
-         SLIDE 9: ROADMAP
+         SLIDE 9: EXECUTION ROADMAP
          ========================================== -->
-    <section class="slide" aria-label="Roadmap">
+    <section class="slide" aria-label="Execution roadmap">
         <div class="slide-content">
             <div class="slide-header reveal">
                 <span class="slide-number">09</span>
                 <div class="divider"></div>
-                <span class="section-label">Roadmap</span>
+                <span class="section-label">Execution Roadmap</span>
             </div>
             <h2 class="reveal">Phased deployment.</h2>
             <div class="roadmap reveal" style="margin-top: var(--content-gap);">
@@ -1183,19 +1331,19 @@
                     <div class="phase-label">Phase 1 &mdash; Now</div>
                     <div class="phase-amount">$2&ndash;5M</div>
                     <h3>Foundation</h3>
-                    <p>3&ndash;5 founding partners. Core team. Legal structure. Initial research partnerships. Proof of concept.</p>
+                    <p>Legal structure. Core architecture design. 3&ndash;5 founding academic partners. Initial research framework.</p>
                 </div>
                 <div class="phase">
-                    <div class="phase-label">Phase 2 &mdash; 18 Mo</div>
+                    <div class="phase-label">Phase 2 &mdash; 18 Months</div>
                     <div class="phase-amount">$15&ndash;25M</div>
                     <h3>Scale</h3>
-                    <p>25 consortium partners. Distributed infrastructure deployed. First audit frameworks operational.</p>
+                    <p>25 consortium partners. Distributed infrastructure deployed. Peer-reviewed research published. First audit frameworks operational.</p>
                 </div>
                 <div class="phase">
                     <div class="phase-label">Phase 3 &mdash; Year 3+</div>
                     <div class="phase-amount">$50M+</div>
                     <h3>Standard</h3>
-                    <p>Government adoption. Global standard for AI audit. Self-sustaining operational model.</p>
+                    <p>Government adoption pathway. Global standard for AI audit. Self-sustaining operational model.</p>
                 </div>
             </div>
         </div>
@@ -1203,6 +1351,7 @@
             <span class="page">09 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">Phase 1 is about credibility and structure: legal incorporation, core technical architecture, and 3&ndash;5 founding university partnerships that prove the model. Phase 2 scales to 25 partners, deploys real infrastructure, and publishes peer-reviewed research that establishes Grove as a legitimate standards body. Phase 3 moves to government engagement and global standard-setting. Each phase de-risks the next. Founding members shape Phase 1 directly.</div>
     </section>
 
     <!-- ==========================================
@@ -1216,38 +1365,62 @@
                 <span class="section-label">Founding Membership</span>
             </div>
             <h2 class="reveal">Asymmetric upside.</h2>
-            <p class="reveal" style="margin-bottom: var(--content-gap);">Earliest supporters hold disproportionate influence.</p>
+
+            <div class="balance-visual reveal">
+                <svg viewBox="0 0 480 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Balance scale showing base benefits vs upside">
+                    <!-- Fulcrum -->
+                    <polygon points="240,95 228,70 252,70" fill="#1a2744"/>
+                    <line x1="240" y1="70" x2="240" y2="30" stroke="#1a2744" stroke-width="2"/>
+                    <!-- Beam (tilted slightly right = upside heavier) -->
+                    <line x1="80" y1="35" x2="400" y2="25" stroke="#1a2744" stroke-width="2"/>
+                    <!-- Left pan: Base -->
+                    <line x1="80" y1="35" x2="60" y2="45" stroke="#4a5b78" stroke-width="1"/>
+                    <line x1="80" y1="35" x2="100" y2="45" stroke="#4a5b78" stroke-width="1"/>
+                    <rect x="45" y="45" width="70" height="22" rx="2" fill="#f7f8fa" stroke="#d8dce6" stroke-width="1"/>
+                    <text x="80" y="59" text-anchor="middle" fill="#4a5b78" font-family="Inter, sans-serif" font-size="8" font-weight="600">TAX + LEGACY</text>
+                    <!-- Right pan: Upside -->
+                    <line x1="400" y1="25" x2="380" y2="35" stroke="#e67325" stroke-width="1"/>
+                    <line x1="400" y1="25" x2="420" y2="35" stroke="#e67325" stroke-width="1"/>
+                    <rect x="355" y="35" width="90" height="22" rx="2" fill="rgba(230,115,37,0.08)" stroke="#e67325" stroke-width="1"/>
+                    <text x="400" y="49" text-anchor="middle" fill="#d4671f" font-family="Inter, sans-serif" font-size="8" font-weight="600">FOUNDING INFLUENCE</text>
+                </svg>
+            </div>
+
             <div class="tiers reveal">
                 <div class="tier">
                     <div class="tier-amount">$1M</div>
-                    <div class="tier-name">Member</div>
+                    <div class="tier-name">Founding Member</div>
                     <ul class="tier-benefits">
                         <li>Governance seat</li>
+                        <li>Quarterly briefings</li>
+                        <li>Public recognition</li>
                         <li>Tax-advantaged giving</li>
-                        <li>Legacy positioning</li>
                     </ul>
                 </div>
                 <div class="tier">
                     <div class="tier-amount">$2.5M</div>
-                    <div class="tier-name">Steward</div>
+                    <div class="tier-name">Founding Steward</div>
                     <ul class="tier-benefits">
                         <li>All Member benefits</li>
                         <li>Advisory Board seat</li>
                         <li>Named initiative</li>
+                        <li>Partner introductions</li>
                     </ul>
                 </div>
                 <div class="tier tier-top">
                     <div class="tier-amount">$5M+</div>
-                    <div class="tier-name">Architect</div>
+                    <div class="tier-name">Founding Architect</div>
                     <ul class="tier-benefits">
                         <li>All Steward benefits</li>
                         <li>Board Observer seat</li>
+                        <li>Institutional naming</li>
                         <li>Strategic input rights</li>
                     </ul>
                 </div>
             </div>
             <div class="contact-block reveal">
-                <p class="contact-name">Jim Calhoun, Managing Director</p>
+                <p>Earliest supporters hold disproportionate influence over direction.</p>
+                <p class="contact-name" style="margin-top: var(--element-gap);">Jim Calhoun, Managing Director</p>
                 <p>The Grove Foundation</p>
             </div>
         </div>
@@ -1255,11 +1428,11 @@
             <span class="page">10 / 10</span>
             <span class="org">The Grove Foundation</span>
         </div>
+        <div class="speaker-note">Close on asymmetry. The base case is already compelling: tax-advantaged philanthropic giving, public-good positioning, legacy association with institutional AI infrastructure. The upside is disproportionate: founding members shape governance, research priorities, and partnership strategy for what could become the institutional standard for AI audit and procurement. The window for founding influence is finite &mdash; once the consortium reaches critical mass, these seats are no longer available.</div>
     </section>
 
     <!-- ==========================================
        PRESENTATION CONTROLLER
-       Handles navigation, animations, progress.
        ========================================== -->
     <script>
         class SlidePresentation {
@@ -1267,7 +1440,6 @@
                 this.slides = document.querySelectorAll('.slide');
                 this.currentSlide = 0;
                 this.totalSlides = this.slides.length;
-                this.isAnimating = false;
 
                 this.createNavDots();
                 this.setupIntersectionObserver();
@@ -1277,10 +1449,6 @@
                 this.updateProgress();
             }
 
-            /* ===========================================
-               NAVIGATION DOTS
-               Small squares on right edge for slide jumps.
-               =========================================== */
             createNavDots() {
                 const nav = document.getElementById('navDots');
                 this.slides.forEach((_, i) => {
@@ -1294,10 +1462,6 @@
                 this.dots = nav.querySelectorAll('.nav-dot');
             }
 
-            /* ===========================================
-               INTERSECTION OBSERVER
-               Triggers .visible class when slide enters view.
-               =========================================== */
             setupIntersectionObserver() {
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
@@ -1314,10 +1478,6 @@
                 this.slides.forEach(slide => observer.observe(slide));
             }
 
-            /* ===========================================
-               KEYBOARD NAVIGATION
-               Arrow keys + Space to navigate slides.
-               =========================================== */
             setupKeyboardNav() {
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
@@ -1330,10 +1490,6 @@
                 });
             }
 
-            /* ===========================================
-               TOUCH NAVIGATION
-               Swipe up/down on mobile devices.
-               =========================================== */
             setupTouchNav() {
                 let touchStartY = 0;
                 document.addEventListener('touchstart', (e) => {
@@ -1348,10 +1504,6 @@
                 }, { passive: true });
             }
 
-            /* ===========================================
-               WHEEL NAVIGATION
-               Mouse wheel / trackpad scroll with debounce.
-               =========================================== */
             setupWheelNav() {
                 let lastWheel = 0;
                 document.addEventListener('wheel', (e) => {
@@ -1391,7 +1543,6 @@
             }
         }
 
-        // Initialize presentation
         new SlidePresentation();
     </script>
 </body>
